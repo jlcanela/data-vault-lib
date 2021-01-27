@@ -4,11 +4,15 @@ trait Fixtures {
 
     val archive = "archive.zip"
     val folder = "data"
-    val modelFile = "model.json"
+    val modelFile = "out/model.json"
+    val staging = "out/staging"
 
-    def extractFiles = s"./data-vault extract-files -i $folder/$archive -o $modelFile"
-    def extractRawModel = s"./data-vault extract-raw-model -i $folder/$archive -o $modelFile"
+    def extractFiles = s"./data-vault extract-files -i $folder/$archive -o $staging"
+    def generateRawModel = s"./data-vault generate-raw-model -i $folder/$archive -o $modelFile"
 
-    def sampleRawDataModel = scala.io.Source.fromResource("fixtures/archive.zip-raw-data-model.json").getLines().mkString("\n")
+    val archiveDataModel = "fixtures/archive.zip-raw-data-model.json"
+    def sampleRawDataModel = scala.io.Source.fromResource(archiveDataModel).getLines().mkString("\n")
 
+    val zipContent = "fixtures/archive.zip-content.json"
+    
 }
