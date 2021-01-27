@@ -10,6 +10,7 @@ libraryDependencies ++= Seq(
    "com.novocode" % "junit-interface" % "0.11" % "test" exclude("junit", "junit")
 )
 
+logBuffered in Test := false
 
 testOptions in Test ++= Seq(
    Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/test-reports"),

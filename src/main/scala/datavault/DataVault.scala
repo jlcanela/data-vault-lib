@@ -1,12 +1,16 @@
 package datavault
 
 import java.io.File
-import picocli.CommandLine._
-import java.math.BigInteger
 import java.nio.file.Files
+
+import java.math.BigInteger
+
 import java.security.MessageDigest
+
 import java.util.concurrent.Callable
+
 import picocli.CommandLine
+import picocli.CommandLine._
 
 @Command(
   name = "datavault",
@@ -39,15 +43,16 @@ class DataVaultCli extends Callable[Int] {
   private var outputFile: File = null
 
   def commandNotRecognized(command: String) = {
-      println(s"command '$command' not recognized")
-      Constants.CommandNotRecognized
+    println(s"command '$command' not recognized")
+    Constants.CommandNotRecognized
   }
-  override def call(): Int = {
-      command match {
-          case "extract-files" => ExtractFiles.run(input = inputFile, output = outputFile)
-          case "extract-raw-model" => ExtractRawModel.run(input = inputFile, output = outputFile)
-          case _ => commandNotRecognized(command)
-      }
+
+  override def call(): Int = command match {
+    case "extract-files" =>
+      Command.extractFiles(input = inputFile, output = outputFile)
+    case "generate-raw-model" =>
+      Command.generateRawModel(input = inputFile, output = outputFile)
+    case _ => commandNotRecognized(command)
   }
 }
 object DataVault extends App {

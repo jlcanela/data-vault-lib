@@ -10,6 +10,8 @@ import java.nio.file.Files
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.Optional
+import java.io.OutputStream
+import java.io.FileOutputStream
 
 trait CsvFile {
   def inputStream: InputStream
@@ -22,7 +24,9 @@ trait CsvFile {
 
 }
 
-case class ZipFileInfo(ze: ZipEntry, zis: ZipInputStream) extends FileInfo with CsvFile {
+case class ZipFileInfo(ze: ZipEntry, zis: ZipInputStream)
+    extends FileInfo
+    with CsvFile {
   val _ext = ".csv"
   def name = if (filename.endsWith(_ext)) {
     filename.substring(0, filename.length() - _ext.length());
@@ -32,6 +36,46 @@ case class ZipFileInfo(ze: ZipEntry, zis: ZipInputStream) extends FileInfo with 
 
   def filename = ze.getName()
   def inputStream = zis
+  def writeTo(target: File): Either[String, Unit] = {
+
+    val BUFSIZE = 4096
+    val buffer = new Array[Byte](BUFSIZE)
+
+    def saveFile(fis: InputStream, fos: OutputStream) = {
+      writeToFile(bufferReader(fis) _, fos)
+      //fis.close
+      fos.close
+    }
+
+    def bufferReader(fis: InputStream)(buffer: Array[Byte]) =
+      (fis.read(buffer), buffer)
+
+    def writeToFile(
+        reader: (Array[Byte]) => Tuple2[Int, Array[Byte]],
+        fos: OutputStream
+    ): Boolean = {
+      val (length, data) = reader(buffer)
+      if (length >= 0) {
+        fos.write(data, 0, length)
+        writeToFile(reader, fos)
+      } else
+        true
+    }
+
+    println(s"""writing to $target""")
+    try {
+      saveFile(inputStream, new FileOutputStream(target))
+
+      Right(())
+
+    } catch {
+      case ex: Exception => {
+        println(s"""error writing ${ex.getMessage()}""")
+        Left(ex.getMessage())
+      }
+    }
+
+  }
 }
 
 case class ZipArchive(zipFile: File) extends Archive {
