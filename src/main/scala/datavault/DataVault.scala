@@ -52,6 +52,8 @@ class DataVaultCli extends Callable[Int] {
       Command.extractFiles(input = inputFile, output = outputFile)
     case "generate-raw-model" =>
       Command.generateRawModel(input = inputFile, output = outputFile)
+    case "generate-hub-config-template" =>
+      Command.generateHubConfigTemplate(input = inputFile, output = outputFile)
     case _ => commandNotRecognized(command)
   }
 }

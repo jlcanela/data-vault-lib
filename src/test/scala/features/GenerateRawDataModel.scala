@@ -19,7 +19,10 @@ class GenerateRawDataModelFromZipArchive
 
     scenario("Successfully generates a raw data model from a zip data archive") {
 
+      
       Given(s"""a zip archive "$archive"  in folder "$folder"""")
+      val ouputFilename = modelFile
+      And(s"""an output filename "${ouputFilename}"""")
       val command = generateRawModel
      
       When(s"""a "$command" command is run""")
@@ -32,7 +35,7 @@ class GenerateRawDataModelFromZipArchive
       val current = readFile(modelFile)
 
       And(s""""$modelFile" have expected content""")
-      val expected = sampleRawDataModel
+      val expected = expectedRawDataModel
       withClue(s"$modelFile should be expected model =") { current shouldBe expected} 
   
     }

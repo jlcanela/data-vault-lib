@@ -62,7 +62,6 @@ case class ZipFileInfo(ze: ZipEntry, zis: ZipInputStream)
         true
     }
 
-    println(s"""writing to $target""")
     try {
       saveFile(inputStream, new FileOutputStream(target))
 
