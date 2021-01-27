@@ -39,3 +39,6 @@ note : 
 * target/jgiven-reports/html/index.html is replicated in docs folder. 
 * using samples from https://blog.engineering.publicissapient.fr/2018/01/08/automatiser-lexecution-de-ses-scenarios-gherkin-en-scala/
 
+## Report
+
+JGiven report is accessible at [https://jlcanela.github.io/data-vault-lib/jgiven/index.html](https://jlcanela.github.io/data-vault-lib/jgiven/index.html).
