@@ -1,5 +1,8 @@
+.vscode
+
 .bloop
 .metals
 target
-/data
 project/project
+
+/data
