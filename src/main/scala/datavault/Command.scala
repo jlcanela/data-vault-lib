@@ -22,7 +22,13 @@ object Command {
     } else {
       Constants.Success
     }
-    
+  }
+
+  def generateHubConfigTemplate(input: File, output: File) = {
+    val model = Model.fromFile(input)
+    val hubConfigTemplate = HubConfig.fromModel(model)
+    HubConfig.save(hubConfigTemplate, output)
+    Constants.Success
   }
 
 }

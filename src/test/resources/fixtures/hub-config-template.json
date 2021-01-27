@@ -1,0 +1,36 @@
+{
+  "hubs":[
+    {
+      "name":"customer",
+      "table":"olist_customers_dataset",
+      "source":"olist_customers_dataset.csv",
+      "key":{
+        "name":"customer_id"
+      }
+    },
+    {
+      "name":"product",
+      "table":"olist_products_dataset",
+      "source":"olist_products_dataset.csv",
+      "key":{
+        "name":"product_id"
+      }
+    },
+    {
+      "name":"seller",
+      "table":"olist_sellers_dataset",
+      "source":"olist_sellers_dataset.csv",
+      "key":{
+        "name":"seller_id"
+      }
+    },
+    {
+      "name":"order",
+      "table":"olist_orders_dataset",
+      "source":"olist_orders_dataset.csv",
+      "key":{
+        "name":"order_id"
+      }
+    }
+  ]
+}

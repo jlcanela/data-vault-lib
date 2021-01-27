@@ -38,4 +38,10 @@ trait RunHelper {
     read[Array[FileExtractionStatus]](content)
   }
 
+  def diffJson(current: String, expected: String): Diff = {
+    val currentJson = parse(current)
+    val expectedJson = parse(expected)
+    expectedJson.diff(currentJson)
+  }
+
 }
