@@ -28,7 +28,6 @@ sbt publishLocal
 
 Go to https://www.kaggle.com/olistbr/brazilian-ecommerce and download the file archive.zip, store it in data folder.
 
-
 ### Test
 
 Use sbt to run the tests:
@@ -36,4 +35,7 @@ Use sbt to run the tests:
 sbt test
 ```
 
-Note that target/jgiven-reports/html/index.html is replicated in docs folder. 
+note : 
+* target/jgiven-reports/html/index.html is replicated in docs folder. 
+* using samples from https://blog.engineering.publicissapient.fr/2018/01/08/automatiser-lexecution-de-ses-scenarios-gherkin-en-scala/
+

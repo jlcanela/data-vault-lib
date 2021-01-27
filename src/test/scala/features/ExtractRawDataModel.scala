@@ -50,7 +50,7 @@ class ExtractRawDataModelFromZipArchive
       And(s""""$modelFile" have expected content""")
       val expected = sampleRawDataModel
       withClue(s"$modelFile should be expected model =") { current shouldBe expected} 
-    
+  
     }
   }
 }

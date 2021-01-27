@@ -13,6 +13,5 @@ libraryDependencies ++= Seq(
 
 testOptions in Test ++= Seq(
    Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/test-reports"),
-   Tests.Argument(TestFrameworks.ScalaTest, "-o"),
    Tests.Argument(TestFrameworks.ScalaTest, "-o")
 )

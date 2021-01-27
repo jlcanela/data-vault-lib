@@ -10,4 +10,5 @@ trait Fixtures {
     def extractRawModel = s"./data-vault extract-raw-model -i $folder/$archive -o $modelFile"
 
     def sampleRawDataModel = scala.io.Source.fromResource("fixtures/archive.zip-raw-data-model.json").getLines().mkString("\n")
+
 }
