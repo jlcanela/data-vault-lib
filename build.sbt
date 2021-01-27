@@ -1,5 +1,6 @@
 libraryDependencies ++= Seq(
    "info.picocli" % "picocli" % "4.2.0",
+   "org.json4s" % "json4s-native_2.12" % "3.7.0-M8",
   "com.tngtech.jgiven" % "jgiven-junit" % "0.15.3" % "test",
   "junit" % "junit" % "4.12" % "test",
   "org.scalatest" %% "scalatest" % "3.0.4" % "test",

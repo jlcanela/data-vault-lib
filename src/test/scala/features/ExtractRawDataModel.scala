@@ -16,6 +16,8 @@ class ExtractRawDataModelFromZipArchive
 
   def runCommand(command: String) = new CommandLine(new DataVaultCli()).execute(command.split(" ").tail: _*)
 
+  def readFile(file: String) = scala.io.Source.fromFile(file).getLines().mkString("\n")
+
   feature("Extract a raw data model from a zip data archive") {
 
     scenario("Successfully extract csv files from a zip data archive") {
@@ -40,8 +42,15 @@ class ExtractRawDataModelFromZipArchive
       val exitCode = runCommand(command)
 
       Then(s"""execution is successful""")
-      withClue(s"return value exitCode =") { exitCode shouldBe Constants.NotImplemented }
-      // And Then(s"""a json model file "$modelFile" is created""")
+      withClue(s"return value exitCode =") { exitCode shouldBe Constants.Success }
+
+      And(s"""a json model file "$modelFile" is created""")
+      val current = readFile(modelFile)
+
+      And(s""""$modelFile" have expected content""")
+      val expected = sampleRawDataModel
+      withClue(s"$modelFile should be expected model =") { current shouldBe expected} 
+    
     }
   }
 }
