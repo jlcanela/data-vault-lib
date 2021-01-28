@@ -42,3 +42,5 @@ note : 
 ## Report
 
 JGiven report is accessible at [https://jlcanela.github.io/data-vault-lib/jgiven/index.html](https://jlcanela.github.io/data-vault-lib/jgiven/index.html).
+
+scoverage report is accessible at [https://jlcanela.github.io/data-vault-lib/coverage/index.html](https://jlcanela.github.io/data-vault-lib/coverage/index.html).

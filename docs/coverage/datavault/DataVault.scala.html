@@ -1,0 +1,502 @@
+<html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title id="title">
+          datavault/DataVault.scala.html
+        </title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/css/theme.default.min.css" type="text/css"/><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/js/jquery.tablesorter.min.js"></script><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" type="text/css"/><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script><script type="text/javascript">
+        $(document).ready(function() {$(".tablesorter").tablesorter();});
+      </script>
+        <style>
+          table.codegrid { font-family: monospace; font-size: 12px; width: auto!important; }table.statementlist { width: auto!important; font-size: 13px; } table.codegrid td { padding: 0!important; border: 0!important } table td.linenumber { width: 40px!important; } 
+        </style>
+      </head>
+      <body style="font-family: monospace;">
+        <ul class="nav nav-tabs">
+          <li>
+            <a href="#codegrid" data-toggle="tab">Codegrid</a>
+          </li>
+          <li>
+            <a href="#statementlist" data-toggle="tab">Statement List</a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active" id="codegrid">
+            <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault
+</span>2 <span style=''>
+</span>3 <span style=''>import java.io.File
+</span>4 <span style=''>import java.nio.file.Files
+</span>5 <span style=''>
+</span>6 <span style=''>import java.math.BigInteger
+</span>7 <span style=''>
+</span>8 <span style=''>import java.security.MessageDigest
+</span>9 <span style=''>
+</span>10 <span style=''>import java.util.concurrent.Callable
+</span>11 <span style=''>
+</span>12 <span style=''>import picocli.CommandLine
+</span>13 <span style=''>import picocli.CommandLine._
+</span>14 <span style=''>
+</span>15 <span style=''>@Command(
+</span>16 <span style=''>  name = &quot;datavault&quot;,
+</span>17 <span style=''>  mixinStandardHelpOptions = true,
+</span>18 <span style=''>  version = Array(&quot;datavault 1.0&quot;),
+</span>19 <span style=''>  description = Array(
+</span>20 <span style=''>    &quot;DataVault is a data migration tool built upon DataVault 2.0 recommandations.&quot;
+</span>21 <span style=''>  )
+</span>22 <span style=''>)
+</span>23 <span style=''>class DataVaultCli extends Callable[Int] {
+</span>24 <span style=''>
+</span>25 <span style=''>  @Parameters(
+</span>26 <span style=''>    index = &quot;0&quot;,
+</span>27 <span style=''>    description = Array(&quot;The command to execute: [ExtractRawModel]&quot;)
+</span>28 <span style=''>  )
+</span>29 <span style=''>  private var command: String = </span><span style='background: #AEF1AE'>null</span><span style=''>
+</span>30 <span style=''>
+</span>31 <span style=''>  @Option(
+</span>32 <span style=''>    names = Array(&quot;-i&quot;, &quot;--input-file&quot;),
+</span>33 <span style=''>    required = true,
+</span>34 <span style=''>    description = Array(&quot;The input file to process, format supported: ZIP&quot;)
+</span>35 <span style=''>  )
+</span>36 <span style=''>  private var inputFile: File = </span><span style='background: #AEF1AE'>null</span><span style=''>
+</span>37 <span style=''>
+</span>38 <span style=''>  @Option(
+</span>39 <span style=''>    names = Array(&quot;-o&quot;, &quot;--output-file&quot;),
+</span>40 <span style=''>    required = true,
+</span>41 <span style=''>    description = Array(&quot;The output file to generate&quot;)
+</span>42 <span style=''>  )
+</span>43 <span style=''>  private var outputFile: File = </span><span style='background: #AEF1AE'>null</span><span style=''>
+</span>44 <span style=''>
+</span>45 <span style=''>  def commandNotRecognized(command: String) = </span><span style='background: #AEF1AE'>Constants.CommandNotRecognized</span><span style=''>
+</span>46 <span style=''>  
+</span>47 <span style=''>  override def call(): Int = </span><span style='background: #AEF1AE'>command</span><span style=''> match {
+</span>48 <span style=''>    case &quot;extract-files&quot; =&gt;
+</span>49 <span style=''>      </span><span style='background: #AEF1AE'>Command.extractFiles(input = inputFile, output = outputFile)</span><span style=''>
+</span>50 <span style=''>    case &quot;generate-raw-model&quot; =&gt;
+</span>51 <span style=''>      </span><span style='background: #AEF1AE'>Command.generateRawModel(input = inputFile, output = outputFile)</span><span style=''>
+</span>52 <span style=''>    case &quot;generate-hub-config-template&quot; =&gt;
+</span>53 <span style=''>      </span><span style='background: #AEF1AE'>Command.generateHubConfigTemplate(input = inputFile, output = outputFile)</span><span style=''>
+</span>54 <span style=''>    case _ =&gt; </span><span style='background: #AEF1AE'>commandNotRecognized(command)</span><span style=''>
+</span>55 <span style=''>  }
+</span>56 <span style=''>}
+</span>57 <span style=''>object DataVault {
+</span>58 <span style=''>  def main(args: Array[String]) = {
+</span>59 <span style=''>    val exitCode = </span><span style='background: #F0ADAD'>new CommandLine(new DataVaultCli()).execute(args: _*)</span><span style=''>
+</span>60 <span style=''>    </span><span style='background: #F0ADAD'>System.exit(exitCode)</span><span style=''>
+</span>61 <span style=''>  }
+</span>62 <span style=''>}
+</span></pre>
+          </div>
+          <div class="tab-pane" id="statementlist">
+            <table cellspacing="0" cellpadding="0" class="table statementlist">
+      <tr>
+        <th>Line</th>
+        <th>Stmt Id</th>
+        <th>Pos</th>
+        <th>Tree</th>
+        <th>Symbol</th>
+        <th>Code</th>
+      </tr><tr>
+        <td>
+          29
+        </td>
+        <td>
+          22
+        </td>
+        <td>
+          623
+          -
+          627
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          null
+        </td>
+      </tr><tr>
+        <td>
+          36
+        </td>
+        <td>
+          23
+        </td>
+        <td>
+          814
+          -
+          818
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          null
+        </td>
+      </tr><tr>
+        <td>
+          43
+        </td>
+        <td>
+          24
+        </td>
+        <td>
+          986
+          -
+          990
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          null
+        </td>
+      </tr><tr>
+        <td>
+          45
+        </td>
+        <td>
+          25
+        </td>
+        <td>
+          1038
+          -
+          1068
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.Constants.CommandNotRecognized
+        </td>
+        <td style="background: #AEF1AE">
+          Constants.CommandNotRecognized
+        </td>
+      </tr><tr>
+        <td>
+          47
+        </td>
+        <td>
+          26
+        </td>
+        <td>
+          1101
+          -
+          1108
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.command
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.command
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          29
+        </td>
+        <td>
+          1151
+          -
+          1211
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.Command.extractFiles
+        </td>
+        <td style="background: #AEF1AE">
+          Command.extractFiles(DataVaultCli.this.inputFile, DataVaultCli.this.outputFile)
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          28
+        </td>
+        <td>
+          1200
+          -
+          1210
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.outputFile
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.outputFile
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          27
+        </td>
+        <td>
+          1180
+          -
+          1189
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.inputFile
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.inputFile
+        </td>
+      </tr><tr>
+        <td>
+          51
+        </td>
+        <td>
+          32
+        </td>
+        <td>
+          1251
+          -
+          1315
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.Command.generateRawModel
+        </td>
+        <td style="background: #AEF1AE">
+          Command.generateRawModel(DataVaultCli.this.inputFile, DataVaultCli.this.outputFile)
+        </td>
+      </tr><tr>
+        <td>
+          51
+        </td>
+        <td>
+          31
+        </td>
+        <td>
+          1304
+          -
+          1314
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.outputFile
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.outputFile
+        </td>
+      </tr><tr>
+        <td>
+          51
+        </td>
+        <td>
+          30
+        </td>
+        <td>
+          1284
+          -
+          1293
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.inputFile
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.inputFile
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          35
+        </td>
+        <td>
+          1365
+          -
+          1438
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.Command.generateHubConfigTemplate
+        </td>
+        <td style="background: #AEF1AE">
+          Command.generateHubConfigTemplate(DataVaultCli.this.inputFile, DataVaultCli.this.outputFile)
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          34
+        </td>
+        <td>
+          1427
+          -
+          1437
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.outputFile
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.outputFile
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          33
+        </td>
+        <td>
+          1407
+          -
+          1416
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.inputFile
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.inputFile
+        </td>
+      </tr><tr>
+        <td>
+          54
+        </td>
+        <td>
+          37
+        </td>
+        <td>
+          1453
+          -
+          1482
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.DataVaultCli.commandNotRecognized
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.commandNotRecognized(DataVaultCli.this.command)
+        </td>
+      </tr><tr>
+        <td>
+          54
+        </td>
+        <td>
+          36
+        </td>
+        <td>
+          1474
+          -
+          1481
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.command
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.command
+        </td>
+      </tr><tr>
+        <td>
+          59
+        </td>
+        <td>
+          38
+        </td>
+        <td>
+          1579
+          -
+          1597
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.DataVaultCli.&lt;init&gt;
+        </td>
+        <td style="background: #F0ADAD">
+          new DataVaultCli()
+        </td>
+      </tr><tr>
+        <td>
+          59
+        </td>
+        <td>
+          39
+        </td>
+        <td>
+          1563
+          -
+          1616
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          picocli.CommandLine.execute
+        </td>
+        <td style="background: #F0ADAD">
+          new picocli.CommandLine(new DataVaultCli()).execute((args: _*))
+        </td>
+      </tr><tr>
+        <td>
+          60
+        </td>
+        <td>
+          40
+        </td>
+        <td>
+          1621
+          -
+          1642
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.lang.System.exit
+        </td>
+        <td style="background: #F0ADAD">
+          java.lang.System.exit(exitCode)
+        </td>
+      </tr>
+    </table>
+          </div>
+        </div>
+      </body>
+    </html>

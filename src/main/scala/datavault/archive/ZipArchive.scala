@@ -1,32 +1,14 @@
 package datavault.archive
 
 import java.nio.file.Path
-import java.io.InputStream
-import java.io.FileInputStream
-import java.util.zip.ZipInputStream
-import java.util.zip.ZipEntry
-import java.io.File
-import java.nio.file.Files
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import java.io._
+
+import java.util.zip._
 import java.util.Optional
-import java.io.OutputStream
-import java.io.FileOutputStream
 
-trait CsvFile {
-  def inputStream: InputStream
+import java.nio.file.Files
 
-  def firstLine: String = {
-    val br = new BufferedReader(new InputStreamReader(inputStream))
-    val line: Optional[String] = br.lines().findFirst()
-    line.orElse("")
-  }
-
-}
-
-case class ZipFileInfo(ze: ZipEntry, zis: ZipInputStream)
-    extends FileInfo
-    with CsvFile {
+case class ZipFileInfo(ze: ZipEntry, zis: ZipInputStream) extends FileInfo {
   val _ext = ".csv"
   def name = if (filename.endsWith(_ext)) {
     filename.substring(0, filename.length() - _ext.length());
@@ -34,16 +16,15 @@ case class ZipFileInfo(ze: ZipEntry, zis: ZipInputStream)
     filename
   }
 
-  def filename = ze.getName()
+  def filename    = ze.getName()
   def inputStream = zis
   def writeTo(target: File): Either[String, Unit] = {
 
     val BUFSIZE = 4096
-    val buffer = new Array[Byte](BUFSIZE)
+    val buffer  = new Array[Byte](BUFSIZE)
 
     def saveFile(fis: InputStream, fos: OutputStream) = {
       writeToFile(bufferReader(fis) _, fos)
-      //fis.close
       fos.close
     }
 
@@ -64,16 +45,10 @@ case class ZipFileInfo(ze: ZipEntry, zis: ZipInputStream)
 
     try {
       saveFile(inputStream, new FileOutputStream(target))
-
       Right(())
-
     } catch {
-      case ex: Exception => {
-        println(s"""error writing ${ex.getMessage()}""")
-        Left(ex.getMessage())
-      }
+      case ex: Exception => Left(ex.getMessage())
     }
-
   }
 }
 

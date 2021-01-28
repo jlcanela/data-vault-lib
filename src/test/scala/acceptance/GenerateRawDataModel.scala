@@ -1,15 +1,20 @@
 package features
 
-import org.scalatest.FeatureSpec
-import org.scalatest.Matchers
+//import org.scalatest.FeatureSpec
+
 import org.scalatest.GivenWhenThen
 import datavault.DataVault
 import picocli.CommandLine
 import datavault.DataVaultCli
 import datavault.Constants
 
+import org.scalatest._
+import flatspec._
+import matchers.should._
+import featurespec.AnyFeatureSpec
+
 class GenerateRawDataModelFromZipArchive
-    extends FeatureSpec
+    extends AnyFeatureSpec
     with Matchers
     with GivenWhenThen
     with Fixtures
@@ -19,7 +24,6 @@ class GenerateRawDataModelFromZipArchive
 
     scenario("Successfully generates a raw data model from a zip data archive") {
 
-      
       Given(s"""a zip archive "$archive"  in folder "$folder"""")
       val ouputFilename = modelFile
       And(s"""an output filename "${ouputFilename}"""")

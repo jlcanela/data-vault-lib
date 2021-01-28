@@ -42,11 +42,8 @@ class DataVaultCli extends Callable[Int] {
   )
   private var outputFile: File = null
 
-  def commandNotRecognized(command: String) = {
-    println(s"command '$command' not recognized")
-    Constants.CommandNotRecognized
-  }
-
+  def commandNotRecognized(command: String) = Constants.CommandNotRecognized
+  
   override def call(): Int = command match {
     case "extract-files" =>
       Command.extractFiles(input = inputFile, output = outputFile)
@@ -57,7 +54,9 @@ class DataVaultCli extends Callable[Int] {
     case _ => commandNotRecognized(command)
   }
 }
-object DataVault extends App {
-  val exitCode = new CommandLine(new DataVaultCli()).execute(args: _*)
-  System.exit(exitCode)
+object DataVault {
+  def main(args: Array[String]) = {
+    val exitCode = new CommandLine(new DataVaultCli()).execute(args: _*)
+    System.exit(exitCode)
+  }
 }

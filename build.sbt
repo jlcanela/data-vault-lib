@@ -1,18 +1,24 @@
 libraryDependencies ++= Seq(
-   "info.picocli" % "picocli" % "4.2.0",
-   "org.json4s" % "json4s-native_2.12" % "3.7.0-M8",
+  "dev.zio" %% "zio-nio-core" % "1.0.0-RC10",
+  "info.picocli" % "picocli" % "4.2.0",
+  "org.json4s" % "json4s-native_2.12" % "3.7.0-M8",
   "com.tngtech.jgiven" % "jgiven-junit" % "0.15.3" % "test",
   "junit" % "junit" % "4.12" % "test",
-  "org.scalatest" %% "scalatest" % "3.0.4" % "test",
+  "com.vladsch.flexmark" % "flexmark-all" % "0.35.10" % "test",
+  "org.scalatest" %% "scalatest" % "3.2.3" % "test",
+  "org.scalatest" %% "scalatest-featurespec" % "3.2.3" % "test",
   "org.pegdown" % "pegdown" % "1.6.0" % "test",
-   "io.cucumber" % "cucumber-junit" % "6.8.1" % "test",
-   "io.cucumber" %% "cucumber-scala" % "6.8.1" % "test",
-   "com.novocode" % "junit-interface" % "0.11" % "test" exclude("junit", "junit")
+  "io.cucumber" % "cucumber-junit" % "6.8.1" % "test",
+  "io.cucumber" %% "cucumber-scala" % "6.8.1" % "test",
+  "com.novocode" % "junit-interface" % "0.11" % "test" exclude ("junit", "junit")
 )
 
 logBuffered in Test := false
+coverageEnabled := true
+coverageMinimum := 95
+coverageFailOnMinimum := false
 
 testOptions in Test ++= Seq(
-   Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/test-reports"),
-   Tests.Argument(TestFrameworks.ScalaTest, "-o")
+  Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/test-reports"),
+  Tests.Argument(TestFrameworks.ScalaTest, "-o")
 )
