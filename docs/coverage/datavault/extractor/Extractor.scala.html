@@ -1,0 +1,626 @@
+<html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title id="title">
+          datavault/extractor/Extractor.scala.html
+        </title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/css/theme.default.min.css" type="text/css"/><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/js/jquery.tablesorter.min.js"></script><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" type="text/css"/><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script><script type="text/javascript">
+        $(document).ready(function() {$(".tablesorter").tablesorter();});
+      </script>
+        <style>
+          table.codegrid { font-family: monospace; font-size: 12px; width: auto!important; }table.statementlist { width: auto!important; font-size: 13px; } table.codegrid td { padding: 0!important; border: 0!important } table td.linenumber { width: 40px!important; } 
+        </style>
+      </head>
+      <body style="font-family: monospace;">
+        <ul class="nav nav-tabs">
+          <li>
+            <a href="#codegrid" data-toggle="tab">Codegrid</a>
+          </li>
+          <li>
+            <a href="#statementlist" data-toggle="tab">Statement List</a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active" id="codegrid">
+            <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault.extractor
+</span>2 <span style=''>
+</span>3 <span style=''>import datavault.archive.Archive
+</span>4 <span style=''>import java.io.File
+</span>5 <span style=''>import datavault.archive.Visitor
+</span>6 <span style=''>import datavault.archive.FileInfo
+</span>7 <span style=''>import java.nio.file.Path
+</span>8 <span style=''>import java.nio.file.Paths
+</span>9 <span style=''>import java.nio.file.Files
+</span>10 <span style=''>
+</span>11 <span style=''>sealed trait Status {
+</span>12 <span style=''>  def error: Option[String]
+</span>13 <span style=''>}
+</span>14 <span style=''>
+</span>15 <span style=''>case class FileExtractionStatus(
+</span>16 <span style=''>    filename: String,
+</span>17 <span style=''>    length: Long,
+</span>18 <span style=''>    error: Option[String]
+</span>19 <span style=''>) extends Status
+</span>20 <span style=''>
+</span>21 <span style=''>case class Error(message: String) extends Status {
+</span>22 <span style=''>  def error: Option[String] = </span><span style='background: #AEF1AE'>Some(message)</span><span style=''>
+</span>23 <span style=''>}
+</span>24 <span style=''>
+</span>25 <span style=''>object FileExtractionStatus {
+</span>26 <span style=''>  implicit def ordering[A &lt;: FileExtractionStatus]: Ordering[A] =
+</span>27 <span style=''>    </span><span style='background: #AEF1AE'>Ordering.by(_.toString)</span><span style=''>
+</span>28 <span style=''>}
+</span>29 <span style=''>
+</span>30 <span style=''>object Extractor {
+</span>31 <span style=''>
+</span>32 <span style=''>  def extract(
+</span>33 <span style=''>      archive: Archive,
+</span>34 <span style=''>      destination: File
+</span>35 <span style=''>  ): List[Status] = {
+</span>36 <span style=''>
+</span>37 <span style=''>    var status: List[Status] = </span><span style='background: #AEF1AE'>Nil</span><span style=''>
+</span>38 <span style=''>
+</span>39 <span style=''>    val path: Path = </span><span style='background: #AEF1AE'>Paths.get(destination.getPath())</span><span style=''>
+</span>40 <span style=''>    try {
+</span>41 <span style=''>      </span><span style='background: #AEF1AE'>Files.createDirectories(path)
+</span>42 <span style=''></span><span style='background: #AEF1AE'>
+</span>43 <span style=''></span><span style='background: #AEF1AE'>      archive.visit(new Visitor() {
+</span>44 <span style=''></span><span style='background: #AEF1AE'>        def visit(info: FileInfo) {
+</span>45 <span style=''></span><span style='background: #AEF1AE'>          val outputFile = new File(destination, info.filename)
+</span>46 <span style=''></span><span style='background: #AEF1AE'>          status = info
+</span>47 <span style=''></span><span style='background: #AEF1AE'>            .writeTo(outputFile)
+</span>48 <span style=''></span><span style='background: #AEF1AE'>            .fold(
+</span>49 <span style=''></span><span style='background: #AEF1AE'>              error =&gt; FileExtractionStatus(info.filename, 0, Some(error)),
+</span>50 <span style=''></span><span style='background: #AEF1AE'>              Unit =&gt; FileExtractionStatus(info.filename, 0, None)
+</span>51 <span style=''></span><span style='background: #AEF1AE'>            ) :: status
+</span>52 <span style=''></span><span style='background: #AEF1AE'>        }
+</span>53 <span style=''></span><span style='background: #AEF1AE'>      })
+</span>54 <span style=''></span><span style='background: #AEF1AE'>
+</span>55 <span style=''></span><span style='background: #AEF1AE'>      status</span><span style=''>
+</span>56 <span style=''>
+</span>57 <span style=''>    } catch {
+</span>58 <span style=''>      case ex: Exception =&gt; Error(ex.getMessage) </span><span style='background: #AEF1AE'>:: Nil</span><span style=''>
+</span>59 <span style=''>    }
+</span>60 <span style=''>
+</span>61 <span style=''>  }
+</span>62 <span style=''>
+</span>63 <span style=''>  def listFiles(destination: File) = {
+</span>64 <span style=''>    </span><span style='background: #AEF1AE'>destination.listFiles().map { file =&gt;
+</span>65 <span style=''></span><span style='background: #AEF1AE'>      FileExtractionStatus(file.getName(), file.length, None)
+</span>66 <span style=''></span><span style='background: #AEF1AE'>    }</span><span style=''>
+</span>67 <span style=''>  }
+</span>68 <span style=''>}
+</span></pre>
+          </div>
+          <div class="tab-pane" id="statementlist">
+            <table cellspacing="0" cellpadding="0" class="table statementlist">
+      <tr>
+        <th>Line</th>
+        <th>Stmt Id</th>
+        <th>Pos</th>
+        <th>Tree</th>
+        <th>Symbol</th>
+        <th>Code</th>
+      </tr><tr>
+        <td>
+          22
+        </td>
+        <td>
+          92
+        </td>
+        <td>
+          481
+          -
+          494
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Some.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Some.apply[String](Error.this.message)
+        </td>
+      </tr><tr>
+        <td>
+          22
+        </td>
+        <td>
+          91
+        </td>
+        <td>
+          486
+          -
+          493
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.extractor.Error.message
+        </td>
+        <td style="background: #AEF1AE">
+          Error.this.message
+        </td>
+      </tr><tr>
+        <td>
+          27
+        </td>
+        <td>
+          95
+        </td>
+        <td>
+          598
+          -
+          621
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          scala.math.Ordering.by
+        </td>
+        <td style="background: #AEF1AE">
+          scala.`package`.Ordering.by[A, String](((x$1: A) =&gt; x$1.toString()))(math.this.Ordering.String)
+        </td>
+      </tr><tr>
+        <td>
+          27
+        </td>
+        <td>
+          94
+        </td>
+        <td>
+          609
+          -
+          609
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.math.Ordering.String
+        </td>
+        <td style="background: #AEF1AE">
+          math.this.Ordering.String
+        </td>
+      </tr><tr>
+        <td>
+          27
+        </td>
+        <td>
+          93
+        </td>
+        <td>
+          610
+          -
+          620
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractor.FileExtractionStatus.toString
+        </td>
+        <td style="background: #AEF1AE">
+          x$1.toString()
+        </td>
+      </tr><tr>
+        <td>
+          37
+        </td>
+        <td>
+          96
+        </td>
+        <td>
+          762
+          -
+          765
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.collection.immutable.Nil
+        </td>
+        <td style="background: #AEF1AE">
+          scala.collection.immutable.Nil
+        </td>
+      </tr><tr>
+        <td>
+          39
+        </td>
+        <td>
+          98
+        </td>
+        <td>
+          788
+          -
+          820
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Paths.get
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Paths.get(destination.getPath())
+        </td>
+      </tr><tr>
+        <td>
+          39
+        </td>
+        <td>
+          97
+        </td>
+        <td>
+          798
+          -
+          819
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.File.getPath
+        </td>
+        <td style="background: #AEF1AE">
+          destination.getPath()
+        </td>
+      </tr><tr>
+        <td>
+          40
+        </td>
+        <td>
+          105
+        </td>
+        <td>
+          837
+          -
+          1279
+        </td>
+        <td>
+          Block
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          {
+  java.nio.file.Files.createDirectories(path);
+  archive.visit({
+    final class $anon extends AnyRef with datavault.archive.Visitor {
+      def &lt;init&gt;(): &lt;$anon: datavault.archive.Visitor&gt; = {
+        $anon.super.&lt;init&gt;();
+        ()
+      };
+      def visit(info: datavault.archive.FileInfo): Unit = {
+        val outputFile: java.io.File = new java.io.File(destination, info.filename);
+        status = {
+          &lt;synthetic&gt; &lt;artifact&gt; val x$2: datavault.extractor.FileExtractionStatus = info.writeTo(outputFile).fold[datavault.extractor.FileExtractionStatus](((error: String) =&gt; FileExtractionStatus.apply(info.filename, 0L, scala.Some.apply[String](error))), ((Unit: Unit) =&gt; FileExtractionStatus.apply(info.filename, 0L, scala.None)));
+          status.::[datavault.extractor.Status](x$2)
+        }
+      }
+    };
+    new $anon()
+  });
+  status
+}
+        </td>
+      </tr><tr>
+        <td>
+          41
+        </td>
+        <td>
+          99
+        </td>
+        <td>
+          837
+          -
+          866
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Files.createDirectories
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Files.createDirectories(path)
+        </td>
+      </tr><tr>
+        <td>
+          43
+        </td>
+        <td>
+          104
+        </td>
+        <td>
+          874
+          -
+          1265
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.archive.Archive.visit
+        </td>
+        <td style="background: #AEF1AE">
+          archive.visit({
+  final class $anon extends AnyRef with datavault.archive.Visitor {
+    def &lt;init&gt;(): &lt;$anon: datavault.archive.Visitor&gt; = {
+      $anon.super.&lt;init&gt;();
+      ()
+    };
+    def visit(info: datavault.archive.FileInfo): Unit = {
+      val outputFile: java.io.File = new java.io.File(destination, info.filename);
+      status = {
+        &lt;synthetic&gt; &lt;artifact&gt; val x$2: datavault.extractor.FileExtractionStatus = info.writeTo(outputFile).fold[datavault.extractor.FileExtractionStatus](((error: String) =&gt; FileExtractionStatus.apply(info.filename, 0L, scala.Some.apply[String](error))), ((Unit: Unit) =&gt; FileExtractionStatus.apply(info.filename, 0L, scala.None)));
+        status.::[datavault.extractor.Status](x$2)
+      }
+    }
+  };
+  new $anon()
+})
+        </td>
+      </tr><tr>
+        <td>
+          43
+        </td>
+        <td>
+          103
+        </td>
+        <td>
+          888
+          -
+          891
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractor.Extractor.$anon.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new $anon()
+        </td>
+      </tr><tr>
+        <td>
+          45
+        </td>
+        <td>
+          101
+        </td>
+        <td>
+          967
+          -
+          1003
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.File.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new java.io.File(destination, info.filename)
+        </td>
+      </tr><tr>
+        <td>
+          45
+        </td>
+        <td>
+          100
+        </td>
+        <td>
+          989
+          -
+          1002
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.archive.FileInfo.filename
+        </td>
+        <td style="background: #AEF1AE">
+          info.filename
+        </td>
+      </tr><tr>
+        <td>
+          51
+        </td>
+        <td>
+          102
+        </td>
+        <td>
+          1237
+          -
+          1246
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.collection.immutable.List.::
+        </td>
+        <td style="background: #AEF1AE">
+          status.::[datavault.extractor.Status](x$2)
+        </td>
+      </tr><tr>
+        <td>
+          58
+        </td>
+        <td>
+          106
+        </td>
+        <td>
+          1344
+          -
+          1350
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.collection.immutable.List.::
+        </td>
+        <td style="background: #AEF1AE">
+          scala.collection.immutable.Nil.::[datavault.extractor.Error](x$3)
+        </td>
+      </tr><tr>
+        <td>
+          64
+        </td>
+        <td>
+          113
+        </td>
+        <td>
+          1406
+          -
+          1511
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          scala.collection.TraversableLike.map
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.refArrayOps[java.io.File](destination.listFiles()).map[datavault.extractor.FileExtractionStatus, Array[datavault.extractor.FileExtractionStatus]](((file: java.io.File) =&gt; FileExtractionStatus.apply(file.getName(), file.length(), scala.None)))(scala.this.Array.canBuildFrom[datavault.extractor.FileExtractionStatus]((ClassTag.apply[datavault.extractor.FileExtractionStatus](classOf[datavault.extractor.FileExtractionStatus]): scala.reflect.ClassTag[datavault.extractor.FileExtractionStatus])))
+        </td>
+      </tr><tr>
+        <td>
+          64
+        </td>
+        <td>
+          107
+        </td>
+        <td>
+          1406
+          -
+          1429
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.File.listFiles
+        </td>
+        <td style="background: #AEF1AE">
+          destination.listFiles()
+        </td>
+      </tr><tr>
+        <td>
+          64
+        </td>
+        <td>
+          112
+        </td>
+        <td>
+          1434
+          -
+          1434
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          scala.Array.canBuildFrom
+        </td>
+        <td style="background: #AEF1AE">
+          scala.this.Array.canBuildFrom[datavault.extractor.FileExtractionStatus]((ClassTag.apply[datavault.extractor.FileExtractionStatus](classOf[datavault.extractor.FileExtractionStatus]): scala.reflect.ClassTag[datavault.extractor.FileExtractionStatus]))
+        </td>
+      </tr><tr>
+        <td>
+          65
+        </td>
+        <td>
+          110
+        </td>
+        <td>
+          1500
+          -
+          1504
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.None
+        </td>
+        <td style="background: #AEF1AE">
+          scala.None
+        </td>
+      </tr><tr>
+        <td>
+          65
+        </td>
+        <td>
+          109
+        </td>
+        <td>
+          1487
+          -
+          1498
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.File.length
+        </td>
+        <td style="background: #AEF1AE">
+          file.length()
+        </td>
+      </tr><tr>
+        <td>
+          65
+        </td>
+        <td>
+          108
+        </td>
+        <td>
+          1471
+          -
+          1485
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.File.getName
+        </td>
+        <td style="background: #AEF1AE">
+          file.getName()
+        </td>
+      </tr><tr>
+        <td>
+          65
+        </td>
+        <td>
+          111
+        </td>
+        <td>
+          1450
+          -
+          1505
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractor.FileExtractionStatus.apply
+        </td>
+        <td style="background: #AEF1AE">
+          FileExtractionStatus.apply(file.getName(), file.length(), scala.None)
+        </td>
+      </tr>
+    </table>
+          </div>
+        </div>
+      </body>
+    </html>

@@ -1,8 +1,9 @@
 package features
 
-import org.scalatest.FeatureSpec
-import org.scalatest.Matchers
-import org.scalatest.GivenWhenThen
+import org.scalatest._
+import flatspec._
+import matchers.should.Matchers
+import featurespec.AnyFeatureSpec
 
 import picocli.CommandLine
 
@@ -13,7 +14,7 @@ import datavault.extractor.Extractor
 import datavault.extractor.FileExtractionStatus
 
 class ExtractFilesFromZipArchive
-    extends FeatureSpec
+    extends AnyFeatureSpec
     with Matchers
     with GivenWhenThen
     with Fixtures

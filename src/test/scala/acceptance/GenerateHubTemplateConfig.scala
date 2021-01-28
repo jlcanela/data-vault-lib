@@ -1,8 +1,9 @@
 package features
 
-import org.scalatest.FeatureSpec
-import org.scalatest.Matchers
-import org.scalatest.GivenWhenThen
+import org.scalatest._
+import flatspec._
+import matchers.should.Matchers
+import featurespec.AnyFeatureSpec
 
 import picocli.CommandLine
 
@@ -17,7 +18,7 @@ import org.json4s.JsonAST.JNothing
 import org.json4s.native.Serialization.{read, write, writePretty}
 
 class GenerateHubTemplateConfig
-    extends FeatureSpec
+    extends AnyFeatureSpec
     with Matchers
     with GivenWhenThen
     with Fixtures

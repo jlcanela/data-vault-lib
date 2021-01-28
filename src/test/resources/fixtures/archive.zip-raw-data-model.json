@@ -2,7 +2,7 @@
   "tables":{
     "olist_customers_dataset":{
       "name":"olist_customers_dataset",
-      "archive":"data/archive.zip",
+      "archive":"src/test/resources/fixtures/test.zip",
       "path":"olist_customers_dataset.csv",
       "columns":[
         {
@@ -24,7 +24,7 @@
     },
     "olist_order_reviews_dataset":{
       "name":"olist_order_reviews_dataset",
-      "archive":"data/archive.zip",
+      "archive":"src/test/resources/fixtures/test.zip",
       "path":"olist_order_reviews_dataset.csv",
       "columns":[
         {
@@ -52,7 +52,7 @@
     },
     "olist_geolocation_dataset":{
       "name":"olist_geolocation_dataset",
-      "archive":"data/archive.zip",
+      "archive":"src/test/resources/fixtures/test.zip",
       "path":"olist_geolocation_dataset.csv",
       "columns":[
         {
@@ -74,7 +74,7 @@
     },
     "olist_order_items_dataset":{
       "name":"olist_order_items_dataset",
-      "archive":"data/archive.zip",
+      "archive":"src/test/resources/fixtures/test.zip",
       "path":"olist_order_items_dataset.csv",
       "columns":[
         {
@@ -102,7 +102,7 @@
     },
     "olist_products_dataset":{
       "name":"olist_products_dataset",
-      "archive":"data/archive.zip",
+      "archive":"src/test/resources/fixtures/test.zip",
       "path":"olist_products_dataset.csv",
       "columns":[
         {
@@ -136,7 +136,7 @@
     },
     "olist_sellers_dataset":{
       "name":"olist_sellers_dataset",
-      "archive":"data/archive.zip",
+      "archive":"src/test/resources/fixtures/test.zip",
       "path":"olist_sellers_dataset.csv",
       "columns":[
         {
@@ -155,7 +155,7 @@
     },
     "olist_orders_dataset":{
       "name":"olist_orders_dataset",
-      "archive":"data/archive.zip",
+      "archive":"src/test/resources/fixtures/test.zip",
       "path":"olist_orders_dataset.csv",
       "columns":[
         {
@@ -186,7 +186,7 @@
     },
     "product_category_name_translation":{
       "name":"product_category_name_translation",
-      "archive":"data/archive.zip",
+      "archive":"src/test/resources/fixtures/test.zip",
       "path":"product_category_name_translation.csv",
       "columns":[
         {
@@ -199,7 +199,7 @@
     },
     "olist_order_payments_dataset":{
       "name":"olist_order_payments_dataset",
-      "archive":"data/archive.zip",
+      "archive":"src/test/resources/fixtures/test.zip",
       "path":"olist_order_payments_dataset.csv",
       "columns":[
         {

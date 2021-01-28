@@ -2,8 +2,8 @@ package features
 
 trait Fixtures {
 
-    val archive = "archive.zip"
-    val folder = "data"
+    val archive = "test.zip"
+    val folder = "src/test/resources/fixtures"
     val modelFile = "out/model.json"
     val staging = "out/staging"
 

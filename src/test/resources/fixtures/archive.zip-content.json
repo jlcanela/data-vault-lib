@@ -1,38 +1,38 @@
 [
     {
-        "length": 9033957,
+        "length": 95,
         "filename": "olist_customers_dataset.csv"
     },
     {
-        "length": 61273883,
+        "length": 105,
         "filename": "olist_geolocation_dataset.csv"
     },
     {
-        "length": 15438671,
+        "length": 98,
         "filename": "olist_order_items_dataset.csv"
     },
     {
-        "length": 5777138,
+        "length": 86,
         "filename": "olist_order_payments_dataset.csv"
     },
     {
-        "length": 14409007,
+        "length": 135,
         "filename": "olist_order_reviews_dataset.csv"
     },
     {
-        "length": 17654914,
+        "length": 182,
         "filename": "olist_orders_dataset.csv"
     },
     {
-        "length": 2379446,
+        "length": 187,
         "filename": "olist_products_dataset.csv"
     },
     {
-        "length": 174703,
+        "length": 66,
         "filename": "olist_sellers_dataset.csv"
     },
     {
-        "length": 2613,
+        "length": 56,
         "filename": "product_category_name_translation.csv"
     }
 ]
