@@ -1,0 +1,333 @@
+<html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title id="title">
+          datavault/io/FileSystem.scala.html
+        </title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/css/theme.default.min.css" type="text/css"/><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/js/jquery.tablesorter.min.js"></script><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" type="text/css"/><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script><script type="text/javascript">
+        $(document).ready(function() {$(".tablesorter").tablesorter();});
+      </script>
+        <style>
+          table.codegrid { font-family: monospace; font-size: 12px; width: auto!important; }table.statementlist { width: auto!important; font-size: 13px; } table.codegrid td { padding: 0!important; border: 0!important } table td.linenumber { width: 40px!important; } 
+        </style>
+      </head>
+      <body style="font-family: monospace;">
+        <ul class="nav nav-tabs">
+          <li>
+            <a href="#codegrid" data-toggle="tab">Codegrid</a>
+          </li>
+          <li>
+            <a href="#statementlist" data-toggle="tab">Statement List</a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active" id="codegrid">
+            <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault.io
+</span>2 <span style=''>
+</span>3 <span style=''>import java.io.{InputStream, OutputStream, BufferedWriter, OutputStreamWriter}
+</span>4 <span style=''>import java.nio.file.Path
+</span>5 <span style=''>
+</span>6 <span style=''>trait FileSystem {
+</span>7 <span style=''>  def open(path: Path): InputStream
+</span>8 <span style=''>  def create(path: Path): OutputStream
+</span>9 <span style=''>}
+</span>10 <span style=''>
+</span>11 <span style=''>// def localFileSystem: ZIO[Blocking, Exception, FileSystem] =
+</span>12 <span style=''>object LocalFileSystem extends FileSystem {
+</span>13 <span style=''>  def open(path: Path) = </span><span style='background: #AEF1AE'>java.nio.file.Files.newInputStream(path)</span><span style=''>
+</span>14 <span style=''>  def create(path: Path) = </span><span style='background: #AEF1AE'>java.nio.file.Files.newOutputStream(path)</span><span style=''>
+</span>15 <span style=''>}
+</span>16 <span style=''>
+</span>17 <span style=''>object FileSystem {
+</span>18 <span style=''>
+</span>19 <span style=''>  def get(path: Path) = LocalFileSystem
+</span>20 <span style=''>  def open(path: Path) = {
+</span>21 <span style=''>    val fs = </span><span style='background: #AEF1AE'>get(path)</span><span style=''>
+</span>22 <span style=''>    </span><span style='background: #AEF1AE'>fs.open(path)</span><span style=''>
+</span>23 <span style=''>  }
+</span>24 <span style=''>  def readContent(path: Path) =  {
+</span>25 <span style=''>    val is: InputStream = </span><span style='background: #AEF1AE'>FileSystem.open(path)</span><span style=''>
+</span>26 <span style=''>    val content = </span><span style='background: #AEF1AE'>scala.io.Source.fromInputStream(is).getLines().mkString(&quot;\n&quot;)</span><span style=''>
+</span>27 <span style=''>    </span><span style='background: #AEF1AE'>is.close()</span><span style=''>
+</span>28 <span style=''>    content
+</span>29 <span style=''>  }
+</span>30 <span style=''>  def create(path: Path) = {
+</span>31 <span style=''>    val fs = </span><span style='background: #AEF1AE'>get(path)</span><span style=''>
+</span>32 <span style=''>    </span><span style='background: #AEF1AE'>fs.create(path)</span><span style=''>
+</span>33 <span style=''>  }
+</span>34 <span style=''>
+</span>35 <span style=''>  def writer(path: Path) = {
+</span>36 <span style=''>    val os: OutputStream = </span><span style='background: #AEF1AE'>create(path)</span><span style=''>
+</span>37 <span style=''>    </span><span style='background: #AEF1AE'>new BufferedWriter(new OutputStreamWriter(os))</span><span style=''>
+</span>38 <span style=''>  }
+</span>39 <span style=''>
+</span>40 <span style=''>}
+</span></pre>
+          </div>
+          <div class="tab-pane" id="statementlist">
+            <table cellspacing="0" cellpadding="0" class="table statementlist">
+      <tr>
+        <th>Line</th>
+        <th>Stmt Id</th>
+        <th>Pos</th>
+        <th>Tree</th>
+        <th>Symbol</th>
+        <th>Code</th>
+      </tr><tr>
+        <td>
+          13
+        </td>
+        <td>
+          157
+        </td>
+        <td>
+          357
+          -
+          397
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Files.newInputStream
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Files.newInputStream(path)
+        </td>
+      </tr><tr>
+        <td>
+          14
+        </td>
+        <td>
+          158
+        </td>
+        <td>
+          425
+          -
+          466
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Files.newOutputStream
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Files.newOutputStream(path)
+        </td>
+      </tr><tr>
+        <td>
+          21
+        </td>
+        <td>
+          159
+        </td>
+        <td>
+          571
+          -
+          580
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.io.FileSystem.get
+        </td>
+        <td style="background: #AEF1AE">
+          FileSystem.this.get(path)
+        </td>
+      </tr><tr>
+        <td>
+          22
+        </td>
+        <td>
+          160
+        </td>
+        <td>
+          585
+          -
+          598
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.io.LocalFileSystem.open
+        </td>
+        <td style="background: #AEF1AE">
+          fs.open(path)
+        </td>
+      </tr><tr>
+        <td>
+          25
+        </td>
+        <td>
+          161
+        </td>
+        <td>
+          664
+          -
+          685
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.io.FileSystem.open
+        </td>
+        <td style="background: #AEF1AE">
+          FileSystem.open(path)
+        </td>
+      </tr><tr>
+        <td>
+          26
+        </td>
+        <td>
+          162
+        </td>
+        <td>
+          704
+          -
+          765
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.collection.TraversableOnce.mkString
+        </td>
+        <td style="background: #AEF1AE">
+          scala.io.Source.fromInputStream(is)(io.this.Codec.fallbackSystemCodec).getLines().mkString(&quot;\n&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          27
+        </td>
+        <td>
+          163
+        </td>
+        <td>
+          770
+          -
+          780
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.InputStream.close
+        </td>
+        <td style="background: #AEF1AE">
+          is.close()
+        </td>
+      </tr><tr>
+        <td>
+          31
+        </td>
+        <td>
+          164
+        </td>
+        <td>
+          839
+          -
+          848
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.io.FileSystem.get
+        </td>
+        <td style="background: #AEF1AE">
+          FileSystem.this.get(path)
+        </td>
+      </tr><tr>
+        <td>
+          32
+        </td>
+        <td>
+          165
+        </td>
+        <td>
+          853
+          -
+          868
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.io.LocalFileSystem.create
+        </td>
+        <td style="background: #AEF1AE">
+          fs.create(path)
+        </td>
+      </tr><tr>
+        <td>
+          36
+        </td>
+        <td>
+          166
+        </td>
+        <td>
+          930
+          -
+          942
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.io.FileSystem.create
+        </td>
+        <td style="background: #AEF1AE">
+          FileSystem.this.create(path)
+        </td>
+      </tr><tr>
+        <td>
+          37
+        </td>
+        <td>
+          167
+        </td>
+        <td>
+          966
+          -
+          992
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.OutputStreamWriter.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new java.io.OutputStreamWriter(os)
+        </td>
+      </tr><tr>
+        <td>
+          37
+        </td>
+        <td>
+          168
+        </td>
+        <td>
+          947
+          -
+          993
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.BufferedWriter.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new java.io.BufferedWriter(new java.io.OutputStreamWriter(os))
+        </td>
+      </tr>
+    </table>
+          </div>
+        </div>
+      </body>
+    </html>

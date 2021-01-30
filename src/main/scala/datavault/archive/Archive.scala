@@ -1,20 +1,15 @@
 package datavault.archive
 
 import java.io.InputStream
-import java.io.File
+import java.nio.file.Path
 
-trait FileInfo {
-  def name: String
-  def filename: String
-  def inputStream: InputStream
-  def writeTo(file: File): Either[String, Unit]
-}
+import datavault.io.FileSystem
 
 trait Visitor {
   def visit(info: FileInfo)
 }
 
 trait Archive {
-  def name: String
-  def visit(visitor: Visitor)
+  def path: Path
+  def visit(visitor: Visitor): Unit
 }

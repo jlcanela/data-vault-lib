@@ -1,0 +1,1054 @@
+<html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title id="title">
+          datavault/Cli.scala.html
+        </title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/css/theme.default.min.css" type="text/css"/><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/js/jquery.tablesorter.min.js"></script><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" type="text/css"/><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script><script type="text/javascript">
+        $(document).ready(function() {$(".tablesorter").tablesorter();});
+      </script>
+        <style>
+          table.codegrid { font-family: monospace; font-size: 12px; width: auto!important; }table.statementlist { width: auto!important; font-size: 13px; } table.codegrid td { padding: 0!important; border: 0!important } table td.linenumber { width: 40px!important; } 
+        </style>
+      </head>
+      <body style="font-family: monospace;">
+        <ul class="nav nav-tabs">
+          <li>
+            <a href="#codegrid" data-toggle="tab">Codegrid</a>
+          </li>
+          <li>
+            <a href="#statementlist" data-toggle="tab">Statement List</a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active" id="codegrid">
+            <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault
+</span>2 <span style=''>
+</span>3 <span style=''>import scopt.OParser
+</span>4 <span style=''>
+</span>5 <span style=''>import java.nio.file.{Path, Paths}
+</span>6 <span style=''>
+</span>7 <span style=''>/*
+</span>8 <span style=''> override def call(): Int = command match {
+</span>9 <span style=''>    case &quot;extract-files&quot; =&gt;
+</span>10 <span style=''>      DVCommand.extractFiles(input = inputFile, output = outputFile)
+</span>11 <span style=''>    case &quot;generate-raw-model&quot; =&gt;
+</span>12 <span style=''>      DVCommand.generateRawModel(input = inputFile, output = outputFile)
+</span>13 <span style=''>    case &quot;generate-raw-model-f&quot; =&gt;
+</span>14 <span style=''>      DVCommand.generateRawModelF(input = inputFile, output = outputFile)
+</span>15 <span style=''>    case &quot;generate-hub-config-template&quot; =&gt;
+</span>16 <span style=''>      DVCommand.generateHubConfigTemplate(input = inputFile, output = outputFile)
+</span>17 <span style=''>    case &quot;load-hub&quot; =&gt;
+</span>18 <span style=''>      DVCommand.loadHubs(modelFile = dataModelFile, hubFile = hubConfigFile)
+</span>19 <span style=''>*/
+</span>20 <span style=''>
+</span>21 <span style=''>sealed trait Cmd
+</span>22 <span style=''>object NoCmd extends Cmd
+</span>23 <span style=''>case class GenerateModelFile(input: Path, output: Path) extends Cmd 
+</span>24 <span style=''>case class GenerateHubConfigFile(input: Path, output: Path) extends Cmd 
+</span>25 <span style=''>case class ExtractFiles(input: Path, output: Path) extends Cmd 
+</span>26 <span style=''>case class LoadHubs(input: Path, output: Path) extends Cmd
+</span>27 <span style=''>
+</span>28 <span style=''>case class DataVaultCli(cmd: String = null, input: Path = null, output: Path = null) {
+</span>29 <span style=''>    def toCmd = </span><span style='background: #AEF1AE'>cmd</span><span style=''> match {
+</span>30 <span style=''>        case &quot;generate-model-file&quot; =&gt; </span><span style='background: #AEF1AE'>GenerateModelFile(input, output)</span><span style=''>
+</span>31 <span style=''>        case &quot;extract-files&quot; =&gt; </span><span style='background: #AEF1AE'>ExtractFiles(input, output)</span><span style=''>
+</span>32 <span style=''>        case &quot;generate-hub-config&quot; =&gt; </span><span style='background: #AEF1AE'>GenerateHubConfigFile(input, output)</span><span style=''>
+</span>33 <span style=''>        case &quot;load-hubs&quot; =&gt; </span><span style='background: #AEF1AE'>LoadHubs(input, output)</span><span style=''>
+</span>34 <span style=''>        case _ =&gt; NoCmd
+</span>35 <span style=''>    }
+</span>36 <span style=''>}
+</span>37 <span style=''>
+</span>38 <span style=''>object Cli {
+</span>39 <span style=''>    val parser1 = {
+</span>40 <span style=''>         val builder = </span><span style='background: #AEF1AE'>OParser.builder[DataVaultCli]</span><span style=''>
+</span>41 <span style=''>         import builder._
+</span>42 <span style=''>        </span><span style='background: #AEF1AE'>OParser.sequence(
+</span>43 <span style=''></span><span style='background: #AEF1AE'>            programName(&quot;datavault&quot;),
+</span>44 <span style=''></span><span style='background: #AEF1AE'>            head(&quot;datavault&quot;, &quot;1.0&quot;),
+</span>45 <span style=''></span><span style='background: #AEF1AE'>            cmd(&quot;generate-model-file&quot;)
+</span>46 <span style=''></span><span style='background: #AEF1AE'>            .action((_, c) =&gt; c.copy(cmd = &quot;generate-model-file&quot;)),
+</span>47 <span style=''></span><span style='background: #AEF1AE'>            //.text(&quot;generate model file.&quot;),
+</span>48 <span style=''></span><span style='background: #AEF1AE'>            cmd(&quot;extract-files&quot;)
+</span>49 <span style=''></span><span style='background: #AEF1AE'>            .action((_, c) =&gt; c.copy(cmd = &quot;extract-files&quot;)),
+</span>50 <span style=''></span><span style='background: #AEF1AE'>            cmd(&quot;generate-hub-config&quot;)
+</span>51 <span style=''></span><span style='background: #AEF1AE'>            .action((_, c) =&gt; c.copy(cmd = &quot;generate-hub-config&quot;)),
+</span>52 <span style=''></span><span style='background: #AEF1AE'>            cmd(&quot;load-hubs&quot;)
+</span>53 <span style=''></span><span style='background: #AEF1AE'>            .action((_, c) =&gt; c.copy(cmd = &quot;load-hubs&quot;)),       
+</span>54 <span style=''></span><span style='background: #AEF1AE'>            opt[String](&quot;input&quot;)
+</span>55 <span style=''></span><span style='background: #AEF1AE'>                .required()
+</span>56 <span style=''></span><span style='background: #AEF1AE'>                .abbr(&quot;i&quot;)
+</span>57 <span style=''></span><span style='background: #AEF1AE'>                .action((x, c) =&gt; c.copy(input = Paths.get(x)))
+</span>58 <span style=''></span><span style='background: #AEF1AE'>                .text(&quot;input file to process&quot;),
+</span>59 <span style=''></span><span style='background: #AEF1AE'>            opt[String](&quot;output&quot;)
+</span>60 <span style=''></span><span style='background: #AEF1AE'>                .required()
+</span>61 <span style=''></span><span style='background: #AEF1AE'>                .abbr(&quot;o&quot;)
+</span>62 <span style=''></span><span style='background: #AEF1AE'>                .action((x, c) =&gt; c.copy(output = Paths.get(x)))
+</span>63 <span style=''></span><span style='background: #AEF1AE'>                .text(&quot;output file to process&quot;)
+</span>64 <span style=''></span><span style='background: #AEF1AE'>        )</span><span style=''>
+</span>65 <span style=''>    }
+</span>66 <span style=''>
+</span>67 <span style=''>    def parse(args: Array[String]): Cmd = </span><span style='background: #AEF1AE'>OParser.parse(parser1, args, DataVaultCli()).map(_.toCmd).getOrElse(NoCmd)</span><span style=''>
+</span>68 <span style=''>
+</span>69 <span style=''>}
+</span></pre>
+          </div>
+          <div class="tab-pane" id="statementlist">
+            <table cellspacing="0" cellpadding="0" class="table statementlist">
+      <tr>
+        <th>Line</th>
+        <th>Stmt Id</th>
+        <th>Pos</th>
+        <th>Tree</th>
+        <th>Symbol</th>
+        <th>Code</th>
+      </tr><tr>
+        <td>
+          29
+        </td>
+        <td>
+          1
+        </td>
+        <td>
+          1076
+          -
+          1079
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.cmd
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.cmd
+        </td>
+      </tr><tr>
+        <td>
+          30
+        </td>
+        <td>
+          2
+        </td>
+        <td>
+          1144
+          -
+          1149
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.input
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.input
+        </td>
+      </tr><tr>
+        <td>
+          30
+        </td>
+        <td>
+          4
+        </td>
+        <td>
+          1126
+          -
+          1158
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.GenerateModelFile.apply
+        </td>
+        <td style="background: #AEF1AE">
+          GenerateModelFile.apply(DataVaultCli.this.input, DataVaultCli.this.output)
+        </td>
+      </tr><tr>
+        <td>
+          30
+        </td>
+        <td>
+          3
+        </td>
+        <td>
+          1151
+          -
+          1157
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.output
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.output
+        </td>
+      </tr><tr>
+        <td>
+          31
+        </td>
+        <td>
+          5
+        </td>
+        <td>
+          1204
+          -
+          1209
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.input
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.input
+        </td>
+      </tr><tr>
+        <td>
+          31
+        </td>
+        <td>
+          7
+        </td>
+        <td>
+          1191
+          -
+          1218
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.ExtractFiles.apply
+        </td>
+        <td style="background: #AEF1AE">
+          ExtractFiles.apply(DataVaultCli.this.input, DataVaultCli.this.output)
+        </td>
+      </tr><tr>
+        <td>
+          31
+        </td>
+        <td>
+          6
+        </td>
+        <td>
+          1211
+          -
+          1217
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.output
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.output
+        </td>
+      </tr><tr>
+        <td>
+          32
+        </td>
+        <td>
+          8
+        </td>
+        <td>
+          1279
+          -
+          1284
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.input
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.input
+        </td>
+      </tr><tr>
+        <td>
+          32
+        </td>
+        <td>
+          10
+        </td>
+        <td>
+          1257
+          -
+          1293
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.GenerateHubConfigFile.apply
+        </td>
+        <td style="background: #AEF1AE">
+          GenerateHubConfigFile.apply(DataVaultCli.this.input, DataVaultCli.this.output)
+        </td>
+      </tr><tr>
+        <td>
+          32
+        </td>
+        <td>
+          9
+        </td>
+        <td>
+          1286
+          -
+          1292
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.output
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.output
+        </td>
+      </tr><tr>
+        <td>
+          33
+        </td>
+        <td>
+          11
+        </td>
+        <td>
+          1331
+          -
+          1336
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.input
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.input
+        </td>
+      </tr><tr>
+        <td>
+          33
+        </td>
+        <td>
+          13
+        </td>
+        <td>
+          1322
+          -
+          1345
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.LoadHubs.apply
+        </td>
+        <td style="background: #AEF1AE">
+          LoadHubs.apply(DataVaultCli.this.input, DataVaultCli.this.output)
+        </td>
+      </tr><tr>
+        <td>
+          33
+        </td>
+        <td>
+          12
+        </td>
+        <td>
+          1338
+          -
+          1344
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.output
+        </td>
+        <td style="background: #AEF1AE">
+          DataVaultCli.this.output
+        </td>
+      </tr><tr>
+        <td>
+          40
+        </td>
+        <td>
+          14
+        </td>
+        <td>
+          1435
+          -
+          1464
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scopt.OParser.builder
+        </td>
+        <td style="background: #AEF1AE">
+          scopt.OParser.builder[datavault.DataVaultCli]
+        </td>
+      </tr><tr>
+        <td>
+          42
+        </td>
+        <td>
+          43
+        </td>
+        <td>
+          1499
+          -
+          2452
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scopt.OParser.sequence
+        </td>
+        <td style="background: #AEF1AE">
+          scopt.OParser.sequence[Unit, datavault.DataVaultCli](builder.programName(&quot;datavault&quot;), builder.head(&quot;datavault&quot;, &quot;1.0&quot;), builder.cmd(&quot;generate-model-file&quot;).action(((x$1: Unit, c: datavault.DataVaultCli) =&gt; c.copy(&quot;generate-model-file&quot;, c.copy$default$2, c.copy$default$3))), builder.cmd(&quot;extract-files&quot;).action(((x$2: Unit, c: datavault.DataVaultCli) =&gt; c.copy(&quot;extract-files&quot;, c.copy$default$2, c.copy$default$3))), builder.cmd(&quot;generate-hub-config&quot;).action(((x$3: Unit, c: datavault.DataVaultCli) =&gt; c.copy(&quot;generate-hub-config&quot;, c.copy$default$2, c.copy$default$3))), builder.cmd(&quot;load-hubs&quot;).action(((x$4: Unit, c: datavault.DataVaultCli) =&gt; c.copy(&quot;load-hubs&quot;, c.copy$default$2, c.copy$default$3))), builder.opt[String](&quot;input&quot;)(scopt.this.Read.stringRead).required().abbr(&quot;i&quot;).action(((x: String, c: datavault.DataVaultCli) =&gt; {
+  &lt;artifact&gt; val x$1: java.nio.file.Path = java.nio.file.Paths.get(x);
+  &lt;artifact&gt; val x$2: String = c.copy$default$1;
+  &lt;artifact&gt; val x$3: java.nio.file.Path = c.copy$default$3;
+  c.copy(x$2, x$1, x$3)
+})).text(&quot;input file to process&quot;), builder.opt[String](&quot;output&quot;)(scopt.this.Read.stringRead).required().abbr(&quot;o&quot;).action(((x: String, c: datavault.DataVaultCli) =&gt; {
+  &lt;artifact&gt; val x$4: java.nio.file.Path = java.nio.file.Paths.get(x);
+  &lt;artifact&gt; val x$5: String = c.copy$default$1;
+  &lt;artifact&gt; val x$6: java.nio.file.Path = c.copy$default$2;
+  c.copy(x$5, x$6, x$4)
+})).text(&quot;output file to process&quot;))
+        </td>
+      </tr><tr>
+        <td>
+          43
+        </td>
+        <td>
+          15
+        </td>
+        <td>
+          1529
+          -
+          1553
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scopt.OParserBuilder.programName
+        </td>
+        <td style="background: #AEF1AE">
+          builder.programName(&quot;datavault&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          44
+        </td>
+        <td>
+          16
+        </td>
+        <td>
+          1567
+          -
+          1591
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scopt.OParserBuilder.head
+        </td>
+        <td style="background: #AEF1AE">
+          builder.head(&quot;datavault&quot;, &quot;1.0&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          45
+        </td>
+        <td>
+          17
+        </td>
+        <td>
+          1609
+          -
+          1630
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;generate-model-file&quot;
+        </td>
+      </tr><tr>
+        <td>
+          46
+        </td>
+        <td>
+          20
+        </td>
+        <td>
+          1664
+          -
+          1664
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.copy$default$3
+        </td>
+        <td style="background: #AEF1AE">
+          c.copy$default$3
+        </td>
+      </tr><tr>
+        <td>
+          46
+        </td>
+        <td>
+          22
+        </td>
+        <td>
+          1605
+          -
+          1698
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scopt.OParser.action
+        </td>
+        <td style="background: #AEF1AE">
+          builder.cmd(&quot;generate-model-file&quot;).action(((x$1: Unit, c: datavault.DataVaultCli) =&gt; c.copy(&quot;generate-model-file&quot;, c.copy$default$2, c.copy$default$3)))
+        </td>
+      </tr><tr>
+        <td>
+          46
+        </td>
+        <td>
+          19
+        </td>
+        <td>
+          1664
+          -
+          1664
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.copy$default$2
+        </td>
+        <td style="background: #AEF1AE">
+          c.copy$default$2
+        </td>
+      </tr><tr>
+        <td>
+          46
+        </td>
+        <td>
+          18
+        </td>
+        <td>
+          1675
+          -
+          1696
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;generate-model-file&quot;
+        </td>
+      </tr><tr>
+        <td>
+          46
+        </td>
+        <td>
+          21
+        </td>
+        <td>
+          1662
+          -
+          1697
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.DataVaultCli.copy
+        </td>
+        <td style="background: #AEF1AE">
+          c.copy(&quot;generate-model-file&quot;, c.copy$default$2, c.copy$default$3)
+        </td>
+      </tr><tr>
+        <td>
+          48
+        </td>
+        <td>
+          23
+        </td>
+        <td>
+          1761
+          -
+          1776
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;extract-files&quot;
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          26
+        </td>
+        <td>
+          1810
+          -
+          1810
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.copy$default$3
+        </td>
+        <td style="background: #AEF1AE">
+          c.copy$default$3
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          25
+        </td>
+        <td>
+          1810
+          -
+          1810
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.copy$default$2
+        </td>
+        <td style="background: #AEF1AE">
+          c.copy$default$2
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          28
+        </td>
+        <td>
+          1757
+          -
+          1838
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scopt.OParser.action
+        </td>
+        <td style="background: #AEF1AE">
+          builder.cmd(&quot;extract-files&quot;).action(((x$2: Unit, c: datavault.DataVaultCli) =&gt; c.copy(&quot;extract-files&quot;, c.copy$default$2, c.copy$default$3)))
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          27
+        </td>
+        <td>
+          1808
+          -
+          1837
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.DataVaultCli.copy
+        </td>
+        <td style="background: #AEF1AE">
+          c.copy(&quot;extract-files&quot;, c.copy$default$2, c.copy$default$3)
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          24
+        </td>
+        <td>
+          1821
+          -
+          1836
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;extract-files&quot;
+        </td>
+      </tr><tr>
+        <td>
+          50
+        </td>
+        <td>
+          29
+        </td>
+        <td>
+          1856
+          -
+          1877
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;generate-hub-config&quot;
+        </td>
+      </tr><tr>
+        <td>
+          51
+        </td>
+        <td>
+          32
+        </td>
+        <td>
+          1911
+          -
+          1911
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.copy$default$3
+        </td>
+        <td style="background: #AEF1AE">
+          c.copy$default$3
+        </td>
+      </tr><tr>
+        <td>
+          51
+        </td>
+        <td>
+          31
+        </td>
+        <td>
+          1911
+          -
+          1911
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.copy$default$2
+        </td>
+        <td style="background: #AEF1AE">
+          c.copy$default$2
+        </td>
+      </tr><tr>
+        <td>
+          51
+        </td>
+        <td>
+          34
+        </td>
+        <td>
+          1852
+          -
+          1945
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scopt.OParser.action
+        </td>
+        <td style="background: #AEF1AE">
+          builder.cmd(&quot;generate-hub-config&quot;).action(((x$3: Unit, c: datavault.DataVaultCli) =&gt; c.copy(&quot;generate-hub-config&quot;, c.copy$default$2, c.copy$default$3)))
+        </td>
+      </tr><tr>
+        <td>
+          51
+        </td>
+        <td>
+          30
+        </td>
+        <td>
+          1922
+          -
+          1943
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;generate-hub-config&quot;
+        </td>
+      </tr><tr>
+        <td>
+          51
+        </td>
+        <td>
+          33
+        </td>
+        <td>
+          1909
+          -
+          1944
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.DataVaultCli.copy
+        </td>
+        <td style="background: #AEF1AE">
+          c.copy(&quot;generate-hub-config&quot;, c.copy$default$2, c.copy$default$3)
+        </td>
+      </tr><tr>
+        <td>
+          52
+        </td>
+        <td>
+          35
+        </td>
+        <td>
+          1963
+          -
+          1974
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;load-hubs&quot;
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          38
+        </td>
+        <td>
+          2008
+          -
+          2008
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.copy$default$3
+        </td>
+        <td style="background: #AEF1AE">
+          c.copy$default$3
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          40
+        </td>
+        <td>
+          1959
+          -
+          2032
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scopt.OParser.action
+        </td>
+        <td style="background: #AEF1AE">
+          builder.cmd(&quot;load-hubs&quot;).action(((x$4: Unit, c: datavault.DataVaultCli) =&gt; c.copy(&quot;load-hubs&quot;, c.copy$default$2, c.copy$default$3)))
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          37
+        </td>
+        <td>
+          2008
+          -
+          2008
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.DataVaultCli.copy$default$2
+        </td>
+        <td style="background: #AEF1AE">
+          c.copy$default$2
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          36
+        </td>
+        <td>
+          2019
+          -
+          2030
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;load-hubs&quot;
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          39
+        </td>
+        <td>
+          2006
+          -
+          2031
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.DataVaultCli.copy
+        </td>
+        <td style="background: #AEF1AE">
+          c.copy(&quot;load-hubs&quot;, c.copy$default$2, c.copy$default$3)
+        </td>
+      </tr><tr>
+        <td>
+          58
+        </td>
+        <td>
+          41
+        </td>
+        <td>
+          2053
+          -
+          2239
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scopt.OParser.text
+        </td>
+        <td style="background: #AEF1AE">
+          builder.opt[String](&quot;input&quot;)(scopt.this.Read.stringRead).required().abbr(&quot;i&quot;).action(((x: String, c: datavault.DataVaultCli) =&gt; {
+  &lt;artifact&gt; val x$1: java.nio.file.Path = java.nio.file.Paths.get(x);
+  &lt;artifact&gt; val x$2: String = c.copy$default$1;
+  &lt;artifact&gt; val x$3: java.nio.file.Path = c.copy$default$3;
+  c.copy(x$2, x$1, x$3)
+})).text(&quot;input file to process&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          63
+        </td>
+        <td>
+          42
+        </td>
+        <td>
+          2253
+          -
+          2442
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scopt.OParser.text
+        </td>
+        <td style="background: #AEF1AE">
+          builder.opt[String](&quot;output&quot;)(scopt.this.Read.stringRead).required().abbr(&quot;o&quot;).action(((x: String, c: datavault.DataVaultCli) =&gt; {
+  &lt;artifact&gt; val x$4: java.nio.file.Path = java.nio.file.Paths.get(x);
+  &lt;artifact&gt; val x$5: String = c.copy$default$1;
+  &lt;artifact&gt; val x$6: java.nio.file.Path = c.copy$default$2;
+  c.copy(x$5, x$6, x$4)
+})).text(&quot;output file to process&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          67
+        </td>
+        <td>
+          44
+        </td>
+        <td>
+          2502
+          -
+          2576
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Option.getOrElse
+        </td>
+        <td style="background: #AEF1AE">
+          scopt.OParser.parse[datavault.DataVaultCli](Cli.this.parser1, scala.Predef.wrapRefArray[String](args), DataVaultCli.apply(DataVaultCli.apply$default$1, DataVaultCli.apply$default$2, DataVaultCli.apply$default$3)).map[datavault.Cmd](((x$5: datavault.DataVaultCli) =&gt; x$5.toCmd)).getOrElse[datavault.Cmd](NoCmd)
+        </td>
+      </tr>
+    </table>
+          </div>
+        </div>
+      </body>
+    </html>

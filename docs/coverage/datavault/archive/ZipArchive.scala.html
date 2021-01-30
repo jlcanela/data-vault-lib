@@ -24,83 +24,58 @@
           <div class="tab-pane active" id="codegrid">
             <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault.archive
 </span>2 <span style=''>
-</span>3 <span style=''>import java.nio.file.Path
-</span>4 <span style=''>import java.io._
-</span>5 <span style=''>
-</span>6 <span style=''>import java.util.zip._
-</span>7 <span style=''>import java.util.Optional
-</span>8 <span style=''>
-</span>9 <span style=''>import java.nio.file.Files
-</span>10 <span style=''>
-</span>11 <span style=''>case class ZipFileInfo(ze: ZipEntry, zis: ZipInputStream) extends FileInfo {
-</span>12 <span style=''>  val _ext = </span><span style='background: #AEF1AE'>&quot;.csv&quot;</span><span style=''>
-</span>13 <span style=''>  def name = if (</span><span style='background: #AEF1AE'>filename.endsWith(_ext)</span><span style=''>) {
-</span>14 <span style=''>    </span><span style='background: #AEF1AE'>filename.substring(0, filename.length() - _ext.length())</span><span style=''>;
-</span>15 <span style=''>  } else {
-</span>16 <span style=''>    </span><span style='background: #AEF1AE'>filename</span><span style=''>
-</span>17 <span style=''>  }
-</span>18 <span style=''>
-</span>19 <span style=''>  def filename    = </span><span style='background: #AEF1AE'>ze.getName()</span><span style=''>
-</span>20 <span style=''>  def inputStream = </span><span style='background: #AEF1AE'>zis</span><span style=''>
-</span>21 <span style=''>  def writeTo(target: File): Either[String, Unit] = {
-</span>22 <span style=''>
-</span>23 <span style=''>    val BUFSIZE = </span><span style='background: #AEF1AE'>4096</span><span style=''>
-</span>24 <span style=''>    val buffer  = </span><span style='background: #AEF1AE'>new Array[Byte](BUFSIZE)</span><span style=''>
-</span>25 <span style=''>
-</span>26 <span style=''>    def saveFile(fis: InputStream, fos: OutputStream) = {
-</span>27 <span style=''>      </span><span style='background: #AEF1AE'>writeToFile(bufferReader(fis) _, fos)</span><span style=''>
-</span>28 <span style=''>      </span><span style='background: #AEF1AE'>fos.close</span><span style=''>
-</span>29 <span style=''>    }
-</span>30 <span style=''>
-</span>31 <span style=''>    def bufferReader(fis: InputStream)(buffer: Array[Byte]) =
-</span>32 <span style=''>      </span><span style='background: #AEF1AE'>(fis.read(buffer), buffer)</span><span style=''>
+</span>3 <span style=''>import datavault.io.FileSystem
+</span>4 <span style=''>
+</span>5 <span style=''>import java.nio.file.{StandardCopyOption, Files, Path}
+</span>6 <span style=''>import java.io._
+</span>7 <span style=''>import java.util.zip._
+</span>8 <span style=''>import java.util.Optional
+</span>9 <span style=''>
+</span>10 <span style=''>case class ZipFileInfo(ze: ZipEntry, zis: ZipInputStream) extends FileInfo {
+</span>11 <span style=''>  val _ext = </span><span style='background: #AEF1AE'>&quot;.csv&quot;</span><span style=''>
+</span>12 <span style=''>  def name = if (</span><span style='background: #AEF1AE'>filename.endsWith(_ext)</span><span style=''>) {
+</span>13 <span style=''>    </span><span style='background: #AEF1AE'>filename.substring(0, filename.length() - _ext.length())</span><span style=''>;
+</span>14 <span style=''>  } else {
+</span>15 <span style=''>    </span><span style='background: #AEF1AE'>filename</span><span style=''>
+</span>16 <span style=''>  }
+</span>17 <span style=''>
+</span>18 <span style=''>  def filename    = </span><span style='background: #AEF1AE'>ze.getName()</span><span style=''>
+</span>19 <span style=''>  def inputStream = </span><span style='background: #AEF1AE'>zis</span><span style=''>
+</span>20 <span style=''>  def writeTo(target: Path): Either[String, Unit] = {
+</span>21 <span style=''>
+</span>22 <span style=''>    try {
+</span>23 <span style=''>      </span><span style='background: #AEF1AE'>Files.copy(inputStream, target, StandardCopyOption.REPLACE_EXISTING)
+</span>24 <span style=''></span><span style='background: #AEF1AE'>      Right(())</span><span style=''>
+</span>25 <span style=''>    } catch {
+</span>26 <span style=''>      case ex: Exception =&gt; </span><span style='background: #AEF1AE'>Left(s&quot;${ex.getClass().getName()}:${ex.getMessage()}&quot;)</span><span style=''>
+</span>27 <span style=''>    }
+</span>28 <span style=''>    
+</span>29 <span style=''>  }
+</span>30 <span style=''>}
+</span>31 <span style=''>
+</span>32 <span style=''>case class ZipArchive(path: Path) extends Archive {
 </span>33 <span style=''>
-</span>34 <span style=''>    def writeToFile(
-</span>35 <span style=''>        reader: (Array[Byte]) =&gt; Tuple2[Int, Array[Byte]],
-</span>36 <span style=''>        fos: OutputStream
-</span>37 <span style=''>    ): Boolean = {
-</span>38 <span style=''>      val (length, data) = reader(buffer)
-</span>39 <span style=''>      if (</span><span style='background: #AEF1AE'>length &gt;= 0</span><span style=''>) </span><span style='background: #AEF1AE'>{
-</span>40 <span style=''></span><span style='background: #AEF1AE'>        fos.write(data, 0, length)
-</span>41 <span style=''></span><span style='background: #AEF1AE'>        writeToFile(reader, fos)
-</span>42 <span style=''></span><span style='background: #AEF1AE'>      }</span><span style=''> else
-</span>43 <span style=''>        </span><span style='background: #AEF1AE'>true</span><span style=''>
-</span>44 <span style=''>    }
-</span>45 <span style=''>
-</span>46 <span style=''>    try {
-</span>47 <span style=''>      </span><span style='background: #AEF1AE'>saveFile(inputStream, new FileOutputStream(target))
-</span>48 <span style=''></span><span style='background: #AEF1AE'>      Right(())</span><span style=''>
-</span>49 <span style=''>    } catch {
-</span>50 <span style=''>      case ex: Exception =&gt; </span><span style='background: #AEF1AE'>Left(ex.getMessage())</span><span style=''>
-</span>51 <span style=''>    }
-</span>52 <span style=''>  }
-</span>53 <span style=''>}
-</span>54 <span style=''>
-</span>55 <span style=''>case class ZipArchive(zipFile: File) extends Archive {
-</span>56 <span style=''>
-</span>57 <span style=''>  def name = </span><span style='background: #AEF1AE'>zipFile.getPath()</span><span style=''>
-</span>58 <span style=''>
-</span>59 <span style=''>  def visit(visitor: Visitor) = {
-</span>60 <span style=''>    val zis: ZipInputStream = </span><span style='background: #AEF1AE'>new ZipInputStream(
-</span>61 <span style=''></span><span style='background: #AEF1AE'>      new FileInputStream(zipFile)
-</span>62 <span style=''></span><span style='background: #AEF1AE'>    )</span><span style=''>;
-</span>63 <span style=''>
-</span>64 <span style=''>    var ze: ZipEntry = </span><span style='background: #AEF1AE'>zis.getNextEntry()</span><span style=''>;
-</span>65 <span style=''>
-</span>66 <span style=''>    while (</span><span style='background: #AEF1AE'>ze != null</span><span style=''>) </span><span style='background: #AEF1AE'>{
-</span>67 <span style=''></span><span style='background: #AEF1AE'>
-</span>68 <span style=''></span><span style='background: #AEF1AE'>      val fileName = ze.getName();
-</span>69 <span style=''></span><span style='background: #AEF1AE'>
-</span>70 <span style=''></span><span style='background: #AEF1AE'>      val info = ZipFileInfo(ze, zis)
-</span>71 <span style=''></span><span style='background: #AEF1AE'>      visitor.visit(info)
-</span>72 <span style=''></span><span style='background: #AEF1AE'>      ze = zis.getNextEntry()
-</span>73 <span style=''></span><span style='background: #AEF1AE'>    }</span><span style=''>
-</span>74 <span style=''>
-</span>75 <span style=''>    </span><span style='background: #AEF1AE'>zis.closeEntry()</span><span style=''>
-</span>76 <span style=''>    </span><span style='background: #AEF1AE'>zis.close()</span><span style=''>
-</span>77 <span style=''>
-</span>78 <span style=''>  }
-</span>79 <span style=''>}
+</span>34 <span style=''>  def visit(visitor: Visitor) = {
+</span>35 <span style=''>    val zis: ZipInputStream = </span><span style='background: #AEF1AE'>new ZipInputStream(
+</span>36 <span style=''></span><span style='background: #AEF1AE'>      FileSystem.open(path)
+</span>37 <span style=''></span><span style='background: #AEF1AE'>    )</span><span style=''>;
+</span>38 <span style=''>
+</span>39 <span style=''>    var ze: ZipEntry = </span><span style='background: #AEF1AE'>zis.getNextEntry()</span><span style=''>;
+</span>40 <span style=''>
+</span>41 <span style=''>    while (</span><span style='background: #AEF1AE'>ze != null</span><span style=''>) </span><span style='background: #AEF1AE'>{
+</span>42 <span style=''></span><span style='background: #AEF1AE'>
+</span>43 <span style=''></span><span style='background: #AEF1AE'>      val fileName = ze.getName();
+</span>44 <span style=''></span><span style='background: #AEF1AE'>
+</span>45 <span style=''></span><span style='background: #AEF1AE'>      val info = ZipFileInfo(ze, zis)
+</span>46 <span style=''></span><span style='background: #AEF1AE'>      visitor.visit(info)
+</span>47 <span style=''></span><span style='background: #AEF1AE'>      ze = zis.getNextEntry()
+</span>48 <span style=''></span><span style='background: #AEF1AE'>    }</span><span style=''>
+</span>49 <span style=''>
+</span>50 <span style=''>    </span><span style='background: #AEF1AE'>zis.closeEntry()</span><span style=''>
+</span>51 <span style=''>    </span><span style='background: #AEF1AE'>zis.close()</span><span style=''>
+</span>52 <span style=''>
+</span>53 <span style=''>  }
+</span>54 <span style=''>}
 </span></pre>
           </div>
           <div class="tab-pane" id="statementlist">
@@ -114,15 +89,15 @@
         <th>Code</th>
       </tr><tr>
         <td>
-          12
+          11
         </td>
         <td>
-          41
+          92
         </td>
         <td>
-          239
+          271
           -
-          245
+          277
         </td>
         <td>
           Literal
@@ -135,15 +110,15 @@
         </td>
       </tr><tr>
         <td>
-          13
+          12
         </td>
         <td>
-          43
+          94
         </td>
         <td>
-          263
+          295
           -
-          286
+          318
         </td>
         <td>
           Apply
@@ -156,15 +131,15 @@
         </td>
       </tr><tr>
         <td>
-          13
+          12
         </td>
         <td>
-          42
+          93
         </td>
         <td>
-          281
+          313
           -
-          285
+          317
         </td>
         <td>
           Select
@@ -177,15 +152,15 @@
         </td>
       </tr><tr>
         <td>
-          14
+          13
         </td>
         <td>
-          44
+          95
         </td>
         <td>
-          313
+          345
           -
-          314
+          346
         </td>
         <td>
           Literal
@@ -198,15 +173,15 @@
         </td>
       </tr><tr>
         <td>
-          14
+          13
         </td>
         <td>
-          47
+          98
         </td>
         <td>
-          294
+          326
           -
-          350
+          382
         </td>
         <td>
           Apply
@@ -219,15 +194,15 @@
         </td>
       </tr><tr>
         <td>
-          14
+          13
         </td>
         <td>
-          46
+          97
         </td>
         <td>
-          316
+          348
           -
-          349
+          381
         </td>
         <td>
           Apply
@@ -240,15 +215,15 @@
         </td>
       </tr><tr>
         <td>
-          14
+          13
         </td>
         <td>
-          45
+          96
         </td>
         <td>
-          336
+          368
           -
-          349
+          381
         </td>
         <td>
           Apply
@@ -261,15 +236,15 @@
         </td>
       </tr><tr>
         <td>
-          14
+          13
         </td>
         <td>
-          48
+          99
         </td>
         <td>
-          294
+          326
           -
-          350
+          382
         </td>
         <td>
           Block
@@ -282,15 +257,15 @@
         </td>
       </tr><tr>
         <td>
-          16
+          15
         </td>
         <td>
-          50
+          101
         </td>
         <td>
-          367
+          399
           -
-          375
+          407
         </td>
         <td>
           Block
@@ -303,15 +278,15 @@
         </td>
       </tr><tr>
         <td>
-          16
+          15
         </td>
         <td>
-          49
+          100
         </td>
         <td>
-          367
+          399
           -
-          375
+          407
         </td>
         <td>
           Select
@@ -324,15 +299,15 @@
         </td>
       </tr><tr>
         <td>
-          19
+          18
         </td>
         <td>
-          51
+          102
         </td>
         <td>
-          401
+          433
           -
-          413
+          445
         </td>
         <td>
           Apply
@@ -345,15 +320,15 @@
         </td>
       </tr><tr>
         <td>
-          20
+          19
         </td>
         <td>
-          52
+          103
         </td>
         <td>
-          434
+          466
           -
-          437
+          469
         </td>
         <td>
           Select
@@ -366,227 +341,15 @@
         </td>
       </tr><tr>
         <td>
-          23
+          22
         </td>
         <td>
-          53
+          108
         </td>
         <td>
-          511
+          541
           -
-          515
-        </td>
-        <td>
-          Literal
-        </td>
-        <td>
-          &lt;nosymbol&gt;
-        </td>
-        <td style="background: #AEF1AE">
-          4096
-        </td>
-      </tr><tr>
-        <td>
-          24
-        </td>
-        <td>
-          54
-        </td>
-        <td>
-          534
-          -
-          558
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          scala.Array.&lt;init&gt;
-        </td>
-        <td style="background: #AEF1AE">
-          new Array[Byte](BUFSIZE)
-        </td>
-      </tr><tr>
-        <td>
-          27
-        </td>
-        <td>
-          56
-        </td>
-        <td>
-          624
-          -
-          661
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          datavault.archive.ZipFileInfo.writeToFile
-        </td>
-        <td style="background: #AEF1AE">
-          writeToFile({
-  ((buffer: Array[Byte]) =&gt; bufferReader(fis)(buffer))
-}, fos)
-        </td>
-      </tr><tr>
-        <td>
-          27
-        </td>
-        <td>
-          55
-        </td>
-        <td>
-          636
-          -
-          653
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          datavault.archive.ZipFileInfo.bufferReader
-        </td>
-        <td style="background: #AEF1AE">
-          bufferReader(fis)(buffer)
-        </td>
-      </tr><tr>
-        <td>
-          28
-        </td>
-        <td>
-          57
-        </td>
-        <td>
-          668
-          -
-          677
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          java.io.OutputStream.close
-        </td>
-        <td style="background: #AEF1AE">
-          fos.close()
-        </td>
-      </tr><tr>
-        <td>
-          32
-        </td>
-        <td>
-          59
-        </td>
-        <td>
-          753
-          -
-          779
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          scala.Tuple2.apply
-        </td>
-        <td style="background: #AEF1AE">
-          scala.Tuple2.apply[Int, Array[Byte]](fis.read(buffer), buffer)
-        </td>
-      </tr><tr>
-        <td>
-          32
-        </td>
-        <td>
-          58
-        </td>
-        <td>
-          754
-          -
-          770
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          java.io.InputStream.read
-        </td>
-        <td style="background: #AEF1AE">
-          fis.read(buffer)
-        </td>
-      </tr><tr>
-        <td>
-          38
-        </td>
-        <td>
-          61
-        </td>
-        <td>
-          925
-          -
-          925
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          scala.Tuple2._2
-        </td>
-        <td style="background: #AEF1AE">
-          x$1._2
-        </td>
-      </tr><tr>
-        <td>
-          38
-        </td>
-        <td>
-          60
-        </td>
-        <td>
-          917
-          -
-          917
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          scala.Tuple2._1
-        </td>
-        <td style="background: #AEF1AE">
-          x$1._1
-        </td>
-      </tr><tr>
-        <td>
-          39
-        </td>
-        <td>
-          62
-        </td>
-        <td>
-          958
-          -
-          969
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          scala.Int.&gt;=
-        </td>
-        <td style="background: #AEF1AE">
-          length.&gt;=(0)
-        </td>
-      </tr><tr>
-        <td>
-          39
-        </td>
-        <td>
-          65
-        </td>
-        <td>
-          971
-          -
-          1048
+          625
         </td>
         <td>
           Block
@@ -596,129 +359,21 @@
         </td>
         <td style="background: #AEF1AE">
           {
-  fos.write(data, 0, length);
-  writeToFile(reader, fos)
-}
-        </td>
-      </tr><tr>
-        <td>
-          40
-        </td>
-        <td>
-          63
-        </td>
-        <td>
-          981
-          -
-          1007
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          java.io.OutputStream.write
-        </td>
-        <td style="background: #AEF1AE">
-          fos.write(data, 0, length)
-        </td>
-      </tr><tr>
-        <td>
-          41
-        </td>
-        <td>
-          64
-        </td>
-        <td>
-          1016
-          -
-          1040
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          datavault.archive.ZipFileInfo.writeToFile
-        </td>
-        <td style="background: #AEF1AE">
-          writeToFile(reader, fos)
-        </td>
-      </tr><tr>
-        <td>
-          43
-        </td>
-        <td>
-          67
-        </td>
-        <td>
-          1062
-          -
-          1066
-        </td>
-        <td>
-          Block
-        </td>
-        <td>
-          &lt;nosymbol&gt;
-        </td>
-        <td style="background: #AEF1AE">
-          true
-        </td>
-      </tr><tr>
-        <td>
-          43
-        </td>
-        <td>
-          66
-        </td>
-        <td>
-          1062
-          -
-          1066
-        </td>
-        <td>
-          Literal
-        </td>
-        <td>
-          &lt;nosymbol&gt;
-        </td>
-        <td style="background: #AEF1AE">
-          true
-        </td>
-      </tr><tr>
-        <td>
-          46
-        </td>
-        <td>
-          72
-        </td>
-        <td>
-          1090
-          -
-          1157
-        </td>
-        <td>
-          Block
-        </td>
-        <td>
-          &lt;nosymbol&gt;
-        </td>
-        <td style="background: #AEF1AE">
-          {
-  saveFile(ZipFileInfo.this.inputStream, new java.io.FileOutputStream(target));
+  java.nio.file.Files.copy(ZipFileInfo.this.inputStream, target, REPLACE_EXISTING);
   scala.`package`.Right.apply[Nothing, Unit](())
 }
         </td>
       </tr><tr>
         <td>
-          47
+          23
         </td>
         <td>
-          68
+          104
         </td>
         <td>
-          1099
+          552
           -
-          1110
+          563
         </td>
         <td>
           Select
@@ -731,57 +386,57 @@
         </td>
       </tr><tr>
         <td>
-          47
+          23
         </td>
         <td>
-          70
+          106
         </td>
         <td>
-          1090
+          541
           -
-          1141
+          609
         </td>
         <td>
           Apply
         </td>
         <td>
-          datavault.archive.ZipFileInfo.saveFile
+          java.nio.file.Files.copy
         </td>
         <td style="background: #AEF1AE">
-          saveFile(ZipFileInfo.this.inputStream, new java.io.FileOutputStream(target))
+          java.nio.file.Files.copy(ZipFileInfo.this.inputStream, target, REPLACE_EXISTING)
         </td>
       </tr><tr>
         <td>
-          47
+          23
         </td>
         <td>
-          69
+          105
         </td>
         <td>
-          1112
+          573
           -
-          1140
+          608
         </td>
         <td>
-          Apply
+          Literal
         </td>
         <td>
-          java.io.FileOutputStream.&lt;init&gt;
+          &lt;nosymbol&gt;
         </td>
         <td style="background: #AEF1AE">
-          new java.io.FileOutputStream(target)
+          REPLACE_EXISTING
         </td>
       </tr><tr>
         <td>
-          48
+          24
         </td>
         <td>
-          71
+          107
         </td>
         <td>
-          1148
+          616
           -
-          1157
+          625
         </td>
         <td>
           Apply
@@ -794,36 +449,36 @@
         </td>
       </tr><tr>
         <td>
-          50
+          26
         </td>
         <td>
-          74
+          110
         </td>
         <td>
-          1200
+          701
           -
-          1221
+          703
         </td>
         <td>
-          Apply
+          Literal
         </td>
         <td>
-          scala.util.Left.apply
+          &lt;nosymbol&gt;
         </td>
         <td style="background: #AEF1AE">
-          scala.`package`.Left.apply[String, Nothing](ex.getMessage())
+          &quot;:&quot;
         </td>
       </tr><tr>
         <td>
-          50
+          26
         </td>
         <td>
-          73
+          113
         </td>
         <td>
-          1205
+          704
           -
-          1220
+          719
         </td>
         <td>
           Apply
@@ -836,36 +491,120 @@
         </td>
       </tr><tr>
         <td>
-          57
+          26
         </td>
         <td>
-          75
+          115
         </td>
         <td>
-          1304
+          668
           -
-          1321
+          722
         </td>
         <td>
           Apply
         </td>
         <td>
-          java.io.File.getPath
+          scala.util.Left.apply
         </td>
         <td style="background: #AEF1AE">
-          ZipArchive.this.zipFile.getPath()
+          scala.`package`.Left.apply[String, Nothing](scala.StringContext.apply(&quot;&quot;, &quot;:&quot;, &quot;&quot;).s(ex.getClass().getName(), ex.getMessage()))
         </td>
       </tr><tr>
         <td>
-          60
+          26
         </td>
         <td>
-          78
+          109
         </td>
         <td>
-          1387
+          675
           -
-          1447
+          676
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;&quot;
+        </td>
+      </tr><tr>
+        <td>
+          26
+        </td>
+        <td>
+          112
+        </td>
+        <td>
+          677
+          -
+          700
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.lang.Class.getName
+        </td>
+        <td style="background: #AEF1AE">
+          ex.getClass().getName()
+        </td>
+      </tr><tr>
+        <td>
+          26
+        </td>
+        <td>
+          114
+        </td>
+        <td>
+          673
+          -
+          721
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.StringContext.s
+        </td>
+        <td style="background: #AEF1AE">
+          scala.StringContext.apply(&quot;&quot;, &quot;:&quot;, &quot;&quot;).s(ex.getClass().getName(), ex.getMessage())
+        </td>
+      </tr><tr>
+        <td>
+          26
+        </td>
+        <td>
+          111
+        </td>
+        <td>
+          720
+          -
+          721
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;&quot;
+        </td>
+      </tr><tr>
+        <td>
+          35
+        </td>
+        <td>
+          118
+        </td>
+        <td>
+          858
+          -
+          911
         </td>
         <td>
           Apply
@@ -874,61 +613,61 @@
           java.util.zip.ZipInputStream.&lt;init&gt;
         </td>
         <td style="background: #AEF1AE">
-          new java.util.zip.ZipInputStream(new java.io.FileInputStream(ZipArchive.this.zipFile))
+          new java.util.zip.ZipInputStream(datavault.io.FileSystem.open(ZipArchive.this.path))
         </td>
       </tr><tr>
         <td>
-          61
+          36
         </td>
         <td>
-          77
+          116
         </td>
         <td>
-          1413
+          900
           -
-          1441
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          java.io.FileInputStream.&lt;init&gt;
-        </td>
-        <td style="background: #AEF1AE">
-          new java.io.FileInputStream(ZipArchive.this.zipFile)
-        </td>
-      </tr><tr>
-        <td>
-          61
-        </td>
-        <td>
-          76
-        </td>
-        <td>
-          1433
-          -
-          1440
+          904
         </td>
         <td>
           Select
         </td>
         <td>
-          datavault.archive.ZipArchive.zipFile
+          datavault.archive.ZipArchive.path
         </td>
         <td style="background: #AEF1AE">
-          ZipArchive.this.zipFile
+          ZipArchive.this.path
         </td>
       </tr><tr>
         <td>
-          64
+          36
         </td>
         <td>
-          79
+          117
         </td>
         <td>
-          1473
+          884
           -
-          1491
+          905
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.io.FileSystem.open
+        </td>
+        <td style="background: #AEF1AE">
+          datavault.io.FileSystem.open(ZipArchive.this.path)
+        </td>
+      </tr><tr>
+        <td>
+          39
+        </td>
+        <td>
+          119
+        </td>
+        <td>
+          937
+          -
+          955
         </td>
         <td>
           Apply
@@ -941,15 +680,99 @@
         </td>
       </tr><tr>
         <td>
-          66
+          41
         </td>
         <td>
-          86
+          128
         </td>
         <td>
-          1517
+          962
           -
-          1655
+          962
+        </td>
+        <td>
+          Block
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          ()
+        </td>
+      </tr><tr>
+        <td>
+          41
+        </td>
+        <td>
+          125
+        </td>
+        <td>
+          981
+          -
+          981
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.archive.ZipArchive.while$1
+        </td>
+        <td style="background: #AEF1AE">
+          while$1()
+        </td>
+      </tr><tr>
+        <td>
+          41
+        </td>
+        <td>
+          127
+        </td>
+        <td>
+          962
+          -
+          962
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          ()
+        </td>
+      </tr><tr>
+        <td>
+          41
+        </td>
+        <td>
+          120
+        </td>
+        <td>
+          969
+          -
+          979
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.lang.Object.!=
+        </td>
+        <td style="background: #AEF1AE">
+          ze.!=(null)
+        </td>
+      </tr><tr>
+        <td>
+          41
+        </td>
+        <td>
+          126
+        </td>
+        <td>
+          981
+          -
+          1119
         </td>
         <td>
           Block
@@ -970,99 +793,15 @@
         </td>
       </tr><tr>
         <td>
-          66
+          43
         </td>
         <td>
-          80
+          121
         </td>
         <td>
-          1505
+          1005
           -
-          1515
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          java.lang.Object.!=
-        </td>
-        <td style="background: #AEF1AE">
-          ze.!=(null)
-        </td>
-      </tr><tr>
-        <td>
-          66
-        </td>
-        <td>
-          85
-        </td>
-        <td>
-          1517
-          -
-          1517
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          datavault.archive.ZipArchive.while$1
-        </td>
-        <td style="background: #AEF1AE">
-          while$1()
-        </td>
-      </tr><tr>
-        <td>
-          66
-        </td>
-        <td>
-          88
-        </td>
-        <td>
-          1498
-          -
-          1498
-        </td>
-        <td>
-          Block
-        </td>
-        <td>
-          &lt;nosymbol&gt;
-        </td>
-        <td style="background: #AEF1AE">
-          ()
-        </td>
-      </tr><tr>
-        <td>
-          66
-        </td>
-        <td>
-          87
-        </td>
-        <td>
-          1498
-          -
-          1498
-        </td>
-        <td>
-          Literal
-        </td>
-        <td>
-          &lt;nosymbol&gt;
-        </td>
-        <td style="background: #AEF1AE">
-          ()
-        </td>
-      </tr><tr>
-        <td>
-          68
-        </td>
-        <td>
-          81
-        </td>
-        <td>
-          1541
-          -
-          1553
+          1017
         </td>
         <td>
           Apply
@@ -1075,15 +814,15 @@
         </td>
       </tr><tr>
         <td>
-          70
+          45
         </td>
         <td>
-          82
+          122
         </td>
         <td>
-          1573
+          1037
           -
-          1593
+          1057
         </td>
         <td>
           Apply
@@ -1096,15 +835,15 @@
         </td>
       </tr><tr>
         <td>
-          71
+          46
         </td>
         <td>
-          83
+          123
         </td>
         <td>
-          1600
+          1064
           -
-          1619
+          1083
         </td>
         <td>
           Apply
@@ -1117,15 +856,15 @@
         </td>
       </tr><tr>
         <td>
-          72
+          47
         </td>
         <td>
-          84
+          124
         </td>
         <td>
-          1631
+          1095
           -
-          1649
+          1113
         </td>
         <td>
           Apply
@@ -1138,15 +877,15 @@
         </td>
       </tr><tr>
         <td>
-          75
+          50
         </td>
         <td>
-          89
+          129
         </td>
         <td>
-          1661
+          1125
           -
-          1677
+          1141
         </td>
         <td>
           Apply
@@ -1159,15 +898,15 @@
         </td>
       </tr><tr>
         <td>
-          76
+          51
         </td>
         <td>
-          90
+          130
         </td>
         <td>
-          1682
+          1146
           -
-          1693
+          1157
         </td>
         <td>
           Apply

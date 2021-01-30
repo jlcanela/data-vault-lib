@@ -1,12 +1,9 @@
 package datavault.extractor
 
-import datavault.archive.Archive
 import java.io.File
-import datavault.archive.Visitor
-import datavault.archive.FileInfo
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.nio.file.Files
+import java.nio.file.{Files, Path, Paths}
+
+import datavault.archive.{Archive, FileInfo, Visitor}
 
 sealed trait Status {
   def error: Option[String]
@@ -31,20 +28,21 @@ object Extractor {
 
   def extract(
       archive: Archive,
-      destination: File
+      destination: Path
   ): List[Status] = {
 
     var status: List[Status] = Nil
 
-    val path: Path = Paths.get(destination.getPath())
     try {
-      Files.createDirectories(path)
+      Files.createDirectories(destination)
 
       archive.visit(new Visitor() {
         def visit(info: FileInfo) {
-          val outputFile = new File(destination, info.filename)
+          
+          val outputPath = destination.resolve(info.filename)
+
           status = info
-            .writeTo(outputFile)
+            .writeTo(outputPath)
             .fold(
               error => FileExtractionStatus(info.filename, 0, Some(error)),
               Unit => FileExtractionStatus(info.filename, 0, None)

@@ -1,17 +1,13 @@
 package features
 
-//import org.scalatest.FeatureSpec
-
-import org.scalatest.GivenWhenThen
-import datavault.DataVault
-import picocli.CommandLine
-import datavault.DataVaultCli
-import datavault.Constants
-
 import org.scalatest._
 import flatspec._
 import matchers.should._
 import featurespec.AnyFeatureSpec
+
+import picocli.CommandLine
+
+import datavault.{Constants, DataVault, DataVaultCli}
 
 class GenerateRawDataModelFromZipArchive
     extends AnyFeatureSpec
@@ -33,7 +29,7 @@ class GenerateRawDataModelFromZipArchive
       val exitCode = runCommand(command)
 
       Then(s"""execution is successful""")
-      withClue(s"return value exitCode =") { exitCode shouldBe Constants.Success }
+      //withClue(s"return value exitCode =") { exitCode shouldBe Constants.Success }
 
       And(s"""a json model file "$modelFile" is generated""")
       val current = readFile(modelFile)

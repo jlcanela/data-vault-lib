@@ -24,72 +24,70 @@
           <div class="tab-pane active" id="codegrid">
             <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault.extractor
 </span>2 <span style=''>
-</span>3 <span style=''>import datavault.archive.Archive
-</span>4 <span style=''>import java.io.File
-</span>5 <span style=''>import datavault.archive.Visitor
-</span>6 <span style=''>import datavault.archive.FileInfo
-</span>7 <span style=''>import java.nio.file.Path
-</span>8 <span style=''>import java.nio.file.Paths
-</span>9 <span style=''>import java.nio.file.Files
-</span>10 <span style=''>
-</span>11 <span style=''>sealed trait Status {
-</span>12 <span style=''>  def error: Option[String]
-</span>13 <span style=''>}
-</span>14 <span style=''>
-</span>15 <span style=''>case class FileExtractionStatus(
-</span>16 <span style=''>    filename: String,
-</span>17 <span style=''>    length: Long,
-</span>18 <span style=''>    error: Option[String]
-</span>19 <span style=''>) extends Status
-</span>20 <span style=''>
-</span>21 <span style=''>case class Error(message: String) extends Status {
-</span>22 <span style=''>  def error: Option[String] = </span><span style='background: #AEF1AE'>Some(message)</span><span style=''>
-</span>23 <span style=''>}
-</span>24 <span style=''>
-</span>25 <span style=''>object FileExtractionStatus {
-</span>26 <span style=''>  implicit def ordering[A &lt;: FileExtractionStatus]: Ordering[A] =
-</span>27 <span style=''>    </span><span style='background: #AEF1AE'>Ordering.by(_.toString)</span><span style=''>
-</span>28 <span style=''>}
-</span>29 <span style=''>
-</span>30 <span style=''>object Extractor {
-</span>31 <span style=''>
-</span>32 <span style=''>  def extract(
-</span>33 <span style=''>      archive: Archive,
-</span>34 <span style=''>      destination: File
-</span>35 <span style=''>  ): List[Status] = {
-</span>36 <span style=''>
-</span>37 <span style=''>    var status: List[Status] = </span><span style='background: #AEF1AE'>Nil</span><span style=''>
-</span>38 <span style=''>
-</span>39 <span style=''>    val path: Path = </span><span style='background: #AEF1AE'>Paths.get(destination.getPath())</span><span style=''>
-</span>40 <span style=''>    try {
-</span>41 <span style=''>      </span><span style='background: #AEF1AE'>Files.createDirectories(path)
-</span>42 <span style=''></span><span style='background: #AEF1AE'>
-</span>43 <span style=''></span><span style='background: #AEF1AE'>      archive.visit(new Visitor() {
-</span>44 <span style=''></span><span style='background: #AEF1AE'>        def visit(info: FileInfo) {
-</span>45 <span style=''></span><span style='background: #AEF1AE'>          val outputFile = new File(destination, info.filename)
-</span>46 <span style=''></span><span style='background: #AEF1AE'>          status = info
-</span>47 <span style=''></span><span style='background: #AEF1AE'>            .writeTo(outputFile)
-</span>48 <span style=''></span><span style='background: #AEF1AE'>            .fold(
-</span>49 <span style=''></span><span style='background: #AEF1AE'>              error =&gt; FileExtractionStatus(info.filename, 0, Some(error)),
-</span>50 <span style=''></span><span style='background: #AEF1AE'>              Unit =&gt; FileExtractionStatus(info.filename, 0, None)
-</span>51 <span style=''></span><span style='background: #AEF1AE'>            ) :: status
-</span>52 <span style=''></span><span style='background: #AEF1AE'>        }
-</span>53 <span style=''></span><span style='background: #AEF1AE'>      })
-</span>54 <span style=''></span><span style='background: #AEF1AE'>
-</span>55 <span style=''></span><span style='background: #AEF1AE'>      status</span><span style=''>
-</span>56 <span style=''>
-</span>57 <span style=''>    } catch {
-</span>58 <span style=''>      case ex: Exception =&gt; Error(ex.getMessage) </span><span style='background: #AEF1AE'>:: Nil</span><span style=''>
-</span>59 <span style=''>    }
+</span>3 <span style=''>import java.io.File
+</span>4 <span style=''>import java.nio.file.{Files, Path, Paths}
+</span>5 <span style=''>
+</span>6 <span style=''>import datavault.archive.{Archive, FileInfo, Visitor}
+</span>7 <span style=''>
+</span>8 <span style=''>sealed trait Status {
+</span>9 <span style=''>  def error: Option[String]
+</span>10 <span style=''>}
+</span>11 <span style=''>
+</span>12 <span style=''>case class FileExtractionStatus(
+</span>13 <span style=''>    filename: String,
+</span>14 <span style=''>    length: Long,
+</span>15 <span style=''>    error: Option[String]
+</span>16 <span style=''>) extends Status
+</span>17 <span style=''>
+</span>18 <span style=''>case class Error(message: String) extends Status {
+</span>19 <span style=''>  def error: Option[String] = </span><span style='background: #AEF1AE'>Some(message)</span><span style=''>
+</span>20 <span style=''>}
+</span>21 <span style=''>
+</span>22 <span style=''>object FileExtractionStatus {
+</span>23 <span style=''>  implicit def ordering[A &lt;: FileExtractionStatus]: Ordering[A] =
+</span>24 <span style=''>    </span><span style='background: #AEF1AE'>Ordering.by(_.toString)</span><span style=''>
+</span>25 <span style=''>}
+</span>26 <span style=''>
+</span>27 <span style=''>object Extractor {
+</span>28 <span style=''>
+</span>29 <span style=''>  def extract(
+</span>30 <span style=''>      archive: Archive,
+</span>31 <span style=''>      destination: Path
+</span>32 <span style=''>  ): List[Status] = {
+</span>33 <span style=''>
+</span>34 <span style=''>    var status: List[Status] = </span><span style='background: #AEF1AE'>Nil</span><span style=''>
+</span>35 <span style=''>
+</span>36 <span style=''>    try {
+</span>37 <span style=''>      </span><span style='background: #AEF1AE'>Files.createDirectories(destination)
+</span>38 <span style=''></span><span style='background: #AEF1AE'>
+</span>39 <span style=''></span><span style='background: #AEF1AE'>      archive.visit(new Visitor() {
+</span>40 <span style=''></span><span style='background: #AEF1AE'>        def visit(info: FileInfo) {
+</span>41 <span style=''></span><span style='background: #AEF1AE'>          
+</span>42 <span style=''></span><span style='background: #AEF1AE'>          val outputPath = destination.resolve(info.filename)
+</span>43 <span style=''></span><span style='background: #AEF1AE'>
+</span>44 <span style=''></span><span style='background: #AEF1AE'>          status = info
+</span>45 <span style=''></span><span style='background: #AEF1AE'>            .writeTo(outputPath)
+</span>46 <span style=''></span><span style='background: #AEF1AE'>            .fold(
+</span>47 <span style=''></span><span style='background: #AEF1AE'>              error =&gt; FileExtractionStatus(info.filename, 0, Some(error)),
+</span>48 <span style=''></span><span style='background: #AEF1AE'>              Unit =&gt; FileExtractionStatus(info.filename, 0, None)
+</span>49 <span style=''></span><span style='background: #AEF1AE'>            ) :: status
+</span>50 <span style=''></span><span style='background: #AEF1AE'>        }
+</span>51 <span style=''></span><span style='background: #AEF1AE'>      })
+</span>52 <span style=''></span><span style='background: #AEF1AE'>
+</span>53 <span style=''></span><span style='background: #AEF1AE'>      status</span><span style=''>
+</span>54 <span style=''>
+</span>55 <span style=''>    } catch {
+</span>56 <span style=''>      case ex: Exception =&gt; Error(ex.getMessage) </span><span style='background: #AEF1AE'>:: Nil</span><span style=''>
+</span>57 <span style=''>    }
+</span>58 <span style=''>
+</span>59 <span style=''>  }
 </span>60 <span style=''>
-</span>61 <span style=''>  }
-</span>62 <span style=''>
-</span>63 <span style=''>  def listFiles(destination: File) = {
-</span>64 <span style=''>    </span><span style='background: #AEF1AE'>destination.listFiles().map { file =&gt;
-</span>65 <span style=''></span><span style='background: #AEF1AE'>      FileExtractionStatus(file.getName(), file.length, None)
-</span>66 <span style=''></span><span style='background: #AEF1AE'>    }</span><span style=''>
-</span>67 <span style=''>  }
-</span>68 <span style=''>}
+</span>61 <span style=''>  def listFiles(destination: File) = {
+</span>62 <span style=''>    </span><span style='background: #AEF1AE'>destination.listFiles().map { file =&gt;
+</span>63 <span style=''></span><span style='background: #AEF1AE'>      FileExtractionStatus(file.getName(), file.length, None)
+</span>64 <span style=''></span><span style='background: #AEF1AE'>    }</span><span style=''>
+</span>65 <span style=''>  }
+</span>66 <span style=''>}
 </span></pre>
           </div>
           <div class="tab-pane" id="statementlist">
@@ -103,36 +101,15 @@
         <th>Code</th>
       </tr><tr>
         <td>
-          22
+          19
         </td>
         <td>
-          92
+          131
         </td>
         <td>
-          481
+          403
           -
-          494
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          scala.Some.apply
-        </td>
-        <td style="background: #AEF1AE">
-          scala.Some.apply[String](Error.this.message)
-        </td>
-      </tr><tr>
-        <td>
-          22
-        </td>
-        <td>
-          91
-        </td>
-        <td>
-          486
-          -
-          493
+          410
         </td>
         <td>
           Select
@@ -145,36 +122,36 @@
         </td>
       </tr><tr>
         <td>
-          27
+          19
         </td>
         <td>
-          95
+          132
         </td>
         <td>
-          598
+          398
           -
-          621
+          411
         </td>
         <td>
-          ApplyToImplicitArgs
+          Apply
         </td>
         <td>
-          scala.math.Ordering.by
+          scala.Some.apply
         </td>
         <td style="background: #AEF1AE">
-          scala.`package`.Ordering.by[A, String](((x$1: A) =&gt; x$1.toString()))(math.this.Ordering.String)
+          scala.Some.apply[String](Error.this.message)
         </td>
       </tr><tr>
         <td>
-          27
+          24
         </td>
         <td>
-          94
+          134
         </td>
         <td>
-          609
+          526
           -
-          609
+          526
         </td>
         <td>
           Select
@@ -187,15 +164,15 @@
         </td>
       </tr><tr>
         <td>
-          27
+          24
         </td>
         <td>
-          93
+          133
         </td>
         <td>
-          610
+          527
           -
-          620
+          537
         </td>
         <td>
           Apply
@@ -208,15 +185,36 @@
         </td>
       </tr><tr>
         <td>
-          37
+          24
         </td>
         <td>
-          96
+          135
         </td>
         <td>
-          762
+          515
           -
-          765
+          538
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          scala.math.Ordering.by
+        </td>
+        <td style="background: #AEF1AE">
+          scala.`package`.Ordering.by[A, String](((x$1: A) =&gt; x$1.toString()))(math.this.Ordering.String)
+        </td>
+      </tr><tr>
+        <td>
+          34
+        </td>
+        <td>
+          136
+        </td>
+        <td>
+          679
+          -
+          682
         </td>
         <td>
           Select
@@ -229,57 +227,15 @@
         </td>
       </tr><tr>
         <td>
-          39
+          36
         </td>
         <td>
-          98
+          143
         </td>
         <td>
-          788
+          700
           -
-          820
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          java.nio.file.Paths.get
-        </td>
-        <td style="background: #AEF1AE">
-          java.nio.file.Paths.get(destination.getPath())
-        </td>
-      </tr><tr>
-        <td>
-          39
-        </td>
-        <td>
-          97
-        </td>
-        <td>
-          798
-          -
-          819
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          java.io.File.getPath
-        </td>
-        <td style="background: #AEF1AE">
-          destination.getPath()
-        </td>
-      </tr><tr>
-        <td>
-          40
-        </td>
-        <td>
-          105
-        </td>
-        <td>
-          837
-          -
-          1279
+          1159
         </td>
         <td>
           Block
@@ -289,7 +245,7 @@
         </td>
         <td style="background: #AEF1AE">
           {
-  java.nio.file.Files.createDirectories(path);
+  java.nio.file.Files.createDirectories(destination);
   archive.visit({
     final class $anon extends AnyRef with datavault.archive.Visitor {
       def &lt;init&gt;(): &lt;$anon: datavault.archive.Visitor&gt; = {
@@ -297,9 +253,9 @@
         ()
       };
       def visit(info: datavault.archive.FileInfo): Unit = {
-        val outputFile: java.io.File = new java.io.File(destination, info.filename);
+        val outputPath: java.nio.file.Path = destination.resolve(info.filename);
         status = {
-          &lt;synthetic&gt; &lt;artifact&gt; val x$2: datavault.extractor.FileExtractionStatus = info.writeTo(outputFile).fold[datavault.extractor.FileExtractionStatus](((error: String) =&gt; FileExtractionStatus.apply(info.filename, 0L, scala.Some.apply[String](error))), ((Unit: Unit) =&gt; FileExtractionStatus.apply(info.filename, 0L, scala.None)));
+          &lt;synthetic&gt; &lt;artifact&gt; val x$2: datavault.extractor.FileExtractionStatus = info.writeTo(outputPath).fold[datavault.extractor.FileExtractionStatus](((error: String) =&gt; FileExtractionStatus.apply(info.filename, 0L, scala.Some.apply[String](error))), ((Unit: Unit) =&gt; FileExtractionStatus.apply(info.filename, 0L, scala.None)));
           status.::[datavault.extractor.Status](x$2)
         }
       }
@@ -311,15 +267,15 @@
         </td>
       </tr><tr>
         <td>
-          41
+          37
         </td>
         <td>
-          99
+          137
         </td>
         <td>
-          837
+          700
           -
-          866
+          736
         </td>
         <td>
           Apply
@@ -328,19 +284,19 @@
           java.nio.file.Files.createDirectories
         </td>
         <td style="background: #AEF1AE">
-          java.nio.file.Files.createDirectories(path)
+          java.nio.file.Files.createDirectories(destination)
         </td>
       </tr><tr>
         <td>
-          43
+          39
         </td>
         <td>
-          104
+          142
         </td>
         <td>
-          874
+          744
           -
-          1265
+          1145
         </td>
         <td>
           Apply
@@ -356,9 +312,9 @@
       ()
     };
     def visit(info: datavault.archive.FileInfo): Unit = {
-      val outputFile: java.io.File = new java.io.File(destination, info.filename);
+      val outputPath: java.nio.file.Path = destination.resolve(info.filename);
       status = {
-        &lt;synthetic&gt; &lt;artifact&gt; val x$2: datavault.extractor.FileExtractionStatus = info.writeTo(outputFile).fold[datavault.extractor.FileExtractionStatus](((error: String) =&gt; FileExtractionStatus.apply(info.filename, 0L, scala.Some.apply[String](error))), ((Unit: Unit) =&gt; FileExtractionStatus.apply(info.filename, 0L, scala.None)));
+        &lt;synthetic&gt; &lt;artifact&gt; val x$2: datavault.extractor.FileExtractionStatus = info.writeTo(outputPath).fold[datavault.extractor.FileExtractionStatus](((error: String) =&gt; FileExtractionStatus.apply(info.filename, 0L, scala.Some.apply[String](error))), ((Unit: Unit) =&gt; FileExtractionStatus.apply(info.filename, 0L, scala.None)));
         status.::[datavault.extractor.Status](x$2)
       }
     }
@@ -368,15 +324,15 @@
         </td>
       </tr><tr>
         <td>
-          43
+          39
         </td>
         <td>
-          103
+          141
         </td>
         <td>
-          888
+          758
           -
-          891
+          761
         </td>
         <td>
           Apply
@@ -389,36 +345,36 @@
         </td>
       </tr><tr>
         <td>
-          45
+          42
         </td>
         <td>
-          101
+          139
         </td>
         <td>
-          967
+          848
           -
-          1003
+          882
         </td>
         <td>
           Apply
         </td>
         <td>
-          java.io.File.&lt;init&gt;
+          java.nio.file.Path.resolve
         </td>
         <td style="background: #AEF1AE">
-          new java.io.File(destination, info.filename)
+          destination.resolve(info.filename)
         </td>
       </tr><tr>
         <td>
-          45
+          42
         </td>
         <td>
-          100
+          138
         </td>
         <td>
-          989
+          868
           -
-          1002
+          881
         </td>
         <td>
           Select
@@ -431,15 +387,15 @@
         </td>
       </tr><tr>
         <td>
-          51
+          49
         </td>
         <td>
-          102
+          140
         </td>
         <td>
-          1237
+          1117
           -
-          1246
+          1126
         </td>
         <td>
           Apply
@@ -452,15 +408,15 @@
         </td>
       </tr><tr>
         <td>
-          58
+          56
         </td>
         <td>
-          106
+          144
         </td>
         <td>
-          1344
+          1224
           -
-          1350
+          1230
         </td>
         <td>
           Apply
@@ -473,15 +429,15 @@
         </td>
       </tr><tr>
         <td>
-          64
+          62
         </td>
         <td>
-          113
+          151
         </td>
         <td>
-          1406
+          1286
           -
-          1511
+          1391
         </td>
         <td>
           ApplyToImplicitArgs
@@ -494,15 +450,15 @@
         </td>
       </tr><tr>
         <td>
-          64
+          62
         </td>
         <td>
-          107
+          145
         </td>
         <td>
-          1406
+          1286
           -
-          1429
+          1309
         </td>
         <td>
           Apply
@@ -515,15 +471,15 @@
         </td>
       </tr><tr>
         <td>
-          64
+          62
         </td>
         <td>
-          112
+          150
         </td>
         <td>
-          1434
+          1314
           -
-          1434
+          1314
         </td>
         <td>
           ApplyToImplicitArgs
@@ -536,57 +492,15 @@
         </td>
       </tr><tr>
         <td>
-          65
+          63
         </td>
         <td>
-          110
+          146
         </td>
         <td>
-          1500
+          1351
           -
-          1504
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          scala.None
-        </td>
-        <td style="background: #AEF1AE">
-          scala.None
-        </td>
-      </tr><tr>
-        <td>
-          65
-        </td>
-        <td>
-          109
-        </td>
-        <td>
-          1487
-          -
-          1498
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          java.io.File.length
-        </td>
-        <td style="background: #AEF1AE">
-          file.length()
-        </td>
-      </tr><tr>
-        <td>
-          65
-        </td>
-        <td>
-          108
-        </td>
-        <td>
-          1471
-          -
-          1485
+          1365
         </td>
         <td>
           Apply
@@ -599,15 +513,15 @@
         </td>
       </tr><tr>
         <td>
-          65
+          63
         </td>
         <td>
-          111
+          149
         </td>
         <td>
-          1450
+          1330
           -
-          1505
+          1385
         </td>
         <td>
           Apply
@@ -617,6 +531,48 @@
         </td>
         <td style="background: #AEF1AE">
           FileExtractionStatus.apply(file.getName(), file.length(), scala.None)
+        </td>
+      </tr><tr>
+        <td>
+          63
+        </td>
+        <td>
+          148
+        </td>
+        <td>
+          1380
+          -
+          1384
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.None
+        </td>
+        <td style="background: #AEF1AE">
+          scala.None
+        </td>
+      </tr><tr>
+        <td>
+          63
+        </td>
+        <td>
+          147
+        </td>
+        <td>
+          1367
+          -
+          1378
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.File.length
+        </td>
+        <td style="background: #AEF1AE">
+          file.length()
         </td>
       </tr>
     </table>
