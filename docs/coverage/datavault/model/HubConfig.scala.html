@@ -1,0 +1,725 @@
+<html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title id="title">
+          datavault/model/HubConfig.scala.html
+        </title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/css/theme.default.min.css" type="text/css"/><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/js/jquery.tablesorter.min.js"></script><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" type="text/css"/><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script><script type="text/javascript">
+        $(document).ready(function() {$(".tablesorter").tablesorter();});
+      </script>
+        <style>
+          table.codegrid { font-family: monospace; font-size: 12px; width: auto!important; }table.statementlist { width: auto!important; font-size: 13px; } table.codegrid td { padding: 0!important; border: 0!important } table td.linenumber { width: 40px!important; } 
+        </style>
+      </head>
+      <body style="font-family: monospace;">
+        <ul class="nav nav-tabs">
+          <li>
+            <a href="#codegrid" data-toggle="tab">Codegrid</a>
+          </li>
+          <li>
+            <a href="#statementlist" data-toggle="tab">Statement List</a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active" id="codegrid">
+            <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault.model
+</span>2 <span style=''>
+</span>3 <span style=''>import java.io._
+</span>4 <span style=''>import java.nio.file.Path
+</span>5 <span style=''>
+</span>6 <span style=''>import org.json4s.JsonDSL._
+</span>7 <span style=''>import org.json4s._
+</span>8 <span style=''>import org.json4s.native.Serialization
+</span>9 <span style=''>import org.json4s.native.Serialization.{read, write, writePretty}
+</span>10 <span style=''>import org.json4s.native.JsonMethods._
+</span>11 <span style=''>
+</span>12 <span style=''>import datavault.io.FileSystem
+</span>13 <span style=''>
+</span>14 <span style=''>case class Hub(name: String, table: String, source: String, key: Column)
+</span>15 <span style=''>case class HubConfig(hubs: Seq[Hub])
+</span>16 <span style=''>
+</span>17 <span style=''>object HubConfig {
+</span>18 <span style=''>
+</span>19 <span style=''>  implicit val formats = </span><span style='background: #AEF1AE'>Serialization.formats(NoTypeHints)</span><span style=''>
+</span>20 <span style=''>
+</span>21 <span style=''>  val R = </span><span style='background: #AEF1AE'>&quot;olist_([a-z]*)?s_dataset&quot;.r</span><span style=''>
+</span>22 <span style=''>  def detectName(table: String) = table match {
+</span>23 <span style=''>    case R(name) =&gt; </span><span style='background: #AEF1AE'>Some(name)</span><span style=''>
+</span>24 <span style=''>    case _ =&gt; </span><span style='background: #AEF1AE'>None</span><span style=''>
+</span>25 <span style=''>  }
+</span>26 <span style=''>
+</span>27 <span style=''>  def detectKey(name: String, keys: Seq[Column]) =
+</span>28 <span style=''>    </span><span style='background: #AEF1AE'>keys.find(_.name == s&quot;${name}_id&quot;)</span><span style=''>
+</span>29 <span style=''>
+</span>30 <span style=''>  def fromTable(table: Table) = </span><span style='background: #AEF1AE'>for {
+</span>31 <span style=''></span><span style='background: #AEF1AE'>    name &lt;- detectName(table.name)
+</span>32 <span style=''></span><span style='background: #AEF1AE'>    key  &lt;- detectKey(name, table.columns)
+</span>33 <span style=''></span><span style='background: #AEF1AE'>  } yield Hub(name, table.name, table.path, key)</span><span style=''>
+</span>34 <span style=''>
+</span>35 <span style=''>  def fromModel(model: Model) = </span><span style='background: #AEF1AE'>HubConfig(model.tables.values.toSeq.flatMap(fromTable))</span><span style=''>
+</span>36 <span style=''>
+</span>37 <span style=''>  def load(path: Path) = {
+</span>38 <span style=''>    val is = </span><span style='background: #AEF1AE'>FileSystem.open(path)</span><span style=''>
+</span>39 <span style=''>    val content = </span><span style='background: #AEF1AE'>scala.io.Source.fromInputStream(is).getLines().mkString(&quot;\n&quot;)</span><span style=''>
+</span>40 <span style=''>    val hubConfig   = </span><span style='background: #AEF1AE'>read[HubConfig](content)</span><span style=''>
+</span>41 <span style=''>    hubConfig
+</span>42 <span style=''>  }
+</span>43 <span style=''>  
+</span>44 <span style=''>  def save(hubConfig: HubConfig, path: Path) = {
+</span>45 <span style=''>    val writer = </span><span style='background: #AEF1AE'>FileSystem.writer(path)</span><span style=''>
+</span>46 <span style=''>    </span><span style='background: #AEF1AE'>writePretty(hubConfig, writer)</span><span style=''>
+</span>47 <span style=''>    </span><span style='background: #AEF1AE'>writer.close()</span><span style=''>
+</span>48 <span style=''>  }
+</span>49 <span style=''>
+</span>50 <span style=''>}
+</span></pre>
+          </div>
+          <div class="tab-pane" id="statementlist">
+            <table cellspacing="0" cellpadding="0" class="table statementlist">
+      <tr>
+        <th>Line</th>
+        <th>Stmt Id</th>
+        <th>Pos</th>
+        <th>Tree</th>
+        <th>Symbol</th>
+        <th>Code</th>
+      </tr><tr>
+        <td>
+          19
+        </td>
+        <td>
+          169
+        </td>
+        <td>
+          472
+          -
+          483
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          org.json4s.NoTypeHints
+        </td>
+        <td style="background: #AEF1AE">
+          org.json4s.NoTypeHints
+        </td>
+      </tr><tr>
+        <td>
+          19
+        </td>
+        <td>
+          170
+        </td>
+        <td>
+          450
+          -
+          484
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          org.json4s.Serialization.formats
+        </td>
+        <td style="background: #AEF1AE">
+          org.json4s.native.Serialization.formats(org.json4s.NoTypeHints)
+        </td>
+      </tr><tr>
+        <td>
+          21
+        </td>
+        <td>
+          172
+        </td>
+        <td>
+          496
+          -
+          524
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.collection.immutable.StringLike.r
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.augmentString(&quot;olist_([a-z]*)?s_dataset&quot;).r
+        </td>
+      </tr><tr>
+        <td>
+          21
+        </td>
+        <td>
+          171
+        </td>
+        <td>
+          496
+          -
+          522
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;olist_([a-z]*)?s_dataset&quot;
+        </td>
+      </tr><tr>
+        <td>
+          23
+        </td>
+        <td>
+          173
+        </td>
+        <td>
+          593
+          -
+          603
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Some.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Some.apply[String](name)
+        </td>
+      </tr><tr>
+        <td>
+          24
+        </td>
+        <td>
+          174
+        </td>
+        <td>
+          618
+          -
+          622
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.None
+        </td>
+        <td style="background: #AEF1AE">
+          scala.None
+        </td>
+      </tr><tr>
+        <td>
+          28
+        </td>
+        <td>
+          176
+        </td>
+        <td>
+          693
+          -
+          716
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.lang.Object.==
+        </td>
+        <td style="background: #AEF1AE">
+          x$1.name.==(scala.StringContext.apply(&quot;&quot;, &quot;_id&quot;).s(name))
+        </td>
+      </tr><tr>
+        <td>
+          28
+        </td>
+        <td>
+          175
+        </td>
+        <td>
+          703
+          -
+          716
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.StringContext.s
+        </td>
+        <td style="background: #AEF1AE">
+          scala.StringContext.apply(&quot;&quot;, &quot;_id&quot;).s(name)
+        </td>
+      </tr><tr>
+        <td>
+          28
+        </td>
+        <td>
+          177
+        </td>
+        <td>
+          683
+          -
+          717
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.collection.IterableLike.find
+        </td>
+        <td style="background: #AEF1AE">
+          keys.find(((x$1: datavault.model.Column) =&gt; x$1.name.==(scala.StringContext.apply(&quot;&quot;, &quot;_id&quot;).s(name))))
+        </td>
+      </tr><tr>
+        <td>
+          31
+        </td>
+        <td>
+          184
+        </td>
+        <td>
+          751
+          -
+          883
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Option.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          HubConfig.this.detectName(table.name).flatMap[datavault.model.Hub](((name: String) =&gt; HubConfig.this.detectKey(name, table.columns).map[datavault.model.Hub](((key: datavault.model.Column) =&gt; Hub.apply(name, table.name, table.path, key)))))
+        </td>
+      </tr><tr>
+        <td>
+          31
+        </td>
+        <td>
+          178
+        </td>
+        <td>
+          780
+          -
+          790
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.model.Table.name
+        </td>
+        <td style="background: #AEF1AE">
+          table.name
+        </td>
+      </tr><tr>
+        <td>
+          32
+        </td>
+        <td>
+          183
+        </td>
+        <td>
+          796
+          -
+          883
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Option.map
+        </td>
+        <td style="background: #AEF1AE">
+          HubConfig.this.detectKey(name, table.columns).map[datavault.model.Hub](((key: datavault.model.Column) =&gt; Hub.apply(name, table.name, table.path, key)))
+        </td>
+      </tr><tr>
+        <td>
+          32
+        </td>
+        <td>
+          179
+        </td>
+        <td>
+          820
+          -
+          833
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.model.Table.columns
+        </td>
+        <td style="background: #AEF1AE">
+          table.columns
+        </td>
+      </tr><tr>
+        <td>
+          33
+        </td>
+        <td>
+          182
+        </td>
+        <td>
+          845
+          -
+          883
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.model.Hub.apply
+        </td>
+        <td style="background: #AEF1AE">
+          Hub.apply(name, table.name, table.path, key)
+        </td>
+      </tr><tr>
+        <td>
+          33
+        </td>
+        <td>
+          181
+        </td>
+        <td>
+          867
+          -
+          877
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.model.Table.path
+        </td>
+        <td style="background: #AEF1AE">
+          table.path
+        </td>
+      </tr><tr>
+        <td>
+          33
+        </td>
+        <td>
+          180
+        </td>
+        <td>
+          855
+          -
+          865
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.model.Table.name
+        </td>
+        <td style="background: #AEF1AE">
+          table.name
+        </td>
+      </tr><tr>
+        <td>
+          35
+        </td>
+        <td>
+          185
+        </td>
+        <td>
+          961
+          -
+          970
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.model.HubConfig.fromTable
+        </td>
+        <td style="background: #AEF1AE">
+          HubConfig.this.fromTable(table)
+        </td>
+      </tr><tr>
+        <td>
+          35
+        </td>
+        <td>
+          187
+        </td>
+        <td>
+          960
+          -
+          960
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.collection.Seq.canBuildFrom
+        </td>
+        <td style="background: #AEF1AE">
+          collection.this.Seq.canBuildFrom[datavault.model.Hub]
+        </td>
+      </tr><tr>
+        <td>
+          35
+        </td>
+        <td>
+          189
+        </td>
+        <td>
+          917
+          -
+          972
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.model.HubConfig.apply
+        </td>
+        <td style="background: #AEF1AE">
+          HubConfig.apply(model.tables.values.toSeq.flatMap[datavault.model.Hub, Seq[datavault.model.Hub]]({
+  ((table: datavault.model.Table) =&gt; scala.this.Option.option2Iterable[datavault.model.Hub](HubConfig.this.fromTable(table)))
+})(collection.this.Seq.canBuildFrom[datavault.model.Hub]))
+        </td>
+      </tr><tr>
+        <td>
+          35
+        </td>
+        <td>
+          186
+        </td>
+        <td>
+          961
+          -
+          970
+        </td>
+        <td>
+          ApplyImplicitView
+        </td>
+        <td>
+          scala.Option.option2Iterable
+        </td>
+        <td style="background: #AEF1AE">
+          scala.this.Option.option2Iterable[datavault.model.Hub](HubConfig.this.fromTable(table))
+        </td>
+      </tr><tr>
+        <td>
+          35
+        </td>
+        <td>
+          188
+        </td>
+        <td>
+          927
+          -
+          971
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          scala.collection.TraversableLike.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          model.tables.values.toSeq.flatMap[datavault.model.Hub, Seq[datavault.model.Hub]]({
+  ((table: datavault.model.Table) =&gt; scala.this.Option.option2Iterable[datavault.model.Hub](HubConfig.this.fromTable(table)))
+})(collection.this.Seq.canBuildFrom[datavault.model.Hub])
+        </td>
+      </tr><tr>
+        <td>
+          38
+        </td>
+        <td>
+          190
+        </td>
+        <td>
+          1014
+          -
+          1035
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.io.FileSystem.open
+        </td>
+        <td style="background: #AEF1AE">
+          datavault.io.FileSystem.open(path)
+        </td>
+      </tr><tr>
+        <td>
+          39
+        </td>
+        <td>
+          191
+        </td>
+        <td>
+          1054
+          -
+          1115
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.collection.TraversableOnce.mkString
+        </td>
+        <td style="background: #AEF1AE">
+          scala.io.Source.fromInputStream(is)(io.this.Codec.fallbackSystemCodec).getLines().mkString(&quot;\n&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          40
+        </td>
+        <td>
+          194
+        </td>
+        <td>
+          1138
+          -
+          1162
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          org.json4s.Serialization.read
+        </td>
+        <td style="background: #AEF1AE">
+          org.json4s.native.Serialization.read[datavault.model.HubConfig](content)(HubConfig.this.formats, scala.reflect.ManifestFactory.classType[datavault.model.HubConfig](classOf[datavault.model.HubConfig]))
+        </td>
+      </tr><tr>
+        <td>
+          40
+        </td>
+        <td>
+          193
+        </td>
+        <td>
+          1153
+          -
+          1153
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.reflect.ManifestFactory.classType
+        </td>
+        <td style="background: #AEF1AE">
+          scala.reflect.ManifestFactory.classType[datavault.model.HubConfig](classOf[datavault.model.HubConfig])
+        </td>
+      </tr><tr>
+        <td>
+          40
+        </td>
+        <td>
+          192
+        </td>
+        <td>
+          1153
+          -
+          1153
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.model.HubConfig.formats
+        </td>
+        <td style="background: #AEF1AE">
+          HubConfig.this.formats
+        </td>
+      </tr><tr>
+        <td>
+          45
+        </td>
+        <td>
+          195
+        </td>
+        <td>
+          1250
+          -
+          1273
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.io.FileSystem.writer
+        </td>
+        <td style="background: #AEF1AE">
+          datavault.io.FileSystem.writer(path)
+        </td>
+      </tr><tr>
+        <td>
+          46
+        </td>
+        <td>
+          196
+        </td>
+        <td>
+          1289
+          -
+          1289
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.model.HubConfig.formats
+        </td>
+        <td style="background: #AEF1AE">
+          HubConfig.this.formats
+        </td>
+      </tr><tr>
+        <td>
+          46
+        </td>
+        <td>
+          197
+        </td>
+        <td>
+          1278
+          -
+          1308
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          org.json4s.native.Serialization.writePretty
+        </td>
+        <td style="background: #AEF1AE">
+          org.json4s.native.Serialization.writePretty[datavault.model.HubConfig, java.io.BufferedWriter](hubConfig, writer)(HubConfig.this.formats)
+        </td>
+      </tr><tr>
+        <td>
+          47
+        </td>
+        <td>
+          198
+        </td>
+        <td>
+          1313
+          -
+          1327
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.BufferedWriter.close
+        </td>
+        <td style="background: #AEF1AE">
+          writer.close()
+        </td>
+      </tr>
+    </table>
+          </div>
+        </div>
+      </body>
+    </html>

@@ -10,8 +10,8 @@ trait Fixtures {
     val hubConfigTemplatePath = "out/hub-config-template.json"
 
     def extractFiles = s"./data-vault extract-files -i $folder/$archive -o $staging"
-    def generateRawModel = s"./data-vault generate-raw-model -i $folder/$archive -o $modelFile"
-    def generateHubConfigTemplate = s"./data-vault generate-hub-config-template -i $sourceModelFile -o $hubConfigTemplatePath"
+    def generateRawModel = s"./data-vault generate-model-file -i $folder/$archive -o $modelFile"
+    def generateHubConfigTemplate = s"./data-vault generate-hub-config -i $sourceModelFile -o $hubConfigTemplatePath"
 
     val archiveDataModel = "fixtures/archive.zip-raw-data-model.json"
     def expectedRawDataModel = scala.io.Source.fromResource(archiveDataModel).getLines().mkString("\n")
@@ -22,4 +22,9 @@ trait Fixtures {
     val hubConfigTemplate = "fixtures/hub-config-template.json"
     def expectedHubConfigTemplate = scala.io.Source.fromResource(hubConfigTemplate).getLines().mkString("\n")
     
+    val testResources = "src/test/resources"
+    val loadHubDataModel = s"$testResources/$archiveDataModel"
+    val loadHubConfig = s"$testResources/$hubConfigTemplate"
+    def loadHub = s"./data-vault load-hubs -i $loadHubDataModel -o $loadHubConfig"
+
 }

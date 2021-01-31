@@ -1,0 +1,875 @@
+<html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title id="title">
+          datavault/DVCommand.scala.html
+        </title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/css/theme.default.min.css" type="text/css"/><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/js/jquery.tablesorter.min.js"></script><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" type="text/css"/><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script><script type="text/javascript">
+        $(document).ready(function() {$(".tablesorter").tablesorter();});
+      </script>
+        <style>
+          table.codegrid { font-family: monospace; font-size: 12px; width: auto!important; }table.statementlist { width: auto!important; font-size: 13px; } table.codegrid td { padding: 0!important; border: 0!important } table td.linenumber { width: 40px!important; } 
+        </style>
+      </head>
+      <body style="font-family: monospace;">
+        <ul class="nav nav-tabs">
+          <li>
+            <a href="#codegrid" data-toggle="tab">Codegrid</a>
+          </li>
+          <li>
+            <a href="#statementlist" data-toggle="tab">Statement List</a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active" id="codegrid">
+            <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault
+</span>2 <span style=''>
+</span>3 <span style=''>import java.nio.file.Path
+</span>4 <span style=''>
+</span>5 <span style=''>import datavault.archive.ZipArchive
+</span>6 <span style=''>import datavault.extractor.Extractor
+</span>7 <span style=''>import datavault.model.{HubConfig, Model}
+</span>8 <span style=''>import org.yaml.snakeyaml.scanner.Constant
+</span>9 <span style=''>
+</span>10 <span style=''>object DVCommand {
+</span>11 <span style=''>
+</span>12 <span style=''>  import zio._
+</span>13 <span style=''>
+</span>14 <span style=''>   def genModel(input: Path, output: Path)  = </span><span style='background: #AEF1AE'>for {
+</span>15 <span style=''></span><span style='background: #AEF1AE'>     _ &lt;- ZIO.effect(println(s&quot;Running app  $input -&gt; $output&quot;))
+</span>16 <span style=''></span><span style='background: #AEF1AE'>     model &lt;- Model.withArchive(new ZipArchive(input))
+</span>17 <span style=''></span><span style='background: #AEF1AE'>     _ &lt;- ZIO.effect(Model.save(model, output))
+</span>18 <span style=''></span><span style='background: #AEF1AE'>     _ &lt;- ZIO.effect(println(s&quot;Done! &quot;))
+</span>19 <span style=''></span><span style='background: #AEF1AE'>   } yield ()</span><span style=''>
+</span>20 <span style=''>
+</span>21 <span style=''>  def extractFiles(input: Path, output: Path) = {
+</span>22 <span style=''>    val archive    = </span><span style='background: #AEF1AE'>new ZipArchive(input)</span><span style=''>
+</span>23 <span style=''>    val result     = </span><span style='background: #AEF1AE'>Extractor.extract(archive, output)</span><span style=''>
+</span>24 <span style=''>    val errorFound = </span><span style='background: #AEF1AE'>result.exists(_.error.isDefined)</span><span style=''>
+</span>25 <span style=''>    if (errorFound) {
+</span>26 <span style=''>      </span><span style='background: #AEF1AE'>Constants.ExtractionError</span><span style=''>
+</span>27 <span style=''>    } else {
+</span>28 <span style=''>      </span><span style='background: #AEF1AE'>Constants.Success</span><span style=''>
+</span>29 <span style=''>    }
+</span>30 <span style=''>  }
+</span>31 <span style=''>
+</span>32 <span style=''>  def generateHubConfigTemplate(input: Path, output: Path) = {
+</span>33 <span style=''>    val model             = </span><span style='background: #AEF1AE'>Model.load(input)</span><span style=''>
+</span>34 <span style=''>    val hubConfigTemplate = </span><span style='background: #AEF1AE'>HubConfig.fromModel(model)</span><span style=''>
+</span>35 <span style=''>    </span><span style='background: #AEF1AE'>HubConfig.save(hubConfigTemplate, output)</span><span style=''>
+</span>36 <span style=''>    </span><span style='background: #AEF1AE'>Constants.Success</span><span style=''>
+</span>37 <span style=''>  }
+</span>38 <span style=''>
+</span>39 <span style=''>  def loadHubs(modelFile: Path, hubFile: Path) = {
+</span>40 <span style=''>    val model = </span><span style='background: #AEF1AE'>Model.load(modelFile)</span><span style=''>
+</span>41 <span style=''>    val hubconfig = </span><span style='background: #AEF1AE'>HubConfig.load(hubFile)</span><span style=''>
+</span>42 <span style=''>    val hub = </span><span style='background: #AEF1AE'>hubconfig.hubs(0)</span><span style=''>
+</span>43 <span style=''>    </span><span style='background: #AEF1AE'>println(hub)</span><span style=''>
+</span>44 <span style=''>    </span><span style='background: #AEF1AE'>Constants.Success</span><span style=''>
+</span>45 <span style=''>  }
+</span>46 <span style=''>
+</span>47 <span style=''>  import zio._
+</span>48 <span style=''>
+</span>49 <span style=''>  def toZio(cmd: Cmd): Task[_] = cmd match {
+</span>50 <span style=''>    case GenerateModelFile(input, output) =&gt; </span><span style='background: #AEF1AE'>genModel(input, output)</span><span style=''>
+</span>51 <span style=''>    case ExtractFiles(input, output) =&gt; </span><span style='background: #AEF1AE'>ZIO.effect(extractFiles(input, output))</span><span style=''>
+</span>52 <span style=''>    case GenerateHubConfigFile(input, output) =&gt; </span><span style='background: #AEF1AE'>ZIO.effect(generateHubConfigTemplate(input, output))</span><span style=''>
+</span>53 <span style=''>    case LoadHubs(input, output) =&gt; </span><span style='background: #AEF1AE'>ZIO.effect(loadHubs(input, output))</span><span style=''>
+</span>54 <span style=''>    case NoCmd =&gt; </span><span style='background: #AEF1AE'>Task.none</span><span style=''>
+</span>55 <span style=''>  }
+</span>56 <span style=''>
+</span>57 <span style=''>}
+</span></pre>
+          </div>
+          <div class="tab-pane" id="statementlist">
+            <table cellspacing="0" cellpadding="0" class="table statementlist">
+      <tr>
+        <th>Line</th>
+        <th>Stmt Id</th>
+        <th>Pos</th>
+        <th>Tree</th>
+        <th>Symbol</th>
+        <th>Code</th>
+      </tr><tr>
+        <td>
+          15
+        </td>
+        <td>
+          62
+        </td>
+        <td>
+          287
+          -
+          515
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.effect[Unit](scala.Predef.println(scala.StringContext.apply(&quot;Running app  &quot;, &quot; -&gt; &quot;, &quot;&quot;).s(input, output))).flatMap[Any, Throwable, Unit](((_: Unit) =&gt; datavault.model.Model.withArchive(new datavault.archive.ZipArchive(input)).flatMap[Any, Throwable, Unit](((model: datavault.model.Model) =&gt; zio.ZIO.effect[Unit](datavault.model.Model.save(model, output, datavault.model.Model.save$default$3)).flatMap[Any, Throwable, Unit](((_: Unit) =&gt; zio.ZIO.effect[Unit](scala.Predef.println(scala.StringContext.apply(&quot;Done! &quot;).s())).map[Unit](((_: Unit) =&gt; ()))))))))
+        </td>
+      </tr><tr>
+        <td>
+          15
+        </td>
+        <td>
+          52
+        </td>
+        <td>
+          314
+          -
+          356
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Predef.println
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.println(scala.StringContext.apply(&quot;Running app  &quot;, &quot; -&gt; &quot;, &quot;&quot;).s(input, output))
+        </td>
+      </tr><tr>
+        <td>
+          15
+        </td>
+        <td>
+          51
+        </td>
+        <td>
+          322
+          -
+          355
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.StringContext.s
+        </td>
+        <td style="background: #AEF1AE">
+          scala.StringContext.apply(&quot;Running app  &quot;, &quot; -&gt; &quot;, &quot;&quot;).s(input, output)
+        </td>
+      </tr><tr>
+        <td>
+          16
+        </td>
+        <td>
+          53
+        </td>
+        <td>
+          390
+          -
+          411
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.archive.ZipArchive.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new datavault.archive.ZipArchive(input)
+        </td>
+      </tr><tr>
+        <td>
+          16
+        </td>
+        <td>
+          61
+        </td>
+        <td>
+          363
+          -
+          515
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          datavault.model.Model.withArchive(new datavault.archive.ZipArchive(input)).flatMap[Any, Throwable, Unit](((model: datavault.model.Model) =&gt; zio.ZIO.effect[Unit](datavault.model.Model.save(model, output, datavault.model.Model.save$default$3)).flatMap[Any, Throwable, Unit](((_: Unit) =&gt; zio.ZIO.effect[Unit](scala.Predef.println(scala.StringContext.apply(&quot;Done! &quot;).s())).map[Unit](((_: Unit) =&gt; ()))))))
+        </td>
+      </tr><tr>
+        <td>
+          17
+        </td>
+        <td>
+          55
+        </td>
+        <td>
+          434
+          -
+          459
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.model.Model.save
+        </td>
+        <td style="background: #AEF1AE">
+          datavault.model.Model.save(model, output, datavault.model.Model.save$default$3)
+        </td>
+      </tr><tr>
+        <td>
+          17
+        </td>
+        <td>
+          60
+        </td>
+        <td>
+          418
+          -
+          515
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.effect[Unit](datavault.model.Model.save(model, output, datavault.model.Model.save$default$3)).flatMap[Any, Throwable, Unit](((_: Unit) =&gt; zio.ZIO.effect[Unit](scala.Predef.println(scala.StringContext.apply(&quot;Done! &quot;).s())).map[Unit](((_: Unit) =&gt; ()))))
+        </td>
+      </tr><tr>
+        <td>
+          17
+        </td>
+        <td>
+          54
+        </td>
+        <td>
+          440
+          -
+          440
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.model.Model.save$default$3
+        </td>
+        <td style="background: #AEF1AE">
+          datavault.model.Model.save$default$3
+        </td>
+      </tr><tr>
+        <td>
+          18
+        </td>
+        <td>
+          59
+        </td>
+        <td>
+          466
+          -
+          515
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.effect[Unit](scala.Predef.println(scala.StringContext.apply(&quot;Done! &quot;).s())).map[Unit](((_: Unit) =&gt; ()))
+        </td>
+      </tr><tr>
+        <td>
+          18
+        </td>
+        <td>
+          56
+        </td>
+        <td>
+          490
+          -
+          499
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.StringContext.s
+        </td>
+        <td style="background: #AEF1AE">
+          scala.StringContext.apply(&quot;Done! &quot;).s()
+        </td>
+      </tr><tr>
+        <td>
+          18
+        </td>
+        <td>
+          57
+        </td>
+        <td>
+          482
+          -
+          500
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Predef.println
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.println(scala.StringContext.apply(&quot;Done! &quot;).s())
+        </td>
+      </tr><tr>
+        <td>
+          19
+        </td>
+        <td>
+          58
+        </td>
+        <td>
+          513
+          -
+          515
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          ()
+        </td>
+      </tr><tr>
+        <td>
+          22
+        </td>
+        <td>
+          63
+        </td>
+        <td>
+          588
+          -
+          609
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.archive.ZipArchive.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new datavault.archive.ZipArchive(input)
+        </td>
+      </tr><tr>
+        <td>
+          23
+        </td>
+        <td>
+          64
+        </td>
+        <td>
+          631
+          -
+          665
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractor.Extractor.extract
+        </td>
+        <td style="background: #AEF1AE">
+          datavault.extractor.Extractor.extract(archive, output)
+        </td>
+      </tr><tr>
+        <td>
+          24
+        </td>
+        <td>
+          65
+        </td>
+        <td>
+          701
+          -
+          718
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.Option.isDefined
+        </td>
+        <td style="background: #AEF1AE">
+          x$1.error.isDefined
+        </td>
+      </tr><tr>
+        <td>
+          24
+        </td>
+        <td>
+          66
+        </td>
+        <td>
+          687
+          -
+          719
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.collection.LinearSeqOptimized.exists
+        </td>
+        <td style="background: #AEF1AE">
+          result.exists(((x$1: datavault.extractor.Status) =&gt; x$1.error.isDefined))
+        </td>
+      </tr><tr>
+        <td>
+          26
+        </td>
+        <td>
+          68
+        </td>
+        <td>
+          748
+          -
+          773
+        </td>
+        <td>
+          Block
+        </td>
+        <td>
+          datavault.Constants.ExtractionError
+        </td>
+        <td style="background: #AEF1AE">
+          Constants.ExtractionError
+        </td>
+      </tr><tr>
+        <td>
+          26
+        </td>
+        <td>
+          67
+        </td>
+        <td>
+          748
+          -
+          773
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.Constants.ExtractionError
+        </td>
+        <td style="background: #AEF1AE">
+          Constants.ExtractionError
+        </td>
+      </tr><tr>
+        <td>
+          28
+        </td>
+        <td>
+          70
+        </td>
+        <td>
+          793
+          -
+          810
+        </td>
+        <td>
+          Block
+        </td>
+        <td>
+          datavault.Constants.Success
+        </td>
+        <td style="background: #AEF1AE">
+          Constants.Success
+        </td>
+      </tr><tr>
+        <td>
+          28
+        </td>
+        <td>
+          69
+        </td>
+        <td>
+          793
+          -
+          810
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.Constants.Success
+        </td>
+        <td style="background: #AEF1AE">
+          Constants.Success
+        </td>
+      </tr><tr>
+        <td>
+          33
+        </td>
+        <td>
+          71
+        </td>
+        <td>
+          913
+          -
+          930
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.model.Model.load
+        </td>
+        <td style="background: #AEF1AE">
+          datavault.model.Model.load(input)
+        </td>
+      </tr><tr>
+        <td>
+          34
+        </td>
+        <td>
+          72
+        </td>
+        <td>
+          959
+          -
+          985
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.model.HubConfig.fromModel
+        </td>
+        <td style="background: #AEF1AE">
+          datavault.model.HubConfig.fromModel(model)
+        </td>
+      </tr><tr>
+        <td>
+          35
+        </td>
+        <td>
+          73
+        </td>
+        <td>
+          990
+          -
+          1031
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.model.HubConfig.save
+        </td>
+        <td style="background: #AEF1AE">
+          datavault.model.HubConfig.save(hubConfigTemplate, output)
+        </td>
+      </tr><tr>
+        <td>
+          36
+        </td>
+        <td>
+          74
+        </td>
+        <td>
+          1036
+          -
+          1053
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.Constants.Success
+        </td>
+        <td style="background: #AEF1AE">
+          Constants.Success
+        </td>
+      </tr><tr>
+        <td>
+          40
+        </td>
+        <td>
+          75
+        </td>
+        <td>
+          1126
+          -
+          1147
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.model.Model.load
+        </td>
+        <td style="background: #AEF1AE">
+          datavault.model.Model.load(modelFile)
+        </td>
+      </tr><tr>
+        <td>
+          41
+        </td>
+        <td>
+          76
+        </td>
+        <td>
+          1168
+          -
+          1191
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.model.HubConfig.load
+        </td>
+        <td style="background: #AEF1AE">
+          datavault.model.HubConfig.load(hubFile)
+        </td>
+      </tr><tr>
+        <td>
+          42
+        </td>
+        <td>
+          77
+        </td>
+        <td>
+          1206
+          -
+          1223
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.collection.SeqLike.apply
+        </td>
+        <td style="background: #AEF1AE">
+          hubconfig.hubs.apply(0)
+        </td>
+      </tr><tr>
+        <td>
+          43
+        </td>
+        <td>
+          78
+        </td>
+        <td>
+          1228
+          -
+          1240
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Predef.println
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.println(hub)
+        </td>
+      </tr><tr>
+        <td>
+          44
+        </td>
+        <td>
+          79
+        </td>
+        <td>
+          1245
+          -
+          1262
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.Constants.Success
+        </td>
+        <td style="background: #AEF1AE">
+          Constants.Success
+        </td>
+      </tr><tr>
+        <td>
+          50
+        </td>
+        <td>
+          80
+        </td>
+        <td>
+          1374
+          -
+          1397
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.DVCommand.genModel
+        </td>
+        <td style="background: #AEF1AE">
+          DVCommand.this.genModel(input, output)
+        </td>
+      </tr><tr>
+        <td>
+          51
+        </td>
+        <td>
+          82
+        </td>
+        <td>
+          1438
+          -
+          1477
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.effect
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.effect[Int](DVCommand.this.extractFiles(input, output))
+        </td>
+      </tr><tr>
+        <td>
+          51
+        </td>
+        <td>
+          81
+        </td>
+        <td>
+          1449
+          -
+          1476
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.DVCommand.extractFiles
+        </td>
+        <td style="background: #AEF1AE">
+          DVCommand.this.extractFiles(input, output)
+        </td>
+      </tr><tr>
+        <td>
+          52
+        </td>
+        <td>
+          83
+        </td>
+        <td>
+          1538
+          -
+          1578
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.DVCommand.generateHubConfigTemplate
+        </td>
+        <td style="background: #AEF1AE">
+          DVCommand.this.generateHubConfigTemplate(input, output)
+        </td>
+      </tr><tr>
+        <td>
+          52
+        </td>
+        <td>
+          84
+        </td>
+        <td>
+          1527
+          -
+          1579
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.effect
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.effect[Int](DVCommand.this.generateHubConfigTemplate(input, output))
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          86
+        </td>
+        <td>
+          1616
+          -
+          1651
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.effect
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.effect[Int](DVCommand.this.loadHubs(input, output))
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          85
+        </td>
+        <td>
+          1627
+          -
+          1650
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.DVCommand.loadHubs
+        </td>
+        <td style="background: #AEF1AE">
+          DVCommand.this.loadHubs(input, output)
+        </td>
+      </tr><tr>
+        <td>
+          54
+        </td>
+        <td>
+          87
+        </td>
+        <td>
+          1670
+          -
+          1679
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          zio.Task.none
+        </td>
+        <td style="background: #AEF1AE">
+          zio.Task.none
+        </td>
+      </tr>
+    </table>
+          </div>
+        </div>
+      </body>
+    </html>

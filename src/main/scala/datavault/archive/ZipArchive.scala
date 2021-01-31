@@ -1,12 +1,11 @@
 package datavault.archive
 
-import java.nio.file.Path
-import java.io._
+import datavault.io.FileSystem
 
+import java.nio.file.{StandardCopyOption, Files, Path}
+import java.io._
 import java.util.zip._
 import java.util.Optional
-
-import java.nio.file.Files
 
 case class ZipFileInfo(ze: ZipEntry, zis: ZipInputStream) extends FileInfo {
   val _ext = ".csv"
@@ -18,47 +17,23 @@ case class ZipFileInfo(ze: ZipEntry, zis: ZipInputStream) extends FileInfo {
 
   def filename    = ze.getName()
   def inputStream = zis
-  def writeTo(target: File): Either[String, Unit] = {
-
-    val BUFSIZE = 4096
-    val buffer  = new Array[Byte](BUFSIZE)
-
-    def saveFile(fis: InputStream, fos: OutputStream) = {
-      writeToFile(bufferReader(fis) _, fos)
-      fos.close
-    }
-
-    def bufferReader(fis: InputStream)(buffer: Array[Byte]) =
-      (fis.read(buffer), buffer)
-
-    def writeToFile(
-        reader: (Array[Byte]) => Tuple2[Int, Array[Byte]],
-        fos: OutputStream
-    ): Boolean = {
-      val (length, data) = reader(buffer)
-      if (length >= 0) {
-        fos.write(data, 0, length)
-        writeToFile(reader, fos)
-      } else
-        true
-    }
+  def writeTo(target: Path): Either[String, Unit] = {
 
     try {
-      saveFile(inputStream, new FileOutputStream(target))
+      Files.copy(inputStream, target, StandardCopyOption.REPLACE_EXISTING)
       Right(())
     } catch {
-      case ex: Exception => Left(ex.getMessage())
+      case ex: Exception => Left(s"${ex.getClass().getName()}:${ex.getMessage()}")
     }
+    
   }
 }
 
-case class ZipArchive(zipFile: File) extends Archive {
-
-  def name = zipFile.getPath()
+case class ZipArchive(path: Path) extends Archive {
 
   def visit(visitor: Visitor) = {
     val zis: ZipInputStream = new ZipInputStream(
-      new FileInputStream(zipFile)
+      FileSystem.open(path)
     );
 
     var ze: ZipEntry = zis.getNextEntry();

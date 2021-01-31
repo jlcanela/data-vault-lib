@@ -1,9 +1,15 @@
+.bloop
+.coursier
+.ensime
+.ensime_cache
+.metals
+.semanticgraphs
 .vscode
 
-.bloop
-.metals
 target
 project/project
 
 /data
 /out
+
+*.log

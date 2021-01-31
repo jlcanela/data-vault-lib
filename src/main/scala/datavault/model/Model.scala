@@ -1,25 +1,25 @@
-package datavault
+package datavault.model
 
-import archive.Archive
-import archive.Visitor
-import archive.FileInfo
-
-import file.CsvFile
+import java.io._
+import java.nio.file.Path
 
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.native.Serialization
 import org.json4s.native.Serialization.{read, write, writePretty}
 import org.json4s.native.JsonMethods._
-import java.io.File
-import java.io.FileWriter
+
+import datavault.archive.{Archive, FileInfo, Visitor}
+import datavault.file.CsvFile
+import datavault.io.FileSystem
+
 
 object Model {
 
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  def fromFile(modelFile: File) = {
-    val content = scala.io.Source.fromFile(modelFile).getLines().mkString("\n")
+  def load(path: Path) = {
+    val content = FileSystem.readContent(path)
     val model   = read[Model](content)
     model
   }
@@ -35,15 +35,22 @@ object Model {
           .toSeq
           .map(_.replaceAll("\"", ""))
           .map(Column)
-        tables = Table(info.name, archive.name, info.filename, columns) :: tables
+        tables = Table(info.name, archive.path.toString, info.filename, columns) :: tables
       }
     })
 
     Model(tables.map(table => (table.name, table)).toMap)
   }
 
-  def save(model: Model, file: File) = {
-    val writer = new FileWriter(file);
+  def withArchive(archive: Archive) = {
+    import zio._
+    //Model.withArchive(new ZipArchive(input)
+    val model = fromArchive(archive)
+    ZIO.succeed(model)
+  }
+
+  def save(model: Model, path: Path, pretty: Boolean = true) = {
+    val writer = FileSystem.writer(path)
     writePretty(model, writer)
     writer.close()
   }
@@ -65,40 +72,7 @@ case class Table(
     archive: String,
     path: String,
     columns: Seq[Column]
-) {}
+)
 
 case class Column(name: String)
 
-case class Hub(name: String, table: String, source: String, key: Column)
-case class HubConfig(hubs: Seq[Hub])
-
-object HubConfig {
-
-  implicit val formats = Serialization.formats(NoTypeHints)
-
-  val R = "olist_([a-z]*)?s_dataset".r
-  def detectName(table: String) = table match {
-    case R(name) => Some(name)
-    case _ => {
-      println(s"""failed $table""")
-      None
-    }
-  }
-
-  def detectKey(name: String, keys: Seq[Column]) =
-    keys.find(_.name == s"${name}_id")
-
-  def fromTable(table: Table) = for {
-    name <- detectName(table.name)
-    key  <- detectKey(name, table.columns)
-  } yield Hub(name, table.name, table.path, key)
-
-  def fromModel(model: Model) = HubConfig(model.tables.values.toSeq.flatMap(fromTable))
-
-  def save(hubConfig: HubConfig, file: File) = {
-    val writer = new FileWriter(file);
-    writePretty(hubConfig, writer)
-    writer.close()
-  }
-
-}

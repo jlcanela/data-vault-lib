@@ -1,9 +1,8 @@
 package features
 
-import picocli.CommandLine
-import datavault.DataVaultCli
-import datavault.extractor.Extractor
 import java.io.File
+
+import picocli.CommandLine
 
 import org.json4s.native.Serialization.{read, write, writePretty}
 import org.json4s.DefaultFormats
@@ -13,14 +12,16 @@ import org.json4s.native.Serialization
 import org.json4s.native.Serialization.{read, write, writePretty}
 import org.json4s.native.JsonMethods._
 
-import datavault.extractor.FileExtractionStatus
+import datavault.DataVaultCli
+import datavault.extractor.{Extractor, FileExtractionStatus}
+
 
 trait RunHelper {
 
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  def runCommand(command: String) =
-    new CommandLine(new DataVaultCli()).execute(command.split(" ").tail: _*)
+  def parseCommand(command: String) = command.split(" ").tail
+  def runCommand(command: String) = datavault.DataVault.main(parseCommand(command))
 
   def readFile(file: String) =
     scala.io.Source.fromFile(file).getLines().mkString("\n")
