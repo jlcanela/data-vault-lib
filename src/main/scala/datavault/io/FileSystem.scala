@@ -8,7 +8,6 @@ trait FileSystem {
   def create(path: Path): OutputStream
 }
 
-// def localFileSystem: ZIO[Blocking, Exception, FileSystem] =
 object LocalFileSystem extends FileSystem {
   def open(path: Path) = java.nio.file.Files.newInputStream(path)
   def create(path: Path) = java.nio.file.Files.newOutputStream(path)

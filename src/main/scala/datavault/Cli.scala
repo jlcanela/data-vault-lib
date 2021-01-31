@@ -4,19 +4,6 @@ import scopt.OParser
 
 import java.nio.file.{Path, Paths}
 
-/*
- override def call(): Int = command match {
-    case "extract-files" =>
-      DVCommand.extractFiles(input = inputFile, output = outputFile)
-    case "generate-raw-model" =>
-      DVCommand.generateRawModel(input = inputFile, output = outputFile)
-    case "generate-raw-model-f" =>
-      DVCommand.generateRawModelF(input = inputFile, output = outputFile)
-    case "generate-hub-config-template" =>
-      DVCommand.generateHubConfigTemplate(input = inputFile, output = outputFile)
-    case "load-hub" =>
-      DVCommand.loadHubs(modelFile = dataModelFile, hubFile = hubConfigFile)
-*/
 
 sealed trait Cmd
 object NoCmd extends Cmd

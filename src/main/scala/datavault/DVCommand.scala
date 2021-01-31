@@ -7,7 +7,7 @@ import datavault.extractor.Extractor
 import datavault.model.{HubConfig, Model}
 import org.yaml.snakeyaml.scanner.Constant
 
-object DVCommand {
+object Command {
 
   import zio._
 
@@ -22,26 +22,18 @@ object DVCommand {
     val archive    = new ZipArchive(input)
     val result     = Extractor.extract(archive, output)
     val errorFound = result.exists(_.error.isDefined)
-    if (errorFound) {
-      Constants.ExtractionError
-    } else {
-      Constants.Success
-    }
   }
 
   def generateHubConfigTemplate(input: Path, output: Path) = {
     val model             = Model.load(input)
     val hubConfigTemplate = HubConfig.fromModel(model)
     HubConfig.save(hubConfigTemplate, output)
-    Constants.Success
   }
 
   def loadHubs(modelFile: Path, hubFile: Path) = {
     val model = Model.load(modelFile)
     val hubconfig = HubConfig.load(hubFile)
     val hub = hubconfig.hubs(0)
-    println(hub)
-    Constants.Success
   }
 
   import zio._

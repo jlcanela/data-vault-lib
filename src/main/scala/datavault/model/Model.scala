@@ -54,17 +54,8 @@ object Model {
     writePretty(model, writer)
     writer.close()
   }
-
-  /*
-  def asJson(model: Model) = write(model)
-
-  def diff(a: Model, b: Model): Diff = {
-    val jsonA = parse(asJson(a))
-    val jsonB = parse(asJson(b))
-    jsonA diff jsonB
-  }*/
-
 }
+
 case class Model(tables: Map[String, Table])
 
 case class Table(

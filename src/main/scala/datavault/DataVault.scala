@@ -17,6 +17,5 @@ object DataVault {
     val runtime = Runtime.default
 
     runtime.unsafeRun(task)
-
   }
 }
