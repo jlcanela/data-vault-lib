@@ -10,7 +10,6 @@ import picocli.CommandLine
 import datavault._
 import extractor._
 
-
 class ExtractFilesFromZipArchive
     extends AnyFeatureSpec
     with Matchers
@@ -31,14 +30,12 @@ class ExtractFilesFromZipArchive
       runCommand(command)
 
       Then(s"""execution is successful""")
-     // withClue(s"return value exitCode =") { exitCode shouldBe Constants.Success }
+      // withClue(s"return value exitCode =") { exitCode shouldBe Constants.Success }
 
       And(s"""all files are extracted in """)
       val current: Array[FileExtractionStatus] = listFiles(staging)
-      val expected = readFileExtractionStatus(zipContent)
+      val expected                             = readFileExtractionStatus(zipContent)
       current.sorted should contain theSameElementsAs expected.sorted
     }
   }
 }
-
-

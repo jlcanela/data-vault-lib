@@ -36,14 +36,13 @@
 </span>12 <span style=''>
 </span>13 <span style=''>object DataVault {
 </span>14 <span style=''>  def main(args: Array[String]): Unit = {
-</span>15 <span style=''>    val cmd = </span><span style='background: #AEF1AE'>Cli.parse(args)</span><span style=''>
-</span>16 <span style=''>    val task: Task[_] = </span><span style='background: #AEF1AE'>DVCommand.toZio(cmd)</span><span style=''>
-</span>17 <span style=''>    val runtime = Runtime.default
+</span>15 <span style=''>    val cmd           = </span><span style='background: #AEF1AE'>Cli.parse(args)</span><span style=''>
+</span>16 <span style=''>    val task: Task[_] = </span><span style='background: #AEF1AE'>Command.toZio(cmd)</span><span style=''>
+</span>17 <span style=''>    val runtime       = Runtime.default
 </span>18 <span style=''>
 </span>19 <span style=''>    </span><span style='background: #AEF1AE'>runtime.unsafeRun(task)</span><span style=''>
-</span>20 <span style=''>
-</span>21 <span style=''>  }
-</span>22 <span style=''>}
+</span>20 <span style=''>  }
+</span>21 <span style=''>}
 </span></pre>
           </div>
           <div class="tab-pane" id="statementlist">
@@ -60,12 +59,12 @@
           15
         </td>
         <td>
-          88
+          89
         </td>
         <td>
-          296
+          306
           -
-          311
+          321
         </td>
         <td>
           Apply
@@ -81,33 +80,33 @@
           16
         </td>
         <td>
-          89
+          90
         </td>
         <td>
-          336
+          346
           -
-          356
+          364
         </td>
         <td>
           Apply
         </td>
         <td>
-          datavault.DVCommand.toZio
+          datavault.Command.toZio
         </td>
         <td style="background: #AEF1AE">
-          DVCommand.toZio(cmd)
+          Command.toZio(cmd)
         </td>
       </tr><tr>
         <td>
           19
         </td>
         <td>
-          91
+          92
         </td>
         <td>
-          413
+          427
           -
-          413
+          427
         </td>
         <td>
           Literal
@@ -123,12 +122,12 @@
           19
         </td>
         <td>
-          90
+          91
         </td>
         <td>
-          396
+          410
           -
-          419
+          433
         </td>
         <td>
           Apply

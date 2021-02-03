@@ -32,36 +32,35 @@
 </span>8 <span style=''>  def create(path: Path): OutputStream
 </span>9 <span style=''>}
 </span>10 <span style=''>
-</span>11 <span style=''>// def localFileSystem: ZIO[Blocking, Exception, FileSystem] =
-</span>12 <span style=''>object LocalFileSystem extends FileSystem {
-</span>13 <span style=''>  def open(path: Path) = </span><span style='background: #AEF1AE'>java.nio.file.Files.newInputStream(path)</span><span style=''>
-</span>14 <span style=''>  def create(path: Path) = </span><span style='background: #AEF1AE'>java.nio.file.Files.newOutputStream(path)</span><span style=''>
-</span>15 <span style=''>}
-</span>16 <span style=''>
-</span>17 <span style=''>object FileSystem {
-</span>18 <span style=''>
-</span>19 <span style=''>  def get(path: Path) = LocalFileSystem
-</span>20 <span style=''>  def open(path: Path) = {
-</span>21 <span style=''>    val fs = </span><span style='background: #AEF1AE'>get(path)</span><span style=''>
-</span>22 <span style=''>    </span><span style='background: #AEF1AE'>fs.open(path)</span><span style=''>
-</span>23 <span style=''>  }
-</span>24 <span style=''>  def readContent(path: Path) =  {
-</span>25 <span style=''>    val is: InputStream = </span><span style='background: #AEF1AE'>FileSystem.open(path)</span><span style=''>
-</span>26 <span style=''>    val content = </span><span style='background: #AEF1AE'>scala.io.Source.fromInputStream(is).getLines().mkString(&quot;\n&quot;)</span><span style=''>
-</span>27 <span style=''>    </span><span style='background: #AEF1AE'>is.close()</span><span style=''>
-</span>28 <span style=''>    content
-</span>29 <span style=''>  }
-</span>30 <span style=''>  def create(path: Path) = {
-</span>31 <span style=''>    val fs = </span><span style='background: #AEF1AE'>get(path)</span><span style=''>
-</span>32 <span style=''>    </span><span style='background: #AEF1AE'>fs.create(path)</span><span style=''>
-</span>33 <span style=''>  }
-</span>34 <span style=''>
-</span>35 <span style=''>  def writer(path: Path) = {
-</span>36 <span style=''>    val os: OutputStream = </span><span style='background: #AEF1AE'>create(path)</span><span style=''>
-</span>37 <span style=''>    </span><span style='background: #AEF1AE'>new BufferedWriter(new OutputStreamWriter(os))</span><span style=''>
-</span>38 <span style=''>  }
-</span>39 <span style=''>
-</span>40 <span style=''>}
+</span>11 <span style=''>object LocalFileSystem extends FileSystem {
+</span>12 <span style=''>  def open(path: Path)   = </span><span style='background: #AEF1AE'>java.nio.file.Files.newInputStream(path)</span><span style=''>
+</span>13 <span style=''>  def create(path: Path) = </span><span style='background: #AEF1AE'>java.nio.file.Files.newOutputStream(path)</span><span style=''>
+</span>14 <span style=''>}
+</span>15 <span style=''>
+</span>16 <span style=''>object FileSystem {
+</span>17 <span style=''>
+</span>18 <span style=''>  def get(path: Path) = LocalFileSystem
+</span>19 <span style=''>  def open(path: Path) = {
+</span>20 <span style=''>    val fs = </span><span style='background: #AEF1AE'>get(path)</span><span style=''>
+</span>21 <span style=''>    </span><span style='background: #AEF1AE'>fs.open(path)</span><span style=''>
+</span>22 <span style=''>  }
+</span>23 <span style=''>  def readContent(path: Path) = {
+</span>24 <span style=''>    val is: InputStream = </span><span style='background: #AEF1AE'>FileSystem.open(path)</span><span style=''>
+</span>25 <span style=''>    val content         = </span><span style='background: #AEF1AE'>scala.io.Source.fromInputStream(is).getLines().mkString(&quot;\n&quot;)</span><span style=''>
+</span>26 <span style=''>    </span><span style='background: #AEF1AE'>is.close()</span><span style=''>
+</span>27 <span style=''>    content
+</span>28 <span style=''>  }
+</span>29 <span style=''>  def create(path: Path) = {
+</span>30 <span style=''>    val fs = </span><span style='background: #AEF1AE'>get(path)</span><span style=''>
+</span>31 <span style=''>    </span><span style='background: #AEF1AE'>fs.create(path)</span><span style=''>
+</span>32 <span style=''>  }
+</span>33 <span style=''>
+</span>34 <span style=''>  def writer(path: Path) = {
+</span>35 <span style=''>    val os: OutputStream = </span><span style='background: #AEF1AE'>create(path)</span><span style=''>
+</span>36 <span style=''>    </span><span style='background: #AEF1AE'>new BufferedWriter(new OutputStreamWriter(os))</span><span style=''>
+</span>37 <span style=''>  }
+</span>38 <span style=''>
+</span>39 <span style=''>}
 </span></pre>
           </div>
           <div class="tab-pane" id="statementlist">
@@ -75,15 +74,15 @@
         <th>Code</th>
       </tr><tr>
         <td>
-          13
+          12
         </td>
         <td>
-          157
+          192
         </td>
         <td>
-          357
+          296
           -
-          397
+          336
         </td>
         <td>
           Apply
@@ -96,15 +95,15 @@
         </td>
       </tr><tr>
         <td>
-          14
+          13
         </td>
         <td>
-          158
+          193
         </td>
         <td>
-          425
+          364
           -
-          466
+          405
         </td>
         <td>
           Apply
@@ -117,15 +116,15 @@
         </td>
       </tr><tr>
         <td>
-          21
+          20
         </td>
         <td>
-          159
+          194
         </td>
         <td>
-          571
+          510
           -
-          580
+          519
         </td>
         <td>
           Apply
@@ -138,15 +137,15 @@
         </td>
       </tr><tr>
         <td>
-          22
+          21
         </td>
         <td>
-          160
+          195
         </td>
         <td>
-          585
+          524
           -
-          598
+          537
         </td>
         <td>
           Apply
@@ -159,15 +158,15 @@
         </td>
       </tr><tr>
         <td>
-          25
+          24
         </td>
         <td>
-          161
+          196
         </td>
         <td>
-          664
+          602
           -
-          685
+          623
         </td>
         <td>
           Apply
@@ -180,15 +179,15 @@
         </td>
       </tr><tr>
         <td>
-          26
+          25
         </td>
         <td>
-          162
+          197
         </td>
         <td>
-          704
+          650
           -
-          765
+          711
         </td>
         <td>
           Apply
@@ -201,15 +200,15 @@
         </td>
       </tr><tr>
         <td>
-          27
+          26
         </td>
         <td>
-          163
+          198
         </td>
         <td>
-          770
+          716
           -
-          780
+          726
         </td>
         <td>
           Apply
@@ -222,15 +221,15 @@
         </td>
       </tr><tr>
         <td>
-          31
+          30
         </td>
         <td>
-          164
+          199
         </td>
         <td>
-          839
+          785
           -
-          848
+          794
         </td>
         <td>
           Apply
@@ -243,15 +242,15 @@
         </td>
       </tr><tr>
         <td>
-          32
+          31
         </td>
         <td>
-          165
+          200
         </td>
         <td>
-          853
+          799
           -
-          868
+          814
         </td>
         <td>
           Apply
@@ -264,15 +263,15 @@
         </td>
       </tr><tr>
         <td>
-          36
+          35
         </td>
         <td>
-          166
+          201
         </td>
         <td>
-          930
+          876
           -
-          942
+          888
         </td>
         <td>
           Apply
@@ -285,15 +284,15 @@
         </td>
       </tr><tr>
         <td>
-          37
+          36
         </td>
         <td>
-          167
+          202
         </td>
         <td>
-          966
+          912
           -
-          992
+          938
         </td>
         <td>
           Apply
@@ -306,15 +305,15 @@
         </td>
       </tr><tr>
         <td>
-          37
+          36
         </td>
         <td>
-          168
+          203
         </td>
         <td>
-          947
+          893
           -
-          993
+          939
         </td>
         <td>
           Apply

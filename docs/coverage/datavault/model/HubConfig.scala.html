@@ -35,43 +35,48 @@
 </span>11 <span style=''>
 </span>12 <span style=''>import datavault.io.FileSystem
 </span>13 <span style=''>
-</span>14 <span style=''>case class Hub(name: String, table: String, source: String, key: Column)
-</span>15 <span style=''>case class HubConfig(hubs: Seq[Hub])
-</span>16 <span style=''>
-</span>17 <span style=''>object HubConfig {
-</span>18 <span style=''>
-</span>19 <span style=''>  implicit val formats = </span><span style='background: #AEF1AE'>Serialization.formats(NoTypeHints)</span><span style=''>
-</span>20 <span style=''>
-</span>21 <span style=''>  val R = </span><span style='background: #AEF1AE'>&quot;olist_([a-z]*)?s_dataset&quot;.r</span><span style=''>
-</span>22 <span style=''>  def detectName(table: String) = table match {
-</span>23 <span style=''>    case R(name) =&gt; </span><span style='background: #AEF1AE'>Some(name)</span><span style=''>
-</span>24 <span style=''>    case _ =&gt; </span><span style='background: #AEF1AE'>None</span><span style=''>
-</span>25 <span style=''>  }
-</span>26 <span style=''>
-</span>27 <span style=''>  def detectKey(name: String, keys: Seq[Column]) =
-</span>28 <span style=''>    </span><span style='background: #AEF1AE'>keys.find(_.name == s&quot;${name}_id&quot;)</span><span style=''>
-</span>29 <span style=''>
-</span>30 <span style=''>  def fromTable(table: Table) = </span><span style='background: #AEF1AE'>for {
-</span>31 <span style=''></span><span style='background: #AEF1AE'>    name &lt;- detectName(table.name)
-</span>32 <span style=''></span><span style='background: #AEF1AE'>    key  &lt;- detectKey(name, table.columns)
-</span>33 <span style=''></span><span style='background: #AEF1AE'>  } yield Hub(name, table.name, table.path, key)</span><span style=''>
+</span>14 <span style=''>
+</span>15 <span style=''>case class Hub(name: String, table: String, source: String, key: Column)
+</span>16 <span style=''>case class HubsConfig(prefix: String, suffix: String)
+</span>17 <span style=''>case class Hubs(config: Option[HubsConfig], hubs: Seq[Hub]) {
+</span>18 <span style=''>   def tablesToProcess = </span><span style='background: #F0ADAD'>hubs.map(_.table).toSet</span><span style=''>
+</span>19 <span style=''>   def withTableName(name: String) = </span><span style='background: #AEF1AE'>hubs.find(_.table == name)</span><span style=''>
+</span>20 <span style=''>}
+</span>21 <span style=''>
+</span>22 <span style=''>object HubConfig {
+</span>23 <span style=''>
+</span>24 <span style=''>  implicit val formats = </span><span style='background: #AEF1AE'>Serialization.formats(NoTypeHints)</span><span style=''>
+</span>25 <span style=''>
+</span>26 <span style=''>  val R = </span><span style='background: #AEF1AE'>&quot;olist_([a-z]*)?s_dataset&quot;.r</span><span style=''>
+</span>27 <span style=''>  def detectName(table: String) = table match {
+</span>28 <span style=''>    case R(name) =&gt; </span><span style='background: #AEF1AE'>Some(name)</span><span style=''>
+</span>29 <span style=''>    case _       =&gt; </span><span style='background: #AEF1AE'>None</span><span style=''>
+</span>30 <span style=''>  }
+</span>31 <span style=''>
+</span>32 <span style=''>  def detectKey(name: String, keys: Seq[Column]) =
+</span>33 <span style=''>    </span><span style='background: #AEF1AE'>keys.find(_.name == s&quot;${name}_id&quot;)</span><span style=''>
 </span>34 <span style=''>
-</span>35 <span style=''>  def fromModel(model: Model) = </span><span style='background: #AEF1AE'>HubConfig(model.tables.values.toSeq.flatMap(fromTable))</span><span style=''>
-</span>36 <span style=''>
-</span>37 <span style=''>  def load(path: Path) = {
-</span>38 <span style=''>    val is = </span><span style='background: #AEF1AE'>FileSystem.open(path)</span><span style=''>
-</span>39 <span style=''>    val content = </span><span style='background: #AEF1AE'>scala.io.Source.fromInputStream(is).getLines().mkString(&quot;\n&quot;)</span><span style=''>
-</span>40 <span style=''>    val hubConfig   = </span><span style='background: #AEF1AE'>read[HubConfig](content)</span><span style=''>
-</span>41 <span style=''>    hubConfig
-</span>42 <span style=''>  }
-</span>43 <span style=''>  
-</span>44 <span style=''>  def save(hubConfig: HubConfig, path: Path) = {
-</span>45 <span style=''>    val writer = </span><span style='background: #AEF1AE'>FileSystem.writer(path)</span><span style=''>
-</span>46 <span style=''>    </span><span style='background: #AEF1AE'>writePretty(hubConfig, writer)</span><span style=''>
-</span>47 <span style=''>    </span><span style='background: #AEF1AE'>writer.close()</span><span style=''>
-</span>48 <span style=''>  }
-</span>49 <span style=''>
-</span>50 <span style=''>}
+</span>35 <span style=''>  def fromTable(table: Table) = </span><span style='background: #AEF1AE'>for {
+</span>36 <span style=''></span><span style='background: #AEF1AE'>    name &lt;- detectName(table.name)
+</span>37 <span style=''></span><span style='background: #AEF1AE'>    key  &lt;- detectKey(name, table.columns)
+</span>38 <span style=''></span><span style='background: #AEF1AE'>  } yield Hub(name, table.name, table.path, key)</span><span style=''>
+</span>39 <span style=''>
+</span>40 <span style=''>  def fromModel(model: Model) = </span><span style='background: #AEF1AE'>Hubs(None, model.tables.values.toSeq.flatMap(fromTable))</span><span style=''>
+</span>41 <span style=''>
+</span>42 <span style=''>  def load(path: Path) = {
+</span>43 <span style=''>    val is        = </span><span style='background: #AEF1AE'>FileSystem.open(path)</span><span style=''>
+</span>44 <span style=''>    val content   = </span><span style='background: #AEF1AE'>scala.io.Source.fromInputStream(is).getLines().mkString(&quot;\n&quot;)</span><span style=''>
+</span>45 <span style=''>    val hubs = </span><span style='background: #AEF1AE'>read[Hubs](content)</span><span style=''>
+</span>46 <span style=''>    hubs
+</span>47 <span style=''>  }
+</span>48 <span style=''>
+</span>49 <span style=''>  def save(hubs: Hubs, path: Path) = {
+</span>50 <span style=''>    val writer = </span><span style='background: #AEF1AE'>FileSystem.writer(path)</span><span style=''>
+</span>51 <span style=''>    </span><span style='background: #AEF1AE'>writePretty(hubs, writer)</span><span style=''>
+</span>52 <span style=''>    </span><span style='background: #AEF1AE'>writer.close()</span><span style=''>
+</span>53 <span style=''>  }
+</span>54 <span style=''>
+</span>55 <span style=''>}
 </span></pre>
           </div>
           <div class="tab-pane" id="statementlist">
@@ -85,15 +90,120 @@
         <th>Code</th>
       </tr><tr>
         <td>
+          18
+        </td>
+        <td>
+          205
+        </td>
+        <td>
+          517
+          -
+          517
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.collection.Seq.canBuildFrom
+        </td>
+        <td style="background: #F0ADAD">
+          collection.this.Seq.canBuildFrom[String]
+        </td>
+      </tr><tr>
+        <td>
+          18
+        </td>
+        <td>
+          204
+        </td>
+        <td>
+          518
+          -
+          525
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.model.Hub.table
+        </td>
+        <td style="background: #F0ADAD">
+          x$1.table
+        </td>
+      </tr><tr>
+        <td>
+          18
+        </td>
+        <td>
+          206
+        </td>
+        <td>
+          509
+          -
+          532
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.collection.TraversableOnce.toSet
+        </td>
+        <td style="background: #F0ADAD">
+          Hubs.this.hubs.map[String, Seq[String]](((x$1: datavault.model.Hub) =&gt; x$1.table))(collection.this.Seq.canBuildFrom[String]).toSet[String]
+        </td>
+      </tr><tr>
+        <td>
           19
         </td>
         <td>
-          169
+          208
         </td>
         <td>
-          472
+          570
           -
-          483
+          596
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.collection.IterableLike.find
+        </td>
+        <td style="background: #AEF1AE">
+          Hubs.this.hubs.find(((x$2: datavault.model.Hub) =&gt; x$2.table.==(name)))
+        </td>
+      </tr><tr>
+        <td>
+          19
+        </td>
+        <td>
+          207
+        </td>
+        <td>
+          580
+          -
+          595
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.lang.Object.==
+        </td>
+        <td style="background: #AEF1AE">
+          x$2.table.==(name)
+        </td>
+      </tr><tr>
+        <td>
+          24
+        </td>
+        <td>
+          209
+        </td>
+        <td>
+          667
+          -
+          678
         </td>
         <td>
           Select
@@ -106,15 +216,15 @@
         </td>
       </tr><tr>
         <td>
-          19
+          24
         </td>
         <td>
-          170
+          210
         </td>
         <td>
-          450
+          645
           -
-          484
+          679
         </td>
         <td>
           Apply
@@ -127,36 +237,15 @@
         </td>
       </tr><tr>
         <td>
-          21
+          26
         </td>
         <td>
-          172
+          211
         </td>
         <td>
-          496
+          691
           -
-          524
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          scala.collection.immutable.StringLike.r
-        </td>
-        <td style="background: #AEF1AE">
-          scala.Predef.augmentString(&quot;olist_([a-z]*)?s_dataset&quot;).r
-        </td>
-      </tr><tr>
-        <td>
-          21
-        </td>
-        <td>
-          171
-        </td>
-        <td>
-          496
-          -
-          522
+          717
         </td>
         <td>
           Literal
@@ -169,15 +258,36 @@
         </td>
       </tr><tr>
         <td>
-          23
+          26
         </td>
         <td>
-          173
+          212
         </td>
         <td>
-          593
+          691
           -
-          603
+          719
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.collection.immutable.StringLike.r
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.augmentString(&quot;olist_([a-z]*)?s_dataset&quot;).r
+        </td>
+      </tr><tr>
+        <td>
+          28
+        </td>
+        <td>
+          213
+        </td>
+        <td>
+          788
+          -
+          798
         </td>
         <td>
           Apply
@@ -190,15 +300,15 @@
         </td>
       </tr><tr>
         <td>
-          24
+          29
         </td>
         <td>
-          174
+          214
         </td>
         <td>
-          618
+          819
           -
-          622
+          823
         </td>
         <td>
           Select
@@ -211,15 +321,36 @@
         </td>
       </tr><tr>
         <td>
-          28
+          33
         </td>
         <td>
-          176
+          217
         </td>
         <td>
-          693
+          884
           -
-          716
+          918
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.collection.IterableLike.find
+        </td>
+        <td style="background: #AEF1AE">
+          keys.find(((x$3: datavault.model.Column) =&gt; x$3.name.==(scala.StringContext.apply(&quot;&quot;, &quot;_id&quot;).s(name))))
+        </td>
+      </tr><tr>
+        <td>
+          33
+        </td>
+        <td>
+          216
+        </td>
+        <td>
+          894
+          -
+          917
         </td>
         <td>
           Apply
@@ -228,19 +359,19 @@
           java.lang.Object.==
         </td>
         <td style="background: #AEF1AE">
-          x$1.name.==(scala.StringContext.apply(&quot;&quot;, &quot;_id&quot;).s(name))
+          x$3.name.==(scala.StringContext.apply(&quot;&quot;, &quot;_id&quot;).s(name))
         </td>
       </tr><tr>
         <td>
-          28
+          33
         </td>
         <td>
-          175
+          215
         </td>
         <td>
-          703
+          904
           -
-          716
+          917
         </td>
         <td>
           Apply
@@ -253,36 +384,36 @@
         </td>
       </tr><tr>
         <td>
-          28
+          36
         </td>
         <td>
-          177
+          218
         </td>
         <td>
-          683
+          981
           -
-          717
+          991
         </td>
         <td>
-          Apply
+          Select
         </td>
         <td>
-          scala.collection.IterableLike.find
+          datavault.model.Table.name
         </td>
         <td style="background: #AEF1AE">
-          keys.find(((x$1: datavault.model.Column) =&gt; x$1.name.==(scala.StringContext.apply(&quot;&quot;, &quot;_id&quot;).s(name))))
+          table.name
         </td>
       </tr><tr>
         <td>
-          31
+          36
         </td>
         <td>
-          184
+          224
         </td>
         <td>
-          751
+          952
           -
-          883
+          1084
         </td>
         <td>
           Apply
@@ -295,36 +426,15 @@
         </td>
       </tr><tr>
         <td>
-          31
+          37
         </td>
         <td>
-          178
+          223
         </td>
         <td>
-          780
+          997
           -
-          790
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          datavault.model.Table.name
-        </td>
-        <td style="background: #AEF1AE">
-          table.name
-        </td>
-      </tr><tr>
-        <td>
-          32
-        </td>
-        <td>
-          183
-        </td>
-        <td>
-          796
-          -
-          883
+          1084
         </td>
         <td>
           Apply
@@ -337,15 +447,15 @@
         </td>
       </tr><tr>
         <td>
-          32
+          37
         </td>
         <td>
-          179
+          219
         </td>
         <td>
-          820
+          1021
           -
-          833
+          1034
         </td>
         <td>
           Select
@@ -358,57 +468,15 @@
         </td>
       </tr><tr>
         <td>
-          33
+          38
         </td>
         <td>
-          182
+          220
         </td>
         <td>
-          845
+          1056
           -
-          883
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          datavault.model.Hub.apply
-        </td>
-        <td style="background: #AEF1AE">
-          Hub.apply(name, table.name, table.path, key)
-        </td>
-      </tr><tr>
-        <td>
-          33
-        </td>
-        <td>
-          181
-        </td>
-        <td>
-          867
-          -
-          877
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          datavault.model.Table.path
-        </td>
-        <td style="background: #AEF1AE">
-          table.path
-        </td>
-      </tr><tr>
-        <td>
-          33
-        </td>
-        <td>
-          180
-        </td>
-        <td>
-          855
-          -
-          865
+          1066
         </td>
         <td>
           Select
@@ -421,80 +489,57 @@
         </td>
       </tr><tr>
         <td>
-          35
+          38
         </td>
         <td>
-          185
+          222
         </td>
         <td>
-          961
+          1046
           -
-          970
+          1084
         </td>
         <td>
           Apply
         </td>
         <td>
-          datavault.model.HubConfig.fromTable
+          datavault.model.Hub.apply
         </td>
         <td style="background: #AEF1AE">
-          HubConfig.this.fromTable(table)
+          Hub.apply(name, table.name, table.path, key)
         </td>
       </tr><tr>
         <td>
-          35
+          38
         </td>
         <td>
-          187
+          221
         </td>
         <td>
-          960
+          1068
           -
-          960
+          1078
         </td>
         <td>
-          TypeApply
+          Select
         </td>
         <td>
-          scala.collection.Seq.canBuildFrom
+          datavault.model.Table.path
         </td>
         <td style="background: #AEF1AE">
-          collection.this.Seq.canBuildFrom[datavault.model.Hub]
+          table.path
         </td>
       </tr><tr>
         <td>
-          35
+          40
         </td>
         <td>
-          189
+          227
         </td>
         <td>
-          917
+          1163
           -
-          972
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          datavault.model.HubConfig.apply
-        </td>
-        <td style="background: #AEF1AE">
-          HubConfig.apply(model.tables.values.toSeq.flatMap[datavault.model.Hub, Seq[datavault.model.Hub]]({
-  ((table: datavault.model.Table) =&gt; scala.this.Option.option2Iterable[datavault.model.Hub](HubConfig.this.fromTable(table)))
-})(collection.this.Seq.canBuildFrom[datavault.model.Hub]))
-        </td>
-      </tr><tr>
-        <td>
-          35
-        </td>
-        <td>
-          186
-        </td>
-        <td>
-          961
-          -
-          970
+          1172
         </td>
         <td>
           ApplyImplicitView
@@ -507,15 +552,36 @@
         </td>
       </tr><tr>
         <td>
-          35
+          40
         </td>
         <td>
-          188
+          226
         </td>
         <td>
-          927
+          1163
           -
-          971
+          1172
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.model.HubConfig.fromTable
+        </td>
+        <td style="background: #AEF1AE">
+          HubConfig.this.fromTable(table)
+        </td>
+      </tr><tr>
+        <td>
+          40
+        </td>
+        <td>
+          229
+        </td>
+        <td>
+          1129
+          -
+          1173
         </td>
         <td>
           ApplyToImplicitArgs
@@ -530,15 +596,80 @@
         </td>
       </tr><tr>
         <td>
-          38
+          40
         </td>
         <td>
-          190
+          225
         </td>
         <td>
-          1014
+          1123
           -
-          1035
+          1127
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.None
+        </td>
+        <td style="background: #AEF1AE">
+          scala.None
+        </td>
+      </tr><tr>
+        <td>
+          40
+        </td>
+        <td>
+          228
+        </td>
+        <td>
+          1162
+          -
+          1162
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.collection.Seq.canBuildFrom
+        </td>
+        <td style="background: #AEF1AE">
+          collection.this.Seq.canBuildFrom[datavault.model.Hub]
+        </td>
+      </tr><tr>
+        <td>
+          40
+        </td>
+        <td>
+          230
+        </td>
+        <td>
+          1118
+          -
+          1174
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.model.Hubs.apply
+        </td>
+        <td style="background: #AEF1AE">
+          Hubs.apply(scala.None, model.tables.values.toSeq.flatMap[datavault.model.Hub, Seq[datavault.model.Hub]]({
+  ((table: datavault.model.Table) =&gt; scala.this.Option.option2Iterable[datavault.model.Hub](HubConfig.this.fromTable(table)))
+})(collection.this.Seq.canBuildFrom[datavault.model.Hub]))
+        </td>
+      </tr><tr>
+        <td>
+          43
+        </td>
+        <td>
+          231
+        </td>
+        <td>
+          1223
+          -
+          1244
         </td>
         <td>
           Apply
@@ -551,15 +682,15 @@
         </td>
       </tr><tr>
         <td>
-          39
+          44
         </td>
         <td>
-          191
+          232
         </td>
         <td>
-          1054
+          1265
           -
-          1115
+          1326
         </td>
         <td>
           Apply
@@ -572,15 +703,15 @@
         </td>
       </tr><tr>
         <td>
-          40
+          45
         </td>
         <td>
-          194
+          235
         </td>
         <td>
-          1138
+          1342
           -
-          1162
+          1361
         </td>
         <td>
           ApplyToImplicitArgs
@@ -589,19 +720,19 @@
           org.json4s.Serialization.read
         </td>
         <td style="background: #AEF1AE">
-          org.json4s.native.Serialization.read[datavault.model.HubConfig](content)(HubConfig.this.formats, scala.reflect.ManifestFactory.classType[datavault.model.HubConfig](classOf[datavault.model.HubConfig]))
+          org.json4s.native.Serialization.read[datavault.model.Hubs](content)(HubConfig.this.formats, scala.reflect.ManifestFactory.classType[datavault.model.Hubs](classOf[datavault.model.Hubs]))
         </td>
       </tr><tr>
         <td>
-          40
+          45
         </td>
         <td>
-          193
+          234
         </td>
         <td>
-          1153
+          1352
           -
-          1153
+          1352
         </td>
         <td>
           Apply
@@ -610,19 +741,19 @@
           scala.reflect.ManifestFactory.classType
         </td>
         <td style="background: #AEF1AE">
-          scala.reflect.ManifestFactory.classType[datavault.model.HubConfig](classOf[datavault.model.HubConfig])
+          scala.reflect.ManifestFactory.classType[datavault.model.Hubs](classOf[datavault.model.Hubs])
         </td>
       </tr><tr>
         <td>
-          40
+          45
         </td>
         <td>
-          192
+          233
         </td>
         <td>
-          1153
+          1352
           -
-          1153
+          1352
         </td>
         <td>
           Select
@@ -635,15 +766,15 @@
         </td>
       </tr><tr>
         <td>
-          45
+          50
         </td>
         <td>
-          195
+          236
         </td>
         <td>
-          1250
+          1432
           -
-          1273
+          1455
         </td>
         <td>
           Apply
@@ -656,15 +787,36 @@
         </td>
       </tr><tr>
         <td>
-          46
+          51
         </td>
         <td>
-          196
+          238
         </td>
         <td>
-          1289
+          1460
           -
-          1289
+          1485
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          org.json4s.native.Serialization.writePretty
+        </td>
+        <td style="background: #AEF1AE">
+          org.json4s.native.Serialization.writePretty[datavault.model.Hubs, java.io.BufferedWriter](hubs, writer)(HubConfig.this.formats)
+        </td>
+      </tr><tr>
+        <td>
+          51
+        </td>
+        <td>
+          237
+        </td>
+        <td>
+          1471
+          -
+          1471
         </td>
         <td>
           Select
@@ -677,36 +829,15 @@
         </td>
       </tr><tr>
         <td>
-          46
+          52
         </td>
         <td>
-          197
+          239
         </td>
         <td>
-          1278
+          1490
           -
-          1308
-        </td>
-        <td>
-          ApplyToImplicitArgs
-        </td>
-        <td>
-          org.json4s.native.Serialization.writePretty
-        </td>
-        <td style="background: #AEF1AE">
-          org.json4s.native.Serialization.writePretty[datavault.model.HubConfig, java.io.BufferedWriter](hubConfig, writer)(HubConfig.this.formats)
-        </td>
-      </tr><tr>
-        <td>
-          47
-        </td>
-        <td>
-          198
-        </td>
-        <td>
-          1313
-          -
-          1327
+          1504
         </td>
         <td>
           Apply
