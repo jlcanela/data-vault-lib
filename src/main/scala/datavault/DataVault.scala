@@ -12,9 +12,9 @@ import zio._
 
 object DataVault {
   def main(args: Array[String]): Unit = {
-    val cmd = Cli.parse(args)
-    val task: Task[_] = DVCommand.toZio(cmd)
-    val runtime = Runtime.default
+    val cmd           = Cli.parse(args)
+    val task: Task[_] = Command.toZio(cmd)
+    val runtime       = Runtime.default
 
     runtime.unsafeRun(task)
   }

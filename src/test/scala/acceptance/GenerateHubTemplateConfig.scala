@@ -12,7 +12,7 @@ import org.json4s.JsonAST.JNull
 import org.json4s.JsonAST.JNothing
 import org.json4s.native.Serialization.{read, write, writePretty}
 
-import datavault.{Constants, DataVault, DataVaultCli}
+import datavault.{DataVault, DataVaultCli}
 import datavault.extractor.{Extractor, FileExtractionStatus}
 
 class GenerateHubTemplateConfig

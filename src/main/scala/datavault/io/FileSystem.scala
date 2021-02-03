@@ -9,7 +9,7 @@ trait FileSystem {
 }
 
 object LocalFileSystem extends FileSystem {
-  def open(path: Path) = java.nio.file.Files.newInputStream(path)
+  def open(path: Path)   = java.nio.file.Files.newInputStream(path)
   def create(path: Path) = java.nio.file.Files.newOutputStream(path)
 }
 
@@ -20,9 +20,9 @@ object FileSystem {
     val fs = get(path)
     fs.open(path)
   }
-  def readContent(path: Path) =  {
+  def readContent(path: Path) = {
     val is: InputStream = FileSystem.open(path)
-    val content = scala.io.Source.fromInputStream(is).getLines().mkString("\n")
+    val content         = scala.io.Source.fromInputStream(is).getLines().mkString("\n")
     is.close()
     content
   }

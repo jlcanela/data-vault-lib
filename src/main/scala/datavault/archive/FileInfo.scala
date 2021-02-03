@@ -9,5 +9,6 @@ trait FileInfo {
   def name: String
   def filename: String
   def inputStream: InputStream
+  def size: Long
   def writeTo(path: Path): Either[String, Unit]
 }
