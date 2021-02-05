@@ -27,7 +27,7 @@ object Command {
   // Module implementation
   val command: ZLayer[Repository, Nothing, Command] = ZLayer.succeed {
     new Service {
-      import Repository.repository
+     
       import datavault.service.Models.Source
 
       def genModel(input: Path, output: Path) : ZIO[Repository, Throwable, Unit]= for {

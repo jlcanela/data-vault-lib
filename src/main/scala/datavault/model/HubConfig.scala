@@ -11,13 +11,7 @@ import org.json4s.native.JsonMethods._
 
 import datavault.io.FileSystem
 
-
-case class Hub(name: String, table: String, source: String, key: Column)
-case class HubsConfig(prefix: String, suffix: String)
-case class Hubs(config: Option[HubsConfig], hubs: Seq[Hub]) {
-   def tablesToProcess = hubs.map(_.table).toSet
-   def withTableName(name: String) = hubs.find(_.table == name)
-}
+import datavault.service.Models._ 
 
 object HubConfig {
 
@@ -37,19 +31,6 @@ object HubConfig {
     key  <- detectKey(name, table.columns)
   } yield Hub(name, table.name, table.path, key)
 
-  def fromModel(model: Model) = Hubs(None, model.tables.values.toSeq.flatMap(fromTable))
-
-  def load(path: Path) = {
-    val is        = FileSystem.open(path)
-    val content   = scala.io.Source.fromInputStream(is).getLines().mkString("\n")
-    val hubs = read[Hubs](content)
-    hubs
-  }
-
-  def save(hubs: Hubs, path: Path) = {
-    val writer = FileSystem.writer(path)
-    writePretty(hubs, writer)
-    writer.close()
-  }
+  def fromSource(source: Source) = Hubs(None, source.tables.values.toSeq.flatMap(fromTable))
 
 }

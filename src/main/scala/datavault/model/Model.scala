@@ -12,6 +12,7 @@ import org.json4s.native.JsonMethods._
 import datavault.archive.{Archive, FileInfo, Visitor}
 import datavault.file.CsvFile
 import datavault.io.FileSystem
+import datavault.service.Models._
 
 object Model {
 
@@ -32,26 +33,4 @@ object Model {
     Source(tables.map(table => (table.name, table)).toMap)
   }
 
-  def withArchive(archive: Archive) = {
-    import zio._
-
-    val model = fromArchive(archive)
-    ZIO.succeed(model)
-  }
-  def save(model: Source, path: Path, pretty: Boolean = true) = {
-    val writer = FileSystem.writer(path)
-    writePretty(model, writer)
-    writer.close()
-  }
 }
-
-case class Model(tables: Map[String, Table])
-
-case class Table(
-    name: String,
-    archive: String,
-    path: String,
-    columns: Seq[Column]
-)
-
-case class Column(name: String)

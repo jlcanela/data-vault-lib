@@ -72,7 +72,7 @@
 </span>48 <span style=''></span><span style='background: #AEF1AE'>        .toList</span><span style=''>
 </span>49 <span style=''>
 </span>50 <span style=''>    } catch {
-</span>51 <span style=''>      case ex: Exception =&gt; Error(ex.getMessage) </span><span style='background: #AEF1AE'>:: Nil</span><span style=''>
+</span>51 <span style=''>      case ex: Exception =&gt; Error(ex.getMessage) </span><span style='background: #F0ADAD'>:: Nil</span><span style=''>
 </span>52 <span style=''>    }
 </span>53 <span style=''>
 </span>54 <span style=''>  }
@@ -99,7 +99,7 @@
           19
         </td>
         <td>
-          128
+          103
         </td>
         <td>
           398
@@ -112,7 +112,7 @@
         <td>
           scala.Some.apply
         </td>
-        <td style="background: #AEF1AE">
+        <td style="background: #F0ADAD">
           scala.Some.apply[String](Error.this.message)
         </td>
       </tr><tr>
@@ -120,7 +120,7 @@
           19
         </td>
         <td>
-          127
+          102
         </td>
         <td>
           403
@@ -133,7 +133,7 @@
         <td>
           datavault.extractor.Error.message
         </td>
-        <td style="background: #AEF1AE">
+        <td style="background: #F0ADAD">
           Error.this.message
         </td>
       </tr><tr>
@@ -141,7 +141,28 @@
           24
         </td>
         <td>
-          131
+          104
+        </td>
+        <td>
+          527
+          -
+          537
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractor.FileExtractionStatus.toString
+        </td>
+        <td style="background: #AEF1AE">
+          x$1.toString()
+        </td>
+      </tr><tr>
+        <td>
+          24
+        </td>
+        <td>
+          106
         </td>
         <td>
           515
@@ -162,7 +183,7 @@
           24
         </td>
         <td>
-          130
+          105
         </td>
         <td>
           526
@@ -180,31 +201,10 @@
         </td>
       </tr><tr>
         <td>
-          24
-        </td>
-        <td>
-          129
-        </td>
-        <td>
-          527
-          -
-          537
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          datavault.extractor.FileExtractionStatus.toString
-        </td>
-        <td style="background: #AEF1AE">
-          x$1.toString()
-        </td>
-      </tr><tr>
-        <td>
           34
         </td>
         <td>
-          132
+          107
         </td>
         <td>
           679
@@ -225,7 +225,7 @@
           36
         </td>
         <td>
-          147
+          122
         </td>
         <td>
           700
@@ -249,7 +249,7 @@
           37
         </td>
         <td>
-          133
+          108
         </td>
         <td>
           700
@@ -270,7 +270,7 @@
           40
         </td>
         <td>
-          145
+          120
         </td>
         <td>
           771
@@ -291,7 +291,28 @@
           42
         </td>
         <td>
-          134
+          110
+        </td>
+        <td>
+          818
+          -
+          852
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Path.resolve
+        </td>
+        <td style="background: #AEF1AE">
+          destination.resolve(info.filename)
+        </td>
+      </tr><tr>
+        <td>
+          42
+        </td>
+        <td>
+          109
         </td>
         <td>
           838
@@ -309,31 +330,10 @@
         </td>
       </tr><tr>
         <td>
-          42
-        </td>
-        <td>
-          135
-        </td>
-        <td>
-          818
-          -
-          852
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          scala.util.Either.fold
-        </td>
-        <td style="background: #AEF1AE">
-          info.writeTo(destination.resolve(info.filename)).fold[datavault.extractor.FileExtractionStatus](((error: String) =&gt; FileExtractionStatus.apply(info.filename, 0L, scala.Some.apply[String](error))), ((Unit: Unit) =&gt; FileExtractionStatus.apply(info.filename, info.size, scala.None)))
-        </td>
-      </tr><tr>
-        <td>
           43
         </td>
         <td>
-          144
+          119
         </td>
         <td>
           792
@@ -354,7 +354,28 @@
           44
         </td>
         <td>
-          137
+          113
+        </td>
+        <td>
+          935
+          -
+          946
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Some.apply
+        </td>
+        <td style="background: #F0ADAD">
+          scala.Some.apply[String](error)
+        </td>
+      </tr><tr>
+        <td>
+          44
+        </td>
+        <td>
+          112
         </td>
         <td>
           932
@@ -375,28 +396,7 @@
           44
         </td>
         <td>
-          136
-        </td>
-        <td>
-          917
-          -
-          930
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          datavault.archive.FileInfo.filename
-        </td>
-        <td style="background: #F0ADAD">
-          info.filename
-        </td>
-      </tr><tr>
-        <td>
-          44
-        </td>
-        <td>
-          139
+          114
         </td>
         <td>
           896
@@ -415,6 +415,9 @@
       </tr><tr>
         <td>
           44
+        </td>
+        <td>
+          111
         </td>
         <td>
           917
@@ -459,27 +462,6 @@
           115
         </td>
         <td>
-          935
-          -
-          946
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          scala.Some.apply
-        </td>
-        <td style="background: #F0ADAD">
-          scala.Some.apply[String](error)
-        </td>
-      </tr><tr>
-        <td>
-          45
-        </td>
-        <td>
-          140
-        </td>
-        <td>
           992
           -
           1005
@@ -498,49 +480,7 @@
           45
         </td>
         <td>
-          142
-        </td>
-        <td>
-          1018
-          -
-          1022
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          scala.None
-        </td>
-        <td style="background: #AEF1AE">
-          scala.None
-        </td>
-      </tr><tr>
-        <td>
-          45
-        </td>
-        <td>
-          141
-        </td>
-        <td>
-          1007
-          -
-          1016
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          datavault.archive.FileInfo.size
-        </td>
-        <td style="background: #AEF1AE">
-          info.size
-        </td>
-      </tr><tr>
-        <td>
-          45
-        </td>
-        <td>
-          143
+          118
         </td>
         <td>
           971
@@ -558,10 +498,31 @@
         </td>
       </tr><tr>
         <td>
+          45
+        </td>
+        <td>
+          117
+        </td>
+        <td>
+          1018
+          -
+          1022
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.None
+        </td>
+        <td style="background: #AEF1AE">
+          scala.None
+        </td>
+      </tr><tr>
+        <td>
           48
         </td>
         <td>
-          146
+          121
         </td>
         <td>
           744
@@ -582,7 +543,7 @@
           51
         </td>
         <td>
-          148
+          123
         </td>
         <td>
           1129
@@ -590,12 +551,12 @@
           1135
         </td>
         <td>
-          Select
+          Apply
         </td>
         <td>
-          scala.None
+          scala.collection.immutable.List.::
         </td>
-        <td style="background: #AEF1AE">
+        <td style="background: #F0ADAD">
           scala.collection.immutable.Nil.::[datavault.extractor.Error](x$2)
         </td>
       </tr><tr>
@@ -603,28 +564,7 @@
           57
         </td>
         <td>
-          155
-        </td>
-        <td>
-          1191
-          -
-          1296
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          scala.collection.TraversableOnce.toList
-        </td>
-        <td style="background: #AEF1AE">
-          archive.stream.map[datavault.extractor.FileExtractionStatus, scala.collection.immutable.Stream[datavault.extractor.FileExtractionStatus]](((info: datavault.archive.FileInfo) =&gt; info.writeTo(destination.resolve(info.filename)).fold[datavault.extractor.FileExtractionStatus](((error: String) =&gt; FileExtractionStatus.apply(info.filename, 0L, scala.Some.apply[String](error))), ((Unit: Unit) =&gt; FileExtractionStatus.apply(info.filename, info.size, scala.None)))))(immutable.this.Stream.canBuildFrom[datavault.extractor.FileExtractionStatus]).toList
-        </td>
-      </tr><tr>
-        <td>
-          57
-        </td>
-        <td>
-          149
+          124
         </td>
         <td>
           1191
@@ -645,12 +585,12 @@
           57
         </td>
         <td>
-          154
+          130
         </td>
         <td>
-          1219
+          1191
           -
-          1219
+          1296
         </td>
         <td>
           ApplyToImplicitArgs
@@ -663,52 +603,31 @@
         </td>
       </tr><tr>
         <td>
-          58
+          57
         </td>
         <td>
-          151
+          129
         </td>
         <td>
-          1272
+          1219
           -
-          1283
+          1219
         </td>
         <td>
           ApplyToImplicitArgs
         </td>
         <td>
-          java.io.File.length
+          scala.Array.canBuildFrom
         </td>
         <td style="background: #AEF1AE">
-          file.length()
+          scala.this.Array.canBuildFrom[datavault.extractor.FileExtractionStatus]((ClassTag.apply[datavault.extractor.FileExtractionStatus](classOf[datavault.extractor.FileExtractionStatus]): scala.reflect.ClassTag[datavault.extractor.FileExtractionStatus]))
         </td>
       </tr><tr>
         <td>
           58
         </td>
         <td>
-          150
-        </td>
-        <td>
-          1256
-          -
-          1270
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          java.io.File.getName
-        </td>
-        <td style="background: #AEF1AE">
-          file.getName()
-        </td>
-      </tr><tr>
-        <td>
-          58
-        </td>
-        <td>
-          153
+          128
         </td>
         <td>
           1235
@@ -729,7 +648,28 @@
           58
         </td>
         <td>
-          152
+          125
+        </td>
+        <td>
+          1256
+          -
+          1270
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.File.getName
+        </td>
+        <td style="background: #AEF1AE">
+          file.getName()
+        </td>
+      </tr><tr>
+        <td>
+          58
+        </td>
+        <td>
+          127
         </td>
         <td>
           1285
@@ -744,6 +684,27 @@
         </td>
         <td style="background: #AEF1AE">
           scala.None
+        </td>
+      </tr><tr>
+        <td>
+          58
+        </td>
+        <td>
+          126
+        </td>
+        <td>
+          1272
+          -
+          1283
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.File.length
+        </td>
+        <td style="background: #AEF1AE">
+          file.length()
         </td>
       </tr>
     </table>
