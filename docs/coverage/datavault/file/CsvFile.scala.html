@@ -38,58 +38,39 @@
 </span>14 <span style=''>  def end: Unit
 </span>15 <span style=''>}
 </span>16 <span style=''>
-</span>17 <span style=''>case class CsvFileWriter(header: Array[String], stream: Stream[Array[String]]) {
-</span>18 <span style=''>  def writeTo(path: java.nio.file.Path) = {
-</span>19 <span style=''>
-</span>20 <span style=''>    // initialize and configure the mapper
-</span>21 <span style=''>    val mapper = </span><span style='background: #AEF1AE'>new CsvMapper()</span><span style=''>;
-</span>22 <span style=''>
-</span>23 <span style=''>    // initialize the schema
-</span>24 <span style=''>    val builder = </span><span style='background: #AEF1AE'>header.foldLeft(CsvSchema.builder())((builder, name) =&gt; builder.addColumn(name))</span><span style=''>
-</span>25 <span style=''>    val schema  = </span><span style='background: #AEF1AE'>builder.build</span><span style=''>
+</span>17 <span style=''>case class CsvFile(inputStream: InputStream) {
+</span>18 <span style=''>
+</span>19 <span style=''>  def firstLine: String = {
+</span>20 <span style=''>    val br                     = </span><span style='background: #AEF1AE'>new BufferedReader(new InputStreamReader(inputStream))</span><span style=''>
+</span>21 <span style=''>    val line: Optional[String] = </span><span style='background: #AEF1AE'>br.lines().findFirst()</span><span style=''>
+</span>22 <span style=''>    </span><span style='background: #AEF1AE'>line.orElse(&quot;&quot;)</span><span style=''>
+</span>23 <span style=''>  }
+</span>24 <span style=''>
+</span>25 <span style=''>  def csvStream: Option[(Array[String], Stream[Array[String]])] = {
 </span>26 <span style=''>
-</span>27 <span style=''>    // map the bean with our schema for the writer
-</span>28 <span style=''>    val writer: ObjectWriter = </span><span style='background: #AEF1AE'>mapper.writerFor(classOf[Array[String]])</span><span style=''>
-</span>29 <span style=''>
-</span>30 <span style=''>    import collection.JavaConverters._
-</span>31 <span style=''>    val iter: java.lang.Iterable[Array[String]] = </span><span style='background: #AEF1AE'>Stream.cons(header, stream).toIterable.asJava</span><span style=''>
-</span>32 <span style=''>    </span><span style='background: #AEF1AE'>writer.writeValues(path.toFile()).writeAll(iter)</span><span style=''>;
-</span>33 <span style=''>  }
-</span>34 <span style=''>}
-</span>35 <span style=''>
-</span>36 <span style=''>case class CsvFile(inputStream: InputStream) {
-</span>37 <span style=''>
-</span>38 <span style=''>  def firstLine: String = {
-</span>39 <span style=''>    val br                     = </span><span style='background: #AEF1AE'>new BufferedReader(new InputStreamReader(inputStream))</span><span style=''>
-</span>40 <span style=''>    val line: Optional[String] = </span><span style='background: #AEF1AE'>br.lines().findFirst()</span><span style=''>
-</span>41 <span style=''>    </span><span style='background: #AEF1AE'>line.orElse(&quot;&quot;)</span><span style=''>
-</span>42 <span style=''>  }
-</span>43 <span style=''>
-</span>44 <span style=''>  def csvStream: Option[(Array[String], Stream[Array[String]])] = {
-</span>45 <span style=''>
-</span>46 <span style=''>    val mapper = </span><span style='background: #AEF1AE'>new CsvMapper()</span><span style=''>;
-</span>47 <span style=''>
-</span>48 <span style=''>    </span><span style='background: #AEF1AE'>mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY)</span><span style=''>;
-</span>49 <span style=''>
-</span>50 <span style=''>    val it = </span><span style='background: #AEF1AE'>mapper.readerFor(classOf[Array[String]]).readValues(inputStream)</span><span style=''>;
-</span>51 <span style=''>
-</span>52 <span style=''>    if (</span><span style='background: #AEF1AE'>!it.hasNext</span><span style=''>) {
-</span>53 <span style=''>      </span><span style='background: #F0ADAD'>return None</span><span style=''>
-</span>54 <span style=''>    }
-</span>55 <span style=''>
-</span>56 <span style=''>    val headers: Array[String] = </span><span style='background: #AEF1AE'>it.next</span><span style=''>
-</span>57 <span style=''>
-</span>58 <span style=''>    def stream: Stream[Array[String]] = if (</span><span style='background: #AEF1AE'>it.hasNext</span><span style=''>) {
-</span>59 <span style=''>      </span><span style='background: #AEF1AE'>Stream.cons(it.next, stream)</span><span style=''>
-</span>60 <span style=''>    } else {
-</span>61 <span style=''>      </span><span style='background: #AEF1AE'>Stream.empty</span><span style=''>
-</span>62 <span style=''>    }
-</span>63 <span style=''>
-</span>64 <span style=''>    </span><span style='background: #AEF1AE'>Some((headers, stream))</span><span style=''>
-</span>65 <span style=''>
-</span>66 <span style=''>  }
-</span>67 <span style=''>
-</span>68 <span style=''>}
+</span>27 <span style=''>    val mapper = </span><span style='background: #AEF1AE'>new CsvMapper()</span><span style=''>;
+</span>28 <span style=''>
+</span>29 <span style=''>    </span><span style='background: #AEF1AE'>mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY)</span><span style=''>;
+</span>30 <span style=''>
+</span>31 <span style=''>    val it = </span><span style='background: #AEF1AE'>mapper.readerFor(classOf[Array[String]]).readValues(inputStream)</span><span style=''>;
+</span>32 <span style=''>
+</span>33 <span style=''>    if (</span><span style='background: #AEF1AE'>!it.hasNext</span><span style=''>) {
+</span>34 <span style=''>      </span><span style='background: #F0ADAD'>return None</span><span style=''>
+</span>35 <span style=''>    }
+</span>36 <span style=''>
+</span>37 <span style=''>    val headers: Array[String] = </span><span style='background: #AEF1AE'>it.next</span><span style=''>
+</span>38 <span style=''>
+</span>39 <span style=''>    def stream: Stream[Array[String]] = if (</span><span style='background: #AEF1AE'>it.hasNext</span><span style=''>) {
+</span>40 <span style=''>      </span><span style='background: #AEF1AE'>Stream.cons(it.next, stream)</span><span style=''>
+</span>41 <span style=''>    } else {
+</span>42 <span style=''>      </span><span style='background: #AEF1AE'>Stream.empty</span><span style=''>
+</span>43 <span style=''>    }
+</span>44 <span style=''>
+</span>45 <span style=''>    </span><span style='background: #AEF1AE'>Some((headers, stream))</span><span style=''>
+</span>46 <span style=''>
+</span>47 <span style=''>  }
+</span>48 <span style=''>
+</span>49 <span style=''>}
 </span></pre>
           </div>
           <div class="tab-pane" id="statementlist">
@@ -103,288 +84,15 @@
         <th>Code</th>
       </tr><tr>
         <td>
-          21
+          20
         </td>
         <td>
-          156
+          131
         </td>
         <td>
-          556
+          520
           -
-          571
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          com.fasterxml.jackson.dataformat.csv.CsvMapper.&lt;init&gt;
-        </td>
-        <td style="background: #AEF1AE">
-          new com.fasterxml.jackson.dataformat.csv.CsvMapper()
-        </td>
-      </tr><tr>
-        <td>
-          24
-        </td>
-        <td>
-          158
-        </td>
-        <td>
-          637
-          -
-          656
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          com.fasterxml.jackson.dataformat.csv.CsvSchema.builder
-        </td>
-        <td style="background: #AEF1AE">
-          com.fasterxml.jackson.dataformat.csv.CsvSchema.builder()
-        </td>
-      </tr><tr>
-        <td>
-          24
-        </td>
-        <td>
-          160
-        </td>
-        <td>
-          621
-          -
-          701
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          scala.collection.IndexedSeqOptimized.foldLeft
-        </td>
-        <td style="background: #AEF1AE">
-          scala.Predef.refArrayOps[String](CsvFileWriter.this.header).foldLeft[com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder](com.fasterxml.jackson.dataformat.csv.CsvSchema.builder())(((builder: com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder, name: String) =&gt; builder.addColumn(name)))
-        </td>
-      </tr><tr>
-        <td>
-          24
-        </td>
-        <td>
-          157
-        </td>
-        <td>
-          621
-          -
-          627
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          datavault.file.CsvFileWriter.header
-        </td>
-        <td style="background: #AEF1AE">
-          CsvFileWriter.this.header
-        </td>
-      </tr><tr>
-        <td>
-          24
-        </td>
-        <td>
-          159
-        </td>
-        <td>
-          677
-          -
-          700
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder.addColumn
-        </td>
-        <td style="background: #AEF1AE">
-          builder.addColumn(name)
-        </td>
-      </tr><tr>
-        <td>
-          25
-        </td>
-        <td>
-          161
-        </td>
-        <td>
-          720
-          -
-          733
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder.build
-        </td>
-        <td style="background: #AEF1AE">
-          builder.build()
-        </td>
-      </tr><tr>
-        <td>
-          28
-        </td>
-        <td>
-          162
-        </td>
-        <td>
-          817
-          -
-          857
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          com.fasterxml.jackson.databind.ObjectMapper.writerFor
-        </td>
-        <td style="background: #AEF1AE">
-          mapper.writerFor(classOf[[Ljava.lang.String;])
-        </td>
-      </tr><tr>
-        <td>
-          31
-        </td>
-        <td>
-          164
-        </td>
-        <td>
-          968
-          -
-          974
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          datavault.file.CsvFileWriter.stream
-        </td>
-        <td style="background: #AEF1AE">
-          CsvFileWriter.this.stream
-        </td>
-      </tr><tr>
-        <td>
-          31
-        </td>
-        <td>
-          166
-        </td>
-        <td>
-          948
-          -
-          993
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          scala.collection.convert.Decorators.AsJava.asJava
-        </td>
-        <td style="background: #AEF1AE">
-          scala.collection.JavaConverters.asJavaIterableConverter[Array[String]](scala.`package`.Stream.cons.apply[Array[String]](CsvFileWriter.this.header, CsvFileWriter.this.stream).toIterable).asJava
-        </td>
-      </tr><tr>
-        <td>
-          31
-        </td>
-        <td>
-          163
-        </td>
-        <td>
-          960
-          -
-          966
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          datavault.file.CsvFileWriter.header
-        </td>
-        <td style="background: #AEF1AE">
-          CsvFileWriter.this.header
-        </td>
-      </tr><tr>
-        <td>
-          31
-        </td>
-        <td>
-          165
-        </td>
-        <td>
-          948
-          -
-          986
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          scala.collection.IterableLike.toIterable
-        </td>
-        <td style="background: #AEF1AE">
-          scala.`package`.Stream.cons.apply[Array[String]](CsvFileWriter.this.header, CsvFileWriter.this.stream).toIterable
-        </td>
-      </tr><tr>
-        <td>
-          32
-        </td>
-        <td>
-          167
-        </td>
-        <td>
-          998
-          -
-          1046
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          com.fasterxml.jackson.databind.SequenceWriter.writeAll
-        </td>
-        <td style="background: #AEF1AE">
-          writer.writeValues(path.toFile()).writeAll(iter)
-        </td>
-      </tr><tr>
-        <td>
-          39
-        </td>
-        <td>
-          169
-        </td>
-        <td>
-          1183
-          -
-          1217
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          java.io.InputStreamReader.&lt;init&gt;
-        </td>
-        <td style="background: #AEF1AE">
-          new java.io.InputStreamReader(CsvFile.this.inputStream)
-        </td>
-      </tr><tr>
-        <td>
-          39
-        </td>
-        <td>
-          168
-        </td>
-        <td>
-          1205
-          -
-          1216
+          531
         </td>
         <td>
           Select
@@ -397,15 +105,15 @@
         </td>
       </tr><tr>
         <td>
-          39
+          20
         </td>
         <td>
-          170
+          133
         </td>
         <td>
-          1164
+          479
           -
-          1218
+          533
         </td>
         <td>
           Apply
@@ -418,15 +126,36 @@
         </td>
       </tr><tr>
         <td>
-          40
+          20
         </td>
         <td>
-          171
+          132
         </td>
         <td>
-          1252
+          498
           -
-          1274
+          532
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.InputStreamReader.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new java.io.InputStreamReader(CsvFile.this.inputStream)
+        </td>
+      </tr><tr>
+        <td>
+          21
+        </td>
+        <td>
+          134
+        </td>
+        <td>
+          567
+          -
+          589
         </td>
         <td>
           Apply
@@ -439,15 +168,15 @@
         </td>
       </tr><tr>
         <td>
-          41
+          22
         </td>
         <td>
-          172
+          135
         </td>
         <td>
-          1279
+          594
           -
-          1294
+          609
         </td>
         <td>
           Apply
@@ -460,15 +189,15 @@
         </td>
       </tr><tr>
         <td>
-          46
+          27
         </td>
         <td>
-          173
+          136
         </td>
         <td>
-          1386
+          701
           -
-          1401
+          716
         </td>
         <td>
           Apply
@@ -481,15 +210,15 @@
         </td>
       </tr><tr>
         <td>
-          48
+          29
         </td>
         <td>
-          174
+          137
         </td>
         <td>
-          1408
+          723
           -
-          1454
+          769
         </td>
         <td>
           Apply
@@ -502,57 +231,15 @@
         </td>
       </tr><tr>
         <td>
-          50
+          31
         </td>
         <td>
-          176
+          140
         </td>
         <td>
-          1522
+          785
           -
-          1533
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          datavault.file.CsvFile.inputStream
-        </td>
-        <td style="background: #AEF1AE">
-          CsvFile.this.inputStream
-        </td>
-      </tr><tr>
-        <td>
-          50
-        </td>
-        <td>
-          175
-        </td>
-        <td>
-          1487
-          -
-          1509
-        </td>
-        <td>
-          Literal
-        </td>
-        <td>
-          &lt;nosymbol&gt;
-        </td>
-        <td style="background: #AEF1AE">
-          classOf[[Ljava.lang.String;]
-        </td>
-      </tr><tr>
-        <td>
-          50
-        </td>
-        <td>
-          177
-        </td>
-        <td>
-          1470
-          -
-          1534
+          849
         </td>
         <td>
           Apply
@@ -565,15 +252,57 @@
         </td>
       </tr><tr>
         <td>
-          52
+          31
         </td>
         <td>
-          182
+          139
         </td>
         <td>
-          1541
+          837
           -
-          1541
+          848
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.file.CsvFile.inputStream
+        </td>
+        <td style="background: #AEF1AE">
+          CsvFile.this.inputStream
+        </td>
+      </tr><tr>
+        <td>
+          31
+        </td>
+        <td>
+          138
+        </td>
+        <td>
+          802
+          -
+          824
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          classOf[[Ljava.lang.String;]
+        </td>
+      </tr><tr>
+        <td>
+          33
+        </td>
+        <td>
+          145
+        </td>
+        <td>
+          856
+          -
+          856
         </td>
         <td>
           Block
@@ -586,15 +315,15 @@
         </td>
       </tr><tr>
         <td>
-          52
+          33
         </td>
         <td>
-          178
+          141
         </td>
         <td>
-          1545
+          860
           -
-          1556
+          871
         </td>
         <td>
           Select
@@ -607,15 +336,15 @@
         </td>
       </tr><tr>
         <td>
-          52
+          33
         </td>
         <td>
-          181
+          144
         </td>
         <td>
-          1541
+          856
           -
-          1541
+          856
         </td>
         <td>
           Literal
@@ -628,36 +357,15 @@
         </td>
       </tr><tr>
         <td>
-          53
+          34
         </td>
         <td>
-          180
+          142
         </td>
         <td>
-          1566
+          888
           -
-          1577
-        </td>
-        <td>
-          Return
-        </td>
-        <td>
-          datavault.file.CsvFile.csvStream
-        </td>
-        <td style="background: #F0ADAD">
-          return scala.None
-        </td>
-      </tr><tr>
-        <td>
-          53
-        </td>
-        <td>
-          179
-        </td>
-        <td>
-          1573
-          -
-          1577
+          892
         </td>
         <td>
           Select
@@ -670,15 +378,36 @@
         </td>
       </tr><tr>
         <td>
-          56
+          34
         </td>
         <td>
-          183
+          143
         </td>
         <td>
-          1618
+          881
           -
-          1625
+          892
+        </td>
+        <td>
+          Return
+        </td>
+        <td>
+          datavault.file.CsvFile.csvStream
+        </td>
+        <td style="background: #F0ADAD">
+          return scala.None
+        </td>
+      </tr><tr>
+        <td>
+          37
+        </td>
+        <td>
+          146
+        </td>
+        <td>
+          933
+          -
+          940
         </td>
         <td>
           Apply
@@ -691,15 +420,15 @@
         </td>
       </tr><tr>
         <td>
-          58
+          39
         </td>
         <td>
-          184
+          147
         </td>
         <td>
-          1671
+          986
           -
-          1681
+          996
         </td>
         <td>
           Apply
@@ -712,15 +441,36 @@
         </td>
       </tr><tr>
         <td>
-          59
+          40
         </td>
         <td>
-          185
+          149
         </td>
         <td>
-          1703
+          1006
           -
-          1710
+          1034
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.collection.immutable.Stream.cons.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.`package`.Stream.cons.apply[Array[String]](it.next(), stream)
+        </td>
+      </tr><tr>
+        <td>
+          40
+        </td>
+        <td>
+          148
+        </td>
+        <td>
+          1018
+          -
+          1025
         </td>
         <td>
           Apply
@@ -733,15 +483,15 @@
         </td>
       </tr><tr>
         <td>
-          59
+          40
         </td>
         <td>
-          187
+          150
         </td>
         <td>
-          1691
+          1006
           -
-          1719
+          1034
         </td>
         <td>
           Block
@@ -754,57 +504,15 @@
         </td>
       </tr><tr>
         <td>
-          59
+          42
         </td>
         <td>
-          186
+          151
         </td>
         <td>
-          1691
+          1054
           -
-          1719
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          scala.collection.immutable.Stream.cons.apply
-        </td>
-        <td style="background: #AEF1AE">
-          scala.`package`.Stream.cons.apply[Array[String]](it.next(), stream)
-        </td>
-      </tr><tr>
-        <td>
-          61
-        </td>
-        <td>
-          189
-        </td>
-        <td>
-          1739
-          -
-          1751
-        </td>
-        <td>
-          Block
-        </td>
-        <td>
-          scala.collection.immutable.Stream.empty
-        </td>
-        <td style="background: #AEF1AE">
-          scala.`package`.Stream.empty[Nothing]
-        </td>
-      </tr><tr>
-        <td>
-          61
-        </td>
-        <td>
-          188
-        </td>
-        <td>
-          1739
-          -
-          1751
+          1066
         </td>
         <td>
           TypeApply
@@ -817,15 +525,36 @@
         </td>
       </tr><tr>
         <td>
-          64
+          42
         </td>
         <td>
-          191
+          152
         </td>
         <td>
-          1763
+          1054
           -
-          1786
+          1066
+        </td>
+        <td>
+          Block
+        </td>
+        <td>
+          scala.collection.immutable.Stream.empty
+        </td>
+        <td style="background: #AEF1AE">
+          scala.`package`.Stream.empty[Nothing]
+        </td>
+      </tr><tr>
+        <td>
+          45
+        </td>
+        <td>
+          154
+        </td>
+        <td>
+          1078
+          -
+          1101
         </td>
         <td>
           Apply
@@ -838,15 +567,15 @@
         </td>
       </tr><tr>
         <td>
-          64
+          45
         </td>
         <td>
-          190
+          153
         </td>
         <td>
-          1768
+          1083
           -
-          1785
+          1100
         </td>
         <td>
           Apply

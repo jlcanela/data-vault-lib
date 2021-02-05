@@ -36,13 +36,15 @@
 </span>12 <span style=''>
 </span>13 <span style=''>object DataVault {
 </span>14 <span style=''>  def main(args: Array[String]): Unit = {
-</span>15 <span style=''>    val cmd           = </span><span style='background: #AEF1AE'>Cli.parse(args)</span><span style=''>
-</span>16 <span style=''>    val task: Task[_] = </span><span style='background: #AEF1AE'>Command.toZio(cmd)</span><span style=''>
-</span>17 <span style=''>    val runtime       = Runtime.default
-</span>18 <span style=''>
-</span>19 <span style=''>    </span><span style='background: #AEF1AE'>runtime.unsafeRun(task)</span><span style=''>
-</span>20 <span style=''>  }
-</span>21 <span style=''>}
+</span>15 <span style=''>
+</span>16 <span style=''>    val cmd                                        = </span><span style='background: #AEF1AE'>Cli.parse(args)</span><span style=''>
+</span>17 <span style=''>    val task: ZIO[service.Command with service.Repository, Throwable, Any] = </span><span style='background: #AEF1AE'>service.Command.toZio(cmd)</span><span style=''>
+</span>18 <span style=''>    val runtime                                    = Runtime.default
+</span>19 <span style=''>
+</span>20 <span style=''>    val deps = </span><span style='background: #AEF1AE'>service.Repository.repository ++ (service.Repository.repository &gt;&gt;&gt; service.Command.command)</span><span style=''>
+</span>21 <span style=''>    </span><span style='background: #AEF1AE'>runtime.unsafeRun(task.provideLayer(deps))</span><span style=''>
+</span>22 <span style=''>  }
+</span>23 <span style=''>}
 </span></pre>
           </div>
           <div class="tab-pane" id="statementlist">
@@ -56,15 +58,15 @@
         <th>Code</th>
       </tr><tr>
         <td>
-          15
+          16
         </td>
         <td>
-          89
+          57
         </td>
         <td>
-          306
+          336
           -
-          321
+          351
         </td>
         <td>
           Apply
@@ -77,36 +79,162 @@
         </td>
       </tr><tr>
         <td>
-          16
+          17
         </td>
         <td>
-          90
+          58
         </td>
         <td>
-          346
+          429
           -
-          364
+          455
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          datavault.service.Command.toZio
+        </td>
+        <td style="background: #AEF1AE">
+          service.Command.toZio(cmd)((izumi.reflect.Tag.apply[datavault.service.Command.Service](classOf[datavault.service.Command$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((-1508532439: Int), (&quot;\u0004\u0000\u0001!datavault.service.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.service.Command\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.service.Command.Service]))
+        </td>
+      </tr><tr>
+        <td>
+          20
+        </td>
+        <td>
+          59
+        </td>
+        <td>
+          609
+          -
+          632
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.Command.command
+        </td>
+        <td style="background: #AEF1AE">
+          service.Command.command
+        </td>
+      </tr><tr>
+        <td>
+          20
+        </td>
+        <td>
+          62
+        </td>
+        <td>
+          541
+          -
+          633
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          zio.ZLayer.++
+        </td>
+        <td style="background: #AEF1AE">
+          service.Repository.repository.++[Nothing, Any, datavault.service.Repository, datavault.service.Command](service.Repository.repository.&gt;&gt;&gt;[Nothing, datavault.service.Command](service.Command.command))(Has.this.Union.HasHasUnion[datavault.service.Repository, datavault.service.Command]((izumi.reflect.Tag.apply[datavault.service.Command](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1047819957: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.service.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.service.Command\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.service.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.service.Command\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.service.Command])), (izumi.reflect.Tag.apply[datavault.service.Command](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1047819957: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.service.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.service.Command\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.service.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.service.Command\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.service.Command]))
+        </td>
+      </tr><tr>
+        <td>
+          20
+        </td>
+        <td>
+          61
+        </td>
+        <td>
+          571
+          -
+          571
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          zio.Has.Union.HasHasUnion
+        </td>
+        <td style="background: #AEF1AE">
+          Has.this.Union.HasHasUnion[datavault.service.Repository, datavault.service.Command]((izumi.reflect.Tag.apply[datavault.service.Command](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1047819957: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.service.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.service.Command\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.service.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.service.Command\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.service.Command]))
+        </td>
+      </tr><tr>
+        <td>
+          20
+        </td>
+        <td>
+          60
+        </td>
+        <td>
+          575
+          -
+          632
         </td>
         <td>
           Apply
         </td>
         <td>
-          datavault.Command.toZio
+          zio.ZLayer.&gt;&gt;&gt;
         </td>
         <td style="background: #AEF1AE">
-          Command.toZio(cmd)
+          service.Repository.repository.&gt;&gt;&gt;[Nothing, datavault.service.Command](service.Command.command)
         </td>
       </tr><tr>
         <td>
-          19
+          21
         </td>
         <td>
-          92
+          65
         </td>
         <td>
-          427
+          656
           -
-          427
+          679
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          zio.ZIO.provideLayer
+        </td>
+        <td style="background: #AEF1AE">
+          task.provideLayer[Throwable, Any with Any, datavault.service.Repository with datavault.service.Command](deps)(scala.Predef.$conforms[datavault.service.Repository with datavault.service.Command], zio.this.NeedsEnv.needsEnv[Nothing])
+        </td>
+      </tr><tr>
+        <td>
+          21
+        </td>
+        <td>
+          64
+        </td>
+        <td>
+          673
+          -
+          673
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          zio.NeedsEnv.needsEnv
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.NeedsEnv.needsEnv[Nothing]
+        </td>
+      </tr><tr>
+        <td>
+          21
+        </td>
+        <td>
+          67
+        </td>
+        <td>
+          655
+          -
+          655
         </td>
         <td>
           Literal
@@ -119,15 +247,36 @@
         </td>
       </tr><tr>
         <td>
-          19
+          21
         </td>
         <td>
-          91
+          63
         </td>
         <td>
-          410
+          673
           -
-          433
+          673
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.Predef.$conforms
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.$conforms[datavault.service.Repository with datavault.service.Command]
+        </td>
+      </tr><tr>
+        <td>
+          21
+        </td>
+        <td>
+          66
+        </td>
+        <td>
+          638
+          -
+          680
         </td>
         <td>
           Apply
@@ -136,7 +285,7 @@
           zio.Runtime.unsafeRun
         </td>
         <td style="background: #AEF1AE">
-          runtime.unsafeRun[Throwable, _$1](task)
+          runtime.unsafeRun[Throwable, Any](task.provideLayer[Throwable, Any with Any, datavault.service.Repository with datavault.service.Command](deps)(scala.Predef.$conforms[datavault.service.Repository with datavault.service.Command], zio.this.NeedsEnv.needsEnv[Nothing]))
         </td>
       </tr>
     </table>
