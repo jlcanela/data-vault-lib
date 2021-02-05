@@ -15,13 +15,12 @@ import org.json4s.native.JsonMethods._
 import datavault.DataVaultCli
 import datavault.extractor.{Extractor, FileExtractionStatus}
 
-
 trait RunHelper {
 
   implicit val formats = Serialization.formats(NoTypeHints)
 
   def parseCommand(command: String) = command.split(" ").tail
-  def runCommand(command: String) = datavault.DataVault.main(parseCommand(command))
+  def runCommand(command: String)   = datavault.DataVault.main(parseCommand(command))
 
   def readFile(file: String) =
     scala.io.Source.fromFile(file).getLines().mkString("\n")
@@ -35,12 +34,12 @@ trait RunHelper {
 
   def readFileExtractionStatus(file: String) = {
     implicit val formats = DefaultFormats
-    val content = readResourceFile(file)
+    val content          = readResourceFile(file)
     read[Array[FileExtractionStatus]](content)
   }
 
   def diffJson(current: String, expected: String): Diff = {
-    val currentJson = parse(current)
+    val currentJson  = parse(current)
     val expectedJson = parse(expected)
     expectedJson.diff(currentJson)
   }

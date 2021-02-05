@@ -10,9 +10,7 @@ import org.json4s.native.Serialization.{read, write, writePretty}
 import org.json4s.native.JsonMethods._
 
 import datavault.io.FileSystem
-
-case class Hub(name: String, table: String, source: String, key: Column)
-case class HubConfig(hubs: Seq[Hub])
+import datavault.service.Models._
 
 object HubConfig {
 
@@ -21,7 +19,7 @@ object HubConfig {
   val R = "olist_([a-z]*)?s_dataset".r
   def detectName(table: String) = table match {
     case R(name) => Some(name)
-    case _ => None
+    case _       => None
   }
 
   def detectKey(name: String, keys: Seq[Column]) =
@@ -32,19 +30,6 @@ object HubConfig {
     key  <- detectKey(name, table.columns)
   } yield Hub(name, table.name, table.path, key)
 
-  def fromModel(model: Model) = HubConfig(model.tables.values.toSeq.flatMap(fromTable))
-
-  def load(path: Path) = {
-    val is = FileSystem.open(path)
-    val content = scala.io.Source.fromInputStream(is).getLines().mkString("\n")
-    val hubConfig   = read[HubConfig](content)
-    hubConfig
-  }
-  
-  def save(hubConfig: HubConfig, path: Path) = {
-    val writer = FileSystem.writer(path)
-    writePretty(hubConfig, writer)
-    writer.close()
-  }
+  def fromSource(source: Source) = Hubs(None, source.tables.values.toSeq.flatMap(fromTable))
 
 }

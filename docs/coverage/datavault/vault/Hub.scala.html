@@ -1,0 +1,1750 @@
+<html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title id="title">
+          datavault/vault/Hub.scala.html
+        </title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/css/theme.default.min.css" type="text/css"/><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/js/jquery.tablesorter.min.js"></script><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" type="text/css"/><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script><script type="text/javascript">
+        $(document).ready(function() {$(".tablesorter").tablesorter();});
+      </script>
+        <style>
+          table.codegrid { font-family: monospace; font-size: 12px; width: auto!important; }table.statementlist { width: auto!important; font-size: 13px; } table.codegrid td { padding: 0!important; border: 0!important } table td.linenumber { width: 40px!important; } 
+        </style>
+      </head>
+      <body style="font-family: monospace;">
+        <ul class="nav nav-tabs">
+          <li>
+            <a href="#codegrid" data-toggle="tab">Codegrid</a>
+          </li>
+          <li>
+            <a href="#statementlist" data-toggle="tab">Statement List</a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active" id="codegrid">
+            <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault.vault
+</span>2 <span style=''>
+</span>3 <span style=''>import datavault.model.{Model}
+</span>4 <span style=''>import datavault.service.Models._
+</span>5 <span style=''>import datavault.archive.{Archive, FileInfo, Visitor}
+</span>6 <span style=''>import datavault.file.CsvFile
+</span>7 <span style=''>
+</span>8 <span style=''>import java.nio.file.Path
+</span>9 <span style=''>
+</span>10 <span style=''>case class ReadFile(archive: String, path: String, table: String)
+</span>11 <span style=''>
+</span>12 <span style=''>case class WriteTable(table: String)
+</span>13 <span style=''>
+</span>14 <span style=''>object Hub {
+</span>15 <span style=''>
+</span>16 <span style=''>  type FileGenerator = (Archive, Path) =&gt; zio.Task[Unit]
+</span>17 <span style=''>
+</span>18 <span style=''>  def generateHeader(tableName: String, key: Column) =
+</span>19 <span style=''>    </span><span style='background: #AEF1AE'>Array(s&quot;HUB_${tableName.toUpperCase}_KEY&quot;, key.name.toUpperCase, &quot;HUB_Load_DTS&quot;, &quot;HUB_Rec_SRC&quot;)</span><span style=''>
+</span>20 <span style=''>  def generateRow(tableName: String, src: String, key: Column) = {
+</span>21 <span style=''>    val loadDts: String = (</span><span style='background: #AEF1AE'>new java.util.Date).getTime().toString</span><span style=''>
+</span>22 <span style=''>    (key: String) =&gt; </span><span style='background: #AEF1AE'>Array(key, key, loadDts, src)</span><span style=''>
+</span>23 <span style=''>  }
+</span>24 <span style=''>
+</span>25 <span style=''>  def generateHub(
+</span>26 <span style=''>      prefix: Option[String],
+</span>27 <span style=''>      suffix: Option[String],
+</span>28 <span style=''>      info: FileInfo,
+</span>29 <span style=''>      hub: Hub
+</span>30 <span style=''>  ) = {
+</span>31 <span style=''>    </span><span style='background: #AEF1AE'>println(s&quot;${info.name}:${hub.key}&quot;)</span><span style=''>
+</span>32 <span style=''>
+</span>33 <span style=''>    def writeFile(header: Array[String], stream: Stream[Array[String]]) = (path: Path) =&gt; {
+</span>34 <span style=''>      val writer = </span><span style='background: #AEF1AE'>datavault.file.CsvFileWriter(header, stream)</span><span style=''>
+</span>35 <span style=''>      </span><span style='background: #AEF1AE'>writer.writeTo(path)</span><span style=''>
+</span>36 <span style=''>    }
+</span>37 <span style=''>
+</span>38 <span style=''>    def hubName(prefix: Option[String], suffix: Option[String], name: String) = {
+</span>39 <span style=''>
+</span>40 <span style=''>      def stripPrefix(name: String) = </span><span style='background: #AEF1AE'>prefix.map(name.stripPrefix).getOrElse(name)</span><span style=''>
+</span>41 <span style=''>      def stripSuffix(name: String) = </span><span style='background: #AEF1AE'>suffix.map(name.stripSuffix).getOrElse(name)</span><span style=''>
+</span>42 <span style=''>
+</span>43 <span style=''>      </span><span style='background: #AEF1AE'>(stripPrefix _ andThen stripSuffix _)(name)</span><span style=''>
+</span>44 <span style=''>    }
+</span>45 <span style=''>
+</span>46 <span style=''>    </span><span style='background: #AEF1AE'>for {
+</span>47 <span style=''></span><span style='background: #AEF1AE'>      (header: Array[String], stream) &lt;- CsvFile(info.inputStream).csvStream
+</span>48 <span style=''></span><span style='background: #AEF1AE'>      index: Int                  = header.indexOf(hub.key.name) if index &gt;= 0
+</span>49 <span style=''></span><span style='background: #AEF1AE'>      row                         = generateRow(info.name, info.name, hub.key)
+</span>50 <span style=''></span><span style='background: #AEF1AE'>      hn                          = hubName(prefix, suffix, info.name)
+</span>51 <span style=''></span><span style='background: #AEF1AE'>      outputHeader: Array[String] = generateHeader(hn, hub.key)
+</span>52 <span style=''></span><span style='background: #AEF1AE'>      dataStream                  = stream.map(data =&gt; data(index)).map(row)
+</span>53 <span style=''></span><span style='background: #AEF1AE'>    } yield (writeFile(outputHeader, dataStream), s&quot;${hn}.csv&quot;)</span><span style=''>
+</span>54 <span style=''>
+</span>55 <span style=''>  }
+</span>56 <span style=''>
+</span>57 <span style=''>  def process(source: Source, hubs: Hubs, archive: Archive) = {
+</span>58 <span style=''>
+</span>59 <span style=''>    val tablesToProcess = </span><span style='background: #AEF1AE'>hubs.hubs.map(_.table).toSet</span><span style=''>
+</span>60 <span style=''>
+</span>61 <span style=''>    def generate(param: (FileInfo, Hub)) =
+</span>62 <span style=''>      </span><span style='background: #AEF1AE'>generateHub(hubs.config.map(_.prefix), hubs.config.map(_.suffix), param._1, param._2)</span><span style=''>
+</span>63 <span style=''>
+</span>64 <span style=''>    def haveHubDefinition(info: FileInfo) = </span><span style='background: #AEF1AE'>tablesToProcess(info.name)</span><span style=''>
+</span>65 <span style=''>    def infoWithHub(info: FileInfo)       = </span><span style='background: #AEF1AE'>hubs.withTableName(info.name).map(hub =&gt; (info, hub))</span><span style=''>
+</span>66 <span style=''>
+</span>67 <span style=''>    val output = </span><span style='background: #AEF1AE'>java.nio.file.Paths.get(&quot;out&quot;, &quot;hub&quot;)</span><span style=''>
+</span>68 <span style=''>    </span><span style='background: #AEF1AE'>java.nio.file.Files.createDirectories(output)</span><span style=''>
+</span>69 <span style=''>
+</span>70 <span style=''>    def filesToProcess = </span><span style='background: #AEF1AE'>archive.stream</span><span style=''>
+</span>71 <span style=''>
+</span>72 <span style=''>    </span><span style='background: #AEF1AE'>filesToProcess
+</span>73 <span style=''></span><span style='background: #AEF1AE'>      .filter(haveHubDefinition)
+</span>74 <span style=''></span><span style='background: #AEF1AE'>      .flatMap(infoWithHub)
+</span>75 <span style=''></span><span style='background: #AEF1AE'>      .map(generate)
+</span>76 <span style=''></span><span style='background: #AEF1AE'>      .map {
+</span>77 <span style=''></span><span style='background: #AEF1AE'>        case Some((g, name)) =&gt; {
+</span>78 <span style=''></span><span style='background: #AEF1AE'>          val path = output.resolve(name)
+</span>79 <span style=''></span><span style='background: #AEF1AE'>          println()
+</span>80 <span style=''></span><span style='background: #AEF1AE'>          g(path)
+</span>81 <span style=''></span><span style='background: #AEF1AE'>          s&quot;generating ${path}&quot;
+</span>82 <span style=''></span><span style='background: #AEF1AE'>        }
+</span>83 <span style=''></span><span style='background: #AEF1AE'>        case None =&gt; </span><span style='background: #F0ADAD'>&quot;skipped&quot;</span><span style='background: #AEF1AE'>
+</span>84 <span style=''></span><span style='background: #AEF1AE'>      }
+</span>85 <span style=''></span><span style='background: #AEF1AE'>      .foreach(println)</span><span style=''>
+</span>86 <span style=''>  }
+</span>87 <span style=''>
+</span>88 <span style=''>}
+</span></pre>
+          </div>
+          <div class="tab-pane" id="statementlist">
+            <table cellspacing="0" cellpadding="0" class="table statementlist">
+      <tr>
+        <th>Line</th>
+        <th>Stmt Id</th>
+        <th>Pos</th>
+        <th>Tree</th>
+        <th>Symbol</th>
+        <th>Code</th>
+      </tr><tr>
+        <td>
+          19
+        </td>
+        <td>
+          227
+        </td>
+        <td>
+          519
+          -
+          532
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;HUB_Rec_SRC&quot;
+        </td>
+      </tr><tr>
+        <td>
+          19
+        </td>
+        <td>
+          226
+        </td>
+        <td>
+          503
+          -
+          517
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;HUB_Load_DTS&quot;
+        </td>
+      </tr><tr>
+        <td>
+          19
+        </td>
+        <td>
+          223
+        </td>
+        <td>
+          452
+          -
+          473
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.lang.String.toUpperCase
+        </td>
+        <td style="background: #AEF1AE">
+          tableName.toUpperCase()
+        </td>
+      </tr><tr>
+        <td>
+          19
+        </td>
+        <td>
+          225
+        </td>
+        <td>
+          481
+          -
+          501
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.lang.String.toUpperCase
+        </td>
+        <td style="background: #AEF1AE">
+          key.name.toUpperCase()
+        </td>
+      </tr><tr>
+        <td>
+          19
+        </td>
+        <td>
+          228
+        </td>
+        <td>
+          438
+          -
+          533
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          scala.Array.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Array.apply[String](scala.StringContext.apply(&quot;HUB_&quot;, &quot;_KEY&quot;).s(tableName.toUpperCase()), key.name.toUpperCase(), &quot;HUB_Load_DTS&quot;, &quot;HUB_Rec_SRC&quot;)((ClassTag.apply[String](classOf[java.lang.String]): scala.reflect.ClassTag[String]))
+        </td>
+      </tr><tr>
+        <td>
+          19
+        </td>
+        <td>
+          222
+        </td>
+        <td>
+          474
+          -
+          479
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;_KEY&quot;
+        </td>
+      </tr><tr>
+        <td>
+          19
+        </td>
+        <td>
+          221
+        </td>
+        <td>
+          446
+          -
+          451
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;HUB_&quot;
+        </td>
+      </tr><tr>
+        <td>
+          19
+        </td>
+        <td>
+          224
+        </td>
+        <td>
+          444
+          -
+          479
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.StringContext.s
+        </td>
+        <td style="background: #AEF1AE">
+          scala.StringContext.apply(&quot;HUB_&quot;, &quot;_KEY&quot;).s(tableName.toUpperCase())
+        </td>
+      </tr><tr>
+        <td>
+          21
+        </td>
+        <td>
+          229
+        </td>
+        <td>
+          628
+          -
+          666
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Any.toString
+        </td>
+        <td style="background: #AEF1AE">
+          new java.util.Date().getTime().toString()
+        </td>
+      </tr><tr>
+        <td>
+          22
+        </td>
+        <td>
+          230
+        </td>
+        <td>
+          688
+          -
+          717
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          scala.Array.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Array.apply[String](key, key, loadDts, src)((ClassTag.apply[String](classOf[java.lang.String]): scala.reflect.ClassTag[String]))
+        </td>
+      </tr><tr>
+        <td>
+          31
+        </td>
+        <td>
+          236
+        </td>
+        <td>
+          859
+          -
+          885
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.StringContext.s
+        </td>
+        <td style="background: #AEF1AE">
+          scala.StringContext.apply(&quot;&quot;, &quot;:&quot;, &quot;&quot;).s(info.name, hub.key)
+        </td>
+      </tr><tr>
+        <td>
+          31
+        </td>
+        <td>
+          235
+        </td>
+        <td>
+          876
+          -
+          883
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.Models.Hub.key
+        </td>
+        <td style="background: #AEF1AE">
+          hub.key
+        </td>
+      </tr><tr>
+        <td>
+          31
+        </td>
+        <td>
+          232
+        </td>
+        <td>
+          873
+          -
+          875
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;:&quot;
+        </td>
+      </tr><tr>
+        <td>
+          31
+        </td>
+        <td>
+          234
+        </td>
+        <td>
+          863
+          -
+          872
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.archive.FileInfo.name
+        </td>
+        <td style="background: #AEF1AE">
+          info.name
+        </td>
+      </tr><tr>
+        <td>
+          31
+        </td>
+        <td>
+          237
+        </td>
+        <td>
+          851
+          -
+          886
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Predef.println
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.println(scala.StringContext.apply(&quot;&quot;, &quot;:&quot;, &quot;&quot;).s(info.name, hub.key))
+        </td>
+      </tr><tr>
+        <td>
+          31
+        </td>
+        <td>
+          231
+        </td>
+        <td>
+          861
+          -
+          862
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;&quot;
+        </td>
+      </tr><tr>
+        <td>
+          31
+        </td>
+        <td>
+          233
+        </td>
+        <td>
+          884
+          -
+          885
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;&quot;
+        </td>
+      </tr><tr>
+        <td>
+          34
+        </td>
+        <td>
+          238
+        </td>
+        <td>
+          999
+          -
+          1043
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.file.CsvFileWriter.apply
+        </td>
+        <td style="background: #AEF1AE">
+          datavault.file.CsvFileWriter.apply(header, stream)
+        </td>
+      </tr><tr>
+        <td>
+          35
+        </td>
+        <td>
+          239
+        </td>
+        <td>
+          1050
+          -
+          1070
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.file.CsvFileWriter.writeTo
+        </td>
+        <td style="background: #AEF1AE">
+          writer.writeTo(path)
+        </td>
+      </tr><tr>
+        <td>
+          40
+        </td>
+        <td>
+          240
+        </td>
+        <td>
+          1199
+          -
+          1243
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Option.getOrElse
+        </td>
+        <td style="background: #AEF1AE">
+          prefix.map[String]({
+  &lt;synthetic&gt; val eta$0$1: scala.collection.immutable.StringOps = scala.Predef.augmentString(name);
+  ((prefix: String) =&gt; eta$0$1.stripPrefix(prefix))
+}).getOrElse[String](name)
+        </td>
+      </tr><tr>
+        <td>
+          41
+        </td>
+        <td>
+          241
+        </td>
+        <td>
+          1282
+          -
+          1326
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Option.getOrElse
+        </td>
+        <td style="background: #AEF1AE">
+          suffix.map[String]({
+  &lt;synthetic&gt; val eta$0$1: scala.collection.immutable.StringOps = scala.Predef.augmentString(name);
+  ((suffix: String) =&gt; eta$0$1.stripSuffix(suffix))
+}).getOrElse[String](name)
+        </td>
+      </tr><tr>
+        <td>
+          43
+        </td>
+        <td>
+          242
+        </td>
+        <td>
+          1334
+          -
+          1377
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Function1.apply
+        </td>
+        <td style="background: #AEF1AE">
+          {
+  ((name: String) =&gt; stripPrefix(name))
+}.andThen[String]({
+  ((name: String) =&gt; stripSuffix(name))
+}).apply(name)
+        </td>
+      </tr><tr>
+        <td>
+          47
+        </td>
+        <td>
+          245
+        </td>
+        <td>
+          1401
+          -
+          1401
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Tuple2.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Tuple2.apply[(Array[String], Stream[Array[String]]), Int](x$1, index)
+        </td>
+      </tr><tr>
+        <td>
+          47
+        </td>
+        <td>
+          259
+        </td>
+        <td>
+          1401
+          -
+          1401
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Tuple5.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Tuple5.apply[((Array[String], Stream[Array[String]]), Int), String =&gt; Array[String], String, Array[String], scala.collection.immutable.Stream[Array[String]]](x$4, row, hn, outputHeader, dataStream)
+        </td>
+      </tr><tr>
+        <td>
+          47
+        </td>
+        <td>
+          263
+        </td>
+        <td>
+          1389
+          -
+          1905
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Option.map
+        </td>
+        <td style="background: #AEF1AE">
+          datavault.file.CsvFile.apply(info.inputStream).csvStream.withFilter(((check$ifrefutable$1: (Array[String], scala.collection.immutable.Stream[Array[String]])) =&gt; (check$ifrefutable$1: (Array[String], scala.collection.immutable.Stream[Array[String]]) @unchecked) match {
+  case (_1: Array[String], _2: scala.collection.immutable.Stream[Array[String]])(Array[String], scala.collection.immutable.Stream[Array[String]])((header @ (_: Array[String])), (stream @ _)) =&gt; true
+  case _ =&gt; false
+})).map[((Array[String], Stream[Array[String]]), Int)](((x$2: (Array[String], Stream[Array[String]])) =&gt; (x$2: (Array[String], Stream[Array[String]]) @unchecked) match {
+  case (x$1 @ (_1: Array[String], _2: Stream[Array[String]])(Array[String], Stream[Array[String]])((header @ (_: Array[String])), (stream @ _))) =&gt; {
+    val index: Int = scala.Predef.refArrayOps[String](header).indexOf[String](hub.key.name);
+    scala.Tuple2.apply[(Array[String], Stream[Array[String]]), Int](x$1, index)
+  }
+})).withFilter(((x$3: ((Array[String], scala.collection.immutable.Stream[Array[String]]), Int)) =&gt; (x$3: ((Array[String], scala.collection.immutable.Stream[Array[String]]), Int) @unchecked) match {
+  case (_1: (Array[String], scala.collection.immutable.Stream[Array[String]]), _2: Int)((Array[String], scala.collection.immutable.Stream[Array[String]]), Int)((_1: Array[String], _2: scala.collection.immutable.Stream[Array[String]])(Array[String], scala.collection.immutable.Stream[Array[String]])((header @ (_: Array[String])), (stream @ _)), (index @ (_: Int))) =&gt; index.&gt;=(0)
+})).map[(((Array[String], Stream[Array[String]]), Int), String =&gt; Array[String], String, Array[String], scala.collection.immutable.Stream[Array[String]])](((x$5: ((Array[String], Stream[Array[String]]), Int)) =&gt; (x$5: ((Array[String], Stream[Array[String]]), Int) @unchecked) match {
+  case (x$4 @ (_1: (Array[String], Stream[Array[String]]), _2: Int)((Array[String], Stream[Array[String]]), Int)((_1: Array[String], _2: Stream[Array[String]])(Array[String], Stream[Array[String]])((header @ (_: Array[String])), (stream @ _)), (index @ (_: Int)))) =&gt; {
+    val row: String =&gt; Array[String] = Hub.this.generateRow(info.name, info.name, hub.key);
+    val hn: String = hubName(prefix, suffix, info.name);
+    val outputHeader: Array[String] = Hub.this.generateHeader(hn, hub.key);
+    val dataStream: scala.collection.immutable.Stream[Array[String]] = stream.map[String, scala.collection.immutable.Stream[String]](((data: Array[String]) =&gt; data.apply(index)))(immutable.this.Stream.canBuildFrom[String]).map[Array[String], scala.collection.immutable.Stream[Array[String]]](row)(immutable.this.Stream.canBuildFrom[Array[String]]);
+    scala.Tuple5.apply[((Array[String], Stream[Array[String]]), Int), String =&gt; Array[String], String, Array[String], scala.collection.immutable.Stream[Array[String]]](x$4, row, hn, outputHeader, dataStream)
+  }
+})).map[(java.nio.file.Path =&gt; com.fasterxml.jackson.databind.SequenceWriter, String)](((x$6: (((Array[String], Stream[Array[String]]), Int), String =&gt; Array[String], String, Array[String], scala.collection.immutable.Stream[Array[String]])) =&gt; (x$6: (((Array[String], Stream[Array[String]]), Int), String =&gt; Array[String], String, Array[String], scala.collection.immutable.Stream[Array[String]]) @unchecked) match {
+  case (_1: ((Array[String], Stream[Array[String]]), Int), _2: String =&gt; Array[String], _3: String, _4: Array[String], _5: scala.collection.immutable.Stream[Array[String]])(((Array[String], Stream[Array[String]]), Int), String =&gt; Array[String], String, Array[String], scala.collection.immutable.Stream[Array[String]])((_1: (Array[String], Stream[Array[String]]), _2: Int)((Array[String], Stream[Array[String]]), Int)((_1: Array[String], _2: Stream[Array[String]])(Array[String], Stream[Array[String]])((header @ (_: Array[String])), (stream @ _)), (index @ (_: Int))), (row @ _), (hn @ _), (outputHeader @ (_: Array[String])), (dataStream @ _)) =&gt; scala.Tuple2.apply[java.nio.file.Path =&gt; com.fasterxml.jackson.databind.SequenceWriter, String](writeFile(outputHeader, dataStream), scala.StringContext.apply(&quot;&quot;, &quot;.csv&quot;).s(hn))
+}))
+        </td>
+      </tr><tr>
+        <td>
+          48
+        </td>
+        <td>
+          244
+        </td>
+        <td>
+          1508
+          -
+          1536
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.collection.GenSeqLike.indexOf
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.refArrayOps[String](header).indexOf[String](hub.key.name)
+        </td>
+      </tr><tr>
+        <td>
+          48
+        </td>
+        <td>
+          243
+        </td>
+        <td>
+          1523
+          -
+          1535
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.Models.Column.name
+        </td>
+        <td style="background: #AEF1AE">
+          hub.key.name
+        </td>
+      </tr><tr>
+        <td>
+          48
+        </td>
+        <td>
+          246
+        </td>
+        <td>
+          1540
+          -
+          1550
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Int.&gt;=
+        </td>
+        <td style="background: #AEF1AE">
+          index.&gt;=(0)
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          247
+        </td>
+        <td>
+          1599
+          -
+          1608
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.archive.FileInfo.name
+        </td>
+        <td style="background: #AEF1AE">
+          info.name
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          250
+        </td>
+        <td>
+          1587
+          -
+          1629
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.vault.Hub.generateRow
+        </td>
+        <td style="background: #AEF1AE">
+          Hub.this.generateRow(info.name, info.name, hub.key)
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          249
+        </td>
+        <td>
+          1621
+          -
+          1628
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.Models.Hub.key
+        </td>
+        <td style="background: #AEF1AE">
+          hub.key
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          248
+        </td>
+        <td>
+          1610
+          -
+          1619
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.archive.FileInfo.name
+        </td>
+        <td style="background: #AEF1AE">
+          info.name
+        </td>
+      </tr><tr>
+        <td>
+          50
+        </td>
+        <td>
+          252
+        </td>
+        <td>
+          1666
+          -
+          1700
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.vault.Hub.hubName
+        </td>
+        <td style="background: #AEF1AE">
+          hubName(prefix, suffix, info.name)
+        </td>
+      </tr><tr>
+        <td>
+          50
+        </td>
+        <td>
+          251
+        </td>
+        <td>
+          1690
+          -
+          1699
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.archive.FileInfo.name
+        </td>
+        <td style="background: #AEF1AE">
+          info.name
+        </td>
+      </tr><tr>
+        <td>
+          51
+        </td>
+        <td>
+          254
+        </td>
+        <td>
+          1737
+          -
+          1764
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.vault.Hub.generateHeader
+        </td>
+        <td style="background: #AEF1AE">
+          Hub.this.generateHeader(hn, hub.key)
+        </td>
+      </tr><tr>
+        <td>
+          51
+        </td>
+        <td>
+          253
+        </td>
+        <td>
+          1756
+          -
+          1763
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.Models.Hub.key
+        </td>
+        <td style="background: #AEF1AE">
+          hub.key
+        </td>
+      </tr><tr>
+        <td>
+          52
+        </td>
+        <td>
+          256
+        </td>
+        <td>
+          1811
+          -
+          1811
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.collection.immutable.Stream.canBuildFrom
+        </td>
+        <td style="background: #AEF1AE">
+          immutable.this.Stream.canBuildFrom[String]
+        </td>
+      </tr><tr>
+        <td>
+          52
+        </td>
+        <td>
+          258
+        </td>
+        <td>
+          1801
+          -
+          1841
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          scala.collection.immutable.Stream.map
+        </td>
+        <td style="background: #AEF1AE">
+          stream.map[String, scala.collection.immutable.Stream[String]](((data: Array[String]) =&gt; data.apply(index)))(immutable.this.Stream.canBuildFrom[String]).map[Array[String], scala.collection.immutable.Stream[Array[String]]](row)(immutable.this.Stream.canBuildFrom[Array[String]])
+        </td>
+      </tr><tr>
+        <td>
+          52
+        </td>
+        <td>
+          255
+        </td>
+        <td>
+          1820
+          -
+          1831
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Array.apply
+        </td>
+        <td style="background: #AEF1AE">
+          data.apply(index)
+        </td>
+      </tr><tr>
+        <td>
+          52
+        </td>
+        <td>
+          257
+        </td>
+        <td>
+          1836
+          -
+          1836
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.collection.immutable.Stream.canBuildFrom
+        </td>
+        <td style="background: #AEF1AE">
+          immutable.this.Stream.canBuildFrom[Array[String]]
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          262
+        </td>
+        <td>
+          1854
+          -
+          1905
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Tuple2.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Tuple2.apply[java.nio.file.Path =&gt; com.fasterxml.jackson.databind.SequenceWriter, String](writeFile(outputHeader, dataStream), scala.StringContext.apply(&quot;&quot;, &quot;.csv&quot;).s(hn))
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          261
+        </td>
+        <td>
+          1892
+          -
+          1904
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.StringContext.s
+        </td>
+        <td style="background: #AEF1AE">
+          scala.StringContext.apply(&quot;&quot;, &quot;.csv&quot;).s(hn)
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          260
+        </td>
+        <td>
+          1855
+          -
+          1890
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.vault.Hub.writeFile
+        </td>
+        <td style="background: #AEF1AE">
+          writeFile(outputHeader, dataStream)
+        </td>
+      </tr><tr>
+        <td>
+          59
+        </td>
+        <td>
+          265
+        </td>
+        <td>
+          2016
+          -
+          2016
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.collection.Seq.canBuildFrom
+        </td>
+        <td style="background: #AEF1AE">
+          collection.this.Seq.canBuildFrom[String]
+        </td>
+      </tr><tr>
+        <td>
+          59
+        </td>
+        <td>
+          264
+        </td>
+        <td>
+          2017
+          -
+          2024
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.Models.Hub.table
+        </td>
+        <td style="background: #AEF1AE">
+          x$7.table
+        </td>
+      </tr><tr>
+        <td>
+          59
+        </td>
+        <td>
+          266
+        </td>
+        <td>
+          2003
+          -
+          2031
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.collection.TraversableOnce.toSet
+        </td>
+        <td style="background: #AEF1AE">
+          hubs.hubs.map[String, Seq[String]](((x$7: datavault.service.Models.Hub) =&gt; x$7.table))(collection.this.Seq.canBuildFrom[String]).toSet[String]
+        </td>
+      </tr><tr>
+        <td>
+          62
+        </td>
+        <td>
+          271
+        </td>
+        <td>
+          2148
+          -
+          2156
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.Tuple2._1
+        </td>
+        <td style="background: #AEF1AE">
+          param._1
+        </td>
+      </tr><tr>
+        <td>
+          62
+        </td>
+        <td>
+          268
+        </td>
+        <td>
+          2094
+          -
+          2119
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Option.map
+        </td>
+        <td style="background: #AEF1AE">
+          hubs.config.map[String](((x$8: datavault.service.Models.HubsConfig) =&gt; x$8.prefix))
+        </td>
+      </tr><tr>
+        <td>
+          62
+        </td>
+        <td>
+          267
+        </td>
+        <td>
+          2110
+          -
+          2118
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.Models.HubsConfig.prefix
+        </td>
+        <td style="background: #AEF1AE">
+          x$8.prefix
+        </td>
+      </tr><tr>
+        <td>
+          62
+        </td>
+        <td>
+          270
+        </td>
+        <td>
+          2121
+          -
+          2146
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Option.map
+        </td>
+        <td style="background: #AEF1AE">
+          hubs.config.map[String](((x$9: datavault.service.Models.HubsConfig) =&gt; x$9.suffix))
+        </td>
+      </tr><tr>
+        <td>
+          62
+        </td>
+        <td>
+          273
+        </td>
+        <td>
+          2082
+          -
+          2167
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.vault.Hub.generateHub
+        </td>
+        <td style="background: #AEF1AE">
+          Hub.this.generateHub(hubs.config.map[String](((x$8: datavault.service.Models.HubsConfig) =&gt; x$8.prefix)), hubs.config.map[String](((x$9: datavault.service.Models.HubsConfig) =&gt; x$9.suffix)), param._1, param._2)
+        </td>
+      </tr><tr>
+        <td>
+          62
+        </td>
+        <td>
+          272
+        </td>
+        <td>
+          2158
+          -
+          2166
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.Tuple2._2
+        </td>
+        <td style="background: #AEF1AE">
+          param._2
+        </td>
+      </tr><tr>
+        <td>
+          62
+        </td>
+        <td>
+          269
+        </td>
+        <td>
+          2137
+          -
+          2145
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.Models.HubsConfig.suffix
+        </td>
+        <td style="background: #AEF1AE">
+          x$9.suffix
+        </td>
+      </tr><tr>
+        <td>
+          64
+        </td>
+        <td>
+          274
+        </td>
+        <td>
+          2229
+          -
+          2238
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.archive.FileInfo.name
+        </td>
+        <td style="background: #AEF1AE">
+          info.name
+        </td>
+      </tr><tr>
+        <td>
+          64
+        </td>
+        <td>
+          275
+        </td>
+        <td>
+          2213
+          -
+          2239
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.collection.GenSetLike.apply
+        </td>
+        <td style="background: #AEF1AE">
+          tablesToProcess.apply(info.name)
+        </td>
+      </tr><tr>
+        <td>
+          65
+        </td>
+        <td>
+          277
+        </td>
+        <td>
+          2325
+          -
+          2336
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Tuple2.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Tuple2.apply[datavault.archive.FileInfo, datavault.service.Models.Hub](info, hub)
+        </td>
+      </tr><tr>
+        <td>
+          65
+        </td>
+        <td>
+          276
+        </td>
+        <td>
+          2303
+          -
+          2312
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.archive.FileInfo.name
+        </td>
+        <td style="background: #AEF1AE">
+          info.name
+        </td>
+      </tr><tr>
+        <td>
+          65
+        </td>
+        <td>
+          278
+        </td>
+        <td>
+          2284
+          -
+          2337
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Option.map
+        </td>
+        <td style="background: #AEF1AE">
+          hubs.withTableName(info.name).map[(datavault.archive.FileInfo, datavault.service.Models.Hub)](((hub: datavault.service.Models.Hub) =&gt; scala.Tuple2.apply[datavault.archive.FileInfo, datavault.service.Models.Hub](info, hub)))
+        </td>
+      </tr><tr>
+        <td>
+          67
+        </td>
+        <td>
+          279
+        </td>
+        <td>
+          2356
+          -
+          2393
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Paths.get
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Paths.get(&quot;out&quot;, &quot;hub&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          68
+        </td>
+        <td>
+          280
+        </td>
+        <td>
+          2398
+          -
+          2443
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Files.createDirectories
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Files.createDirectories(output)
+        </td>
+      </tr><tr>
+        <td>
+          70
+        </td>
+        <td>
+          281
+        </td>
+        <td>
+          2470
+          -
+          2484
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.archive.Archive.stream
+        </td>
+        <td style="background: #AEF1AE">
+          archive.stream
+        </td>
+      </tr><tr>
+        <td>
+          73
+        </td>
+        <td>
+          282
+        </td>
+        <td>
+          2519
+          -
+          2536
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.vault.Hub.haveHubDefinition
+        </td>
+        <td style="background: #AEF1AE">
+          haveHubDefinition(info)
+        </td>
+      </tr><tr>
+        <td>
+          74
+        </td>
+        <td>
+          283
+        </td>
+        <td>
+          2553
+          -
+          2564
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.vault.Hub.infoWithHub
+        </td>
+        <td style="background: #AEF1AE">
+          infoWithHub(info)
+        </td>
+      </tr><tr>
+        <td>
+          74
+        </td>
+        <td>
+          285
+        </td>
+        <td>
+          2552
+          -
+          2552
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.collection.immutable.Stream.canBuildFrom
+        </td>
+        <td style="background: #AEF1AE">
+          immutable.this.Stream.canBuildFrom[(datavault.archive.FileInfo, datavault.service.Models.Hub)]
+        </td>
+      </tr><tr>
+        <td>
+          74
+        </td>
+        <td>
+          284
+        </td>
+        <td>
+          2553
+          -
+          2564
+        </td>
+        <td>
+          ApplyImplicitView
+        </td>
+        <td>
+          scala.Option.option2Iterable
+        </td>
+        <td style="background: #AEF1AE">
+          scala.this.Option.option2Iterable[(datavault.archive.FileInfo, datavault.service.Models.Hub)](infoWithHub(info))
+        </td>
+      </tr><tr>
+        <td>
+          75
+        </td>
+        <td>
+          286
+        </td>
+        <td>
+          2577
+          -
+          2585
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.vault.Hub.generate
+        </td>
+        <td style="background: #AEF1AE">
+          generate(param)
+        </td>
+      </tr><tr>
+        <td>
+          75
+        </td>
+        <td>
+          287
+        </td>
+        <td>
+          2576
+          -
+          2576
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.collection.immutable.Stream.canBuildFrom
+        </td>
+        <td style="background: #AEF1AE">
+          immutable.this.Stream.canBuildFrom[Option[(java.nio.file.Path =&gt; com.fasterxml.jackson.databind.SequenceWriter, String)]]
+        </td>
+      </tr><tr>
+        <td>
+          76
+        </td>
+        <td>
+          293
+        </td>
+        <td>
+          2598
+          -
+          2598
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.collection.immutable.Stream.canBuildFrom
+        </td>
+        <td style="background: #AEF1AE">
+          immutable.this.Stream.canBuildFrom[String]
+        </td>
+      </tr><tr>
+        <td>
+          78
+        </td>
+        <td>
+          288
+        </td>
+        <td>
+          2655
+          -
+          2675
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Path.resolve
+        </td>
+        <td style="background: #AEF1AE">
+          output.resolve(name)
+        </td>
+      </tr><tr>
+        <td>
+          79
+        </td>
+        <td>
+          289
+        </td>
+        <td>
+          2686
+          -
+          2695
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Predef.println
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.println()
+        </td>
+      </tr><tr>
+        <td>
+          80
+        </td>
+        <td>
+          290
+        </td>
+        <td>
+          2706
+          -
+          2713
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Function1.apply
+        </td>
+        <td style="background: #AEF1AE">
+          g.apply(path)
+        </td>
+      </tr><tr>
+        <td>
+          81
+        </td>
+        <td>
+          291
+        </td>
+        <td>
+          2724
+          -
+          2745
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.StringContext.s
+        </td>
+        <td style="background: #AEF1AE">
+          scala.StringContext.apply(&quot;generating &quot;, &quot;&quot;).s(path)
+        </td>
+      </tr><tr>
+        <td>
+          83
+        </td>
+        <td>
+          292
+        </td>
+        <td>
+          2777
+          -
+          2786
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #F0ADAD">
+          &quot;skipped&quot;
+        </td>
+      </tr><tr>
+        <td>
+          85
+        </td>
+        <td>
+          295
+        </td>
+        <td>
+          2490
+          -
+          2818
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.collection.immutable.Stream.foreach
+        </td>
+        <td style="background: #AEF1AE">
+          filesToProcess.filter({
+  ((info: datavault.archive.FileInfo) =&gt; haveHubDefinition(info))
+}).flatMap[(datavault.archive.FileInfo, datavault.service.Models.Hub), scala.collection.immutable.Stream[(datavault.archive.FileInfo, datavault.service.Models.Hub)]]({
+  ((info: datavault.archive.FileInfo) =&gt; scala.this.Option.option2Iterable[(datavault.archive.FileInfo, datavault.service.Models.Hub)](infoWithHub(info)))
+})(immutable.this.Stream.canBuildFrom[(datavault.archive.FileInfo, datavault.service.Models.Hub)]).map[Option[(java.nio.file.Path =&gt; com.fasterxml.jackson.databind.SequenceWriter, String)], scala.collection.immutable.Stream[Option[(java.nio.file.Path =&gt; com.fasterxml.jackson.databind.SequenceWriter, String)]]]({
+  ((param: (datavault.archive.FileInfo, datavault.service.Models.Hub)) =&gt; generate(param))
+})(immutable.this.Stream.canBuildFrom[Option[(java.nio.file.Path =&gt; com.fasterxml.jackson.databind.SequenceWriter, String)]]).map[String, scala.collection.immutable.Stream[String]](((x0$1: Option[(java.nio.file.Path =&gt; com.fasterxml.jackson.databind.SequenceWriter, String)]) =&gt; x0$1 match {
+  case (value: (java.nio.file.Path =&gt; com.fasterxml.jackson.databind.SequenceWriter, String))Some[(java.nio.file.Path =&gt; com.fasterxml.jackson.databind.SequenceWriter, String)]((_1: java.nio.file.Path =&gt; com.fasterxml.jackson.databind.SequenceWriter, _2: String)(java.nio.file.Path =&gt; com.fasterxml.jackson.databind.SequenceWriter, String)((g @ _), (name @ _))) =&gt; {
+    val path: java.nio.file.Path = output.resolve(name);
+    scala.Predef.println();
+    g.apply(path);
+    scala.StringContext.apply(&quot;generating &quot;, &quot;&quot;).s(path)
+  }
+  case scala.None =&gt; &quot;skipped&quot;
+}))(immutable.this.Stream.canBuildFrom[String]).foreach[Unit]({
+  ((x: Any) =&gt; scala.Predef.println(x))
+})
+        </td>
+      </tr><tr>
+        <td>
+          85
+        </td>
+        <td>
+          294
+        </td>
+        <td>
+          2810
+          -
+          2817
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Predef.println
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.println(x)
+        </td>
+      </tr>
+    </table>
+          </div>
+        </div>
+      </body>
+    </html>

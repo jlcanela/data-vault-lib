@@ -36,21 +36,16 @@ object Extractor {
     try {
       Files.createDirectories(destination)
 
-      archive.visit(new Visitor() {
-        def visit(info: FileInfo) {
-          
-          val outputPath = destination.resolve(info.filename)
-
-          status = info
-            .writeTo(outputPath)
+      archive.stream
+        .map(info => {
+          info
+            .writeTo(destination.resolve(info.filename))
             .fold(
               error => FileExtractionStatus(info.filename, 0, Some(error)),
-              Unit => FileExtractionStatus(info.filename, 0, None)
-            ) :: status
-        }
-      })
-
-      status
+              Unit => FileExtractionStatus(info.filename, info.size, None)
+            )
+        })
+        .toList
 
     } catch {
       case ex: Exception => Error(ex.getMessage) :: Nil

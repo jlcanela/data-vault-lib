@@ -7,7 +7,7 @@ import java.io._
 import java.util.zip._
 import java.util.Optional
 
-case class ZipFileInfo(ze: ZipEntry, zis: ZipInputStream) extends FileInfo {
+case class ZipFileInfo(ze: ZipEntry, is: InputStream) extends FileInfo {
   val _ext = ".csv"
   def name = if (filename.endsWith(_ext)) {
     filename.substring(0, filename.length() - _ext.length());
@@ -16,7 +16,8 @@ case class ZipFileInfo(ze: ZipEntry, zis: ZipInputStream) extends FileInfo {
   }
 
   def filename    = ze.getName()
-  def inputStream = zis
+  def size        = ze.getSize()
+  def inputStream = is
   def writeTo(target: Path): Either[String, Unit] = {
 
     try {
@@ -25,30 +26,27 @@ case class ZipFileInfo(ze: ZipEntry, zis: ZipInputStream) extends FileInfo {
     } catch {
       case ex: Exception => Left(s"${ex.getClass().getName()}:${ex.getMessage()}")
     }
-    
+
   }
 }
 
 case class ZipArchive(path: Path) extends Archive {
 
-  def visit(visitor: Visitor) = {
-    val zis: ZipInputStream = new ZipInputStream(
-      FileSystem.open(path)
-    );
+  def stream: Stream[FileInfo] = {
 
-    var ze: ZipEntry = zis.getNextEntry();
+    val zis: ZipInputStream = new ZipInputStream(FileSystem.open(path));
+    var ze: ZipEntry        = null
 
-    while (ze != null) {
-
-      val fileName = ze.getName();
-
-      val info = ZipFileInfo(ze, zis)
-      visitor.visit(info)
-      ze = zis.getNextEntry()
+    def nextStream: Stream[FileInfo] = {
+      zis.getNextEntry() match {
+        case null => {
+          zis.close
+          Stream.empty
+        }
+        case ze => Stream.cons(ZipFileInfo(ze, zis), nextStream)
+      }
     }
-
-    zis.closeEntry()
-    zis.close()
-
+    nextStream
   }
+
 }

@@ -7,7 +7,7 @@ import featurespec.AnyFeatureSpec
 
 import picocli.CommandLine
 
-import datavault.{Constants, DataVault, DataVaultCli}
+import datavault.{DataVault, DataVaultCli}
 
 class GenerateRawDataModelFromZipArchive
     extends AnyFeatureSpec
@@ -24,7 +24,7 @@ class GenerateRawDataModelFromZipArchive
       val ouputFilename = modelFile
       And(s"""an output filename "${ouputFilename}"""")
       val command = generateRawModel
-     
+
       When(s"""a "$command" command is run""")
       val exitCode = runCommand(command)
 
@@ -36,8 +36,8 @@ class GenerateRawDataModelFromZipArchive
 
       And(s""""$modelFile" have expected content""")
       val expected = expectedRawDataModel
-      withClue(s"$modelFile should be expected model =") { current shouldBe expected} 
-  
+      withClue(s"$modelFile should be expected model =") { current shouldBe expected }
+
     }
   }
 }

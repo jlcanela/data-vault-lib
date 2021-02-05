@@ -2,7 +2,7 @@
       <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <title id="title">
-          datavault/io/FileSystem.scala.html
+          datavault/file/CsvFileWriter.scala.html
         </title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/css/theme.default.min.css" type="text/css"/><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/js/jquery.tablesorter.min.js"></script><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" type="text/css"/><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script><script type="text/javascript">
         $(document).ready(function() {$(".tablesorter").tablesorter();});
@@ -22,45 +22,29 @@
         </ul>
         <div class="tab-content">
           <div class="tab-pane active" id="codegrid">
-            <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault.io
+            <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault.file
 </span>2 <span style=''>
-</span>3 <span style=''>import java.io.{InputStream, OutputStream, BufferedWriter, OutputStreamWriter}
-</span>4 <span style=''>import java.nio.file.Path
+</span>3 <span style=''>import com.fasterxml.jackson.dataformat.csv._
+</span>4 <span style=''>import com.fasterxml.jackson.databind.{ObjectWriter}
 </span>5 <span style=''>
-</span>6 <span style=''>trait FileSystem {
-</span>7 <span style=''>  def open(path: Path): InputStream
-</span>8 <span style=''>  def create(path: Path): OutputStream
-</span>9 <span style=''>}
-</span>10 <span style=''>
-</span>11 <span style=''>object LocalFileSystem extends FileSystem {
-</span>12 <span style=''>  def open(path: Path)   = </span><span style='background: #AEF1AE'>java.nio.file.Files.newInputStream(path)</span><span style=''>
-</span>13 <span style=''>  def create(path: Path) = </span><span style='background: #AEF1AE'>java.nio.file.Files.newOutputStream(path)</span><span style=''>
-</span>14 <span style=''>}
+</span>6 <span style=''>case class CsvFileWriter(header: Array[String], stream: Stream[Array[String]]) {
+</span>7 <span style=''>  def writeTo(path: java.nio.file.Path) = {
+</span>8 <span style=''>
+</span>9 <span style=''>    // initialize and configure the mapper
+</span>10 <span style=''>    val mapper = </span><span style='background: #AEF1AE'>new CsvMapper()</span><span style=''>;
+</span>11 <span style=''>
+</span>12 <span style=''>    // initialize the schema
+</span>13 <span style=''>    val builder = </span><span style='background: #AEF1AE'>header.foldLeft(CsvSchema.builder())((builder, name) =&gt; builder.addColumn(name))</span><span style=''>
+</span>14 <span style=''>    val schema  = </span><span style='background: #AEF1AE'>builder.build</span><span style=''>
 </span>15 <span style=''>
-</span>16 <span style=''>object FileSystem {
-</span>17 <span style=''>
-</span>18 <span style=''>  def get(path: Path) = LocalFileSystem
-</span>19 <span style=''>  def open(path: Path) = {
-</span>20 <span style=''>    val fs = </span><span style='background: #AEF1AE'>get(path)</span><span style=''>
-</span>21 <span style=''>    </span><span style='background: #AEF1AE'>fs.open(path)</span><span style=''>
+</span>16 <span style=''>    // map the bean with our schema for the writer
+</span>17 <span style=''>    val writer: ObjectWriter = </span><span style='background: #AEF1AE'>mapper.writerFor(classOf[Array[String]])</span><span style=''>
+</span>18 <span style=''>
+</span>19 <span style=''>    import collection.JavaConverters._
+</span>20 <span style=''>    val iter: java.lang.Iterable[Array[String]] = </span><span style='background: #AEF1AE'>Stream.cons(header, stream).toIterable.asJava</span><span style=''>
+</span>21 <span style=''>    </span><span style='background: #AEF1AE'>writer.writeValues(path.toFile()).writeAll(iter)</span><span style=''>;
 </span>22 <span style=''>  }
-</span>23 <span style=''>  def readContent(path: Path) = {
-</span>24 <span style=''>    val is: InputStream = </span><span style='background: #F0ADAD'>FileSystem.open(path)</span><span style=''>
-</span>25 <span style=''>    val content         = </span><span style='background: #F0ADAD'>scala.io.Source.fromInputStream(is).getLines().mkString(&quot;\n&quot;)</span><span style=''>
-</span>26 <span style=''>    </span><span style='background: #F0ADAD'>is.close()</span><span style=''>
-</span>27 <span style=''>    content
-</span>28 <span style=''>  }
-</span>29 <span style=''>  def create(path: Path) = {
-</span>30 <span style=''>    val fs = </span><span style='background: #AEF1AE'>get(path)</span><span style=''>
-</span>31 <span style=''>    </span><span style='background: #AEF1AE'>fs.create(path)</span><span style=''>
-</span>32 <span style=''>  }
-</span>33 <span style=''>
-</span>34 <span style=''>  def writer(path: Path) = {
-</span>35 <span style=''>    val os: OutputStream = </span><span style='background: #AEF1AE'>create(path)</span><span style=''>
-</span>36 <span style=''>    </span><span style='background: #AEF1AE'>new BufferedWriter(new OutputStreamWriter(os))</span><span style=''>
-</span>37 <span style=''>  }
-</span>38 <span style=''>
-</span>39 <span style=''>}
+</span>23 <span style=''>}
 </span></pre>
           </div>
           <div class="tab-pane" id="statementlist">
@@ -74,255 +58,255 @@
         <th>Code</th>
       </tr><tr>
         <td>
-          12
+          10
         </td>
         <td>
-          167
+          155
         </td>
         <td>
-          296
+          310
           -
-          336
+          325
         </td>
         <td>
           Apply
         </td>
         <td>
-          java.nio.file.Files.newInputStream
+          com.fasterxml.jackson.dataformat.csv.CsvMapper.&lt;init&gt;
         </td>
         <td style="background: #AEF1AE">
-          java.nio.file.Files.newInputStream(path)
+          new com.fasterxml.jackson.dataformat.csv.CsvMapper()
         </td>
       </tr><tr>
         <td>
           13
         </td>
         <td>
-          168
+          158
         </td>
         <td>
-          364
+          431
           -
-          405
+          454
         </td>
         <td>
           Apply
         </td>
         <td>
-          java.nio.file.Files.newOutputStream
+          com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder.addColumn
         </td>
         <td style="background: #AEF1AE">
-          java.nio.file.Files.newOutputStream(path)
+          builder.addColumn(name)
+        </td>
+      </tr><tr>
+        <td>
+          13
+        </td>
+        <td>
+          157
+        </td>
+        <td>
+          391
+          -
+          410
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          com.fasterxml.jackson.dataformat.csv.CsvSchema.builder
+        </td>
+        <td style="background: #AEF1AE">
+          com.fasterxml.jackson.dataformat.csv.CsvSchema.builder()
+        </td>
+      </tr><tr>
+        <td>
+          13
+        </td>
+        <td>
+          156
+        </td>
+        <td>
+          375
+          -
+          381
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.file.CsvFileWriter.header
+        </td>
+        <td style="background: #AEF1AE">
+          CsvFileWriter.this.header
+        </td>
+      </tr><tr>
+        <td>
+          13
+        </td>
+        <td>
+          159
+        </td>
+        <td>
+          375
+          -
+          455
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.collection.IndexedSeqOptimized.foldLeft
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.refArrayOps[String](CsvFileWriter.this.header).foldLeft[com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder](com.fasterxml.jackson.dataformat.csv.CsvSchema.builder())(((builder: com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder, name: String) =&gt; builder.addColumn(name)))
+        </td>
+      </tr><tr>
+        <td>
+          14
+        </td>
+        <td>
+          160
+        </td>
+        <td>
+          474
+          -
+          487
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder.build
+        </td>
+        <td style="background: #AEF1AE">
+          builder.build()
+        </td>
+      </tr><tr>
+        <td>
+          17
+        </td>
+        <td>
+          161
+        </td>
+        <td>
+          571
+          -
+          611
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          com.fasterxml.jackson.databind.ObjectMapper.writerFor
+        </td>
+        <td style="background: #AEF1AE">
+          mapper.writerFor(classOf[[Ljava.lang.String;])
         </td>
       </tr><tr>
         <td>
           20
         </td>
         <td>
-          169
+          164
         </td>
         <td>
-          510
+          702
           -
-          519
+          740
         </td>
         <td>
-          Apply
+          Select
         </td>
         <td>
-          datavault.io.FileSystem.get
+          scala.collection.IterableLike.toIterable
         </td>
         <td style="background: #AEF1AE">
-          FileSystem.this.get(path)
+          scala.`package`.Stream.cons.apply[Array[String]](CsvFileWriter.this.header, CsvFileWriter.this.stream).toIterable
+        </td>
+      </tr><tr>
+        <td>
+          20
+        </td>
+        <td>
+          163
+        </td>
+        <td>
+          722
+          -
+          728
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.file.CsvFileWriter.stream
+        </td>
+        <td style="background: #AEF1AE">
+          CsvFileWriter.this.stream
+        </td>
+      </tr><tr>
+        <td>
+          20
+        </td>
+        <td>
+          165
+        </td>
+        <td>
+          702
+          -
+          747
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.collection.convert.Decorators.AsJava.asJava
+        </td>
+        <td style="background: #AEF1AE">
+          scala.collection.JavaConverters.asJavaIterableConverter[Array[String]](scala.`package`.Stream.cons.apply[Array[String]](CsvFileWriter.this.header, CsvFileWriter.this.stream).toIterable).asJava
+        </td>
+      </tr><tr>
+        <td>
+          20
+        </td>
+        <td>
+          162
+        </td>
+        <td>
+          714
+          -
+          720
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.file.CsvFileWriter.header
+        </td>
+        <td style="background: #AEF1AE">
+          CsvFileWriter.this.header
         </td>
       </tr><tr>
         <td>
           21
         </td>
         <td>
-          170
+          166
         </td>
         <td>
-          524
+          752
           -
-          537
+          800
         </td>
         <td>
           Apply
         </td>
         <td>
-          datavault.io.LocalFileSystem.open
+          com.fasterxml.jackson.databind.SequenceWriter.writeAll
         </td>
         <td style="background: #AEF1AE">
-          fs.open(path)
-        </td>
-      </tr><tr>
-        <td>
-          24
-        </td>
-        <td>
-          171
-        </td>
-        <td>
-          602
-          -
-          623
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          datavault.io.FileSystem.open
-        </td>
-        <td style="background: #F0ADAD">
-          FileSystem.open(path)
-        </td>
-      </tr><tr>
-        <td>
-          25
-        </td>
-        <td>
-          172
-        </td>
-        <td>
-          650
-          -
-          711
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          scala.collection.TraversableOnce.mkString
-        </td>
-        <td style="background: #F0ADAD">
-          scala.io.Source.fromInputStream(is)(io.this.Codec.fallbackSystemCodec).getLines().mkString(&quot;\n&quot;)
-        </td>
-      </tr><tr>
-        <td>
-          26
-        </td>
-        <td>
-          173
-        </td>
-        <td>
-          716
-          -
-          726
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          java.io.InputStream.close
-        </td>
-        <td style="background: #F0ADAD">
-          is.close()
-        </td>
-      </tr><tr>
-        <td>
-          30
-        </td>
-        <td>
-          174
-        </td>
-        <td>
-          785
-          -
-          794
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          datavault.io.FileSystem.get
-        </td>
-        <td style="background: #AEF1AE">
-          FileSystem.this.get(path)
-        </td>
-      </tr><tr>
-        <td>
-          31
-        </td>
-        <td>
-          175
-        </td>
-        <td>
-          799
-          -
-          814
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          datavault.io.LocalFileSystem.create
-        </td>
-        <td style="background: #AEF1AE">
-          fs.create(path)
-        </td>
-      </tr><tr>
-        <td>
-          35
-        </td>
-        <td>
-          176
-        </td>
-        <td>
-          876
-          -
-          888
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          datavault.io.FileSystem.create
-        </td>
-        <td style="background: #AEF1AE">
-          FileSystem.this.create(path)
-        </td>
-      </tr><tr>
-        <td>
-          36
-        </td>
-        <td>
-          178
-        </td>
-        <td>
-          893
-          -
-          939
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          java.io.BufferedWriter.&lt;init&gt;
-        </td>
-        <td style="background: #AEF1AE">
-          new java.io.BufferedWriter(new java.io.OutputStreamWriter(os))
-        </td>
-      </tr><tr>
-        <td>
-          36
-        </td>
-        <td>
-          177
-        </td>
-        <td>
-          912
-          -
-          938
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          java.io.OutputStreamWriter.&lt;init&gt;
-        </td>
-        <td style="background: #AEF1AE">
-          new java.io.OutputStreamWriter(os)
+          writer.writeValues(path.toFile()).writeAll(iter)
         </td>
       </tr>
     </table>
