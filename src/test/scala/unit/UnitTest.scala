@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream
 import java.util.zip.ZipInputStream
 import picocli.CommandLine
 import datavault.DataVaultCli
+import datavault.Command
 import datavault.io._
 
 import java.nio.file.Path
@@ -56,26 +57,15 @@ class UnitTest extends AnyFlatSpec with Matchers {
 
     val noCmd = datavault.Cli.parse(Array("no", "command"))
     noCmd shouldBe datavault.NoCmd
-    val task = Command.toZio(noCmd)
-
-    val runtime = Runtime.default
-    import datavault.service.Command
-     val deps = Repository.repository ++ (Repository.repository >>> Command.command)
-
-    runtime.unsafeRun(task.provideLayer(deps)) shouldBe ()
-    //task shouldBe zio.Task.none
+    val task: zio.Task[_] = Command.toZio(noCmd)
+    task shouldBe zio.Task.none
   }
 
   "Command.extractFiles" should "manage extraction error" in {
-    import datavault.service.Command
-    val q = Command.extractFiles(
+    val result = Command.extractFiles(
       java.nio.file.Paths.get("src", "test", "resources", "fixtures", "table.zip"),
       java.nio.file.Paths.get("README.md", "no-folder")
     )
-    /* val result = Command.extractFiles(
-      java.nio.file.Paths.get("src", "test", "resources", "fixtures", "table.zip"),
-      java.nio.file.Paths.get("README.md", "no-folder")*/
-
     //result shouldBe Constants.ExtractionError
   }
 }

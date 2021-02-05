@@ -27,9 +27,8 @@ trait Fixtures {
 
   val testResources    = "src/test/resources"
   val loadHubDataModel = s"$testResources/$archiveDataModel"
-  val hubConfig        = "fixtures/hub.json"
+  val hubConfig = "fixtures/hub.json"
   val loadHubConfig    = s"$testResources/$hubConfig"
-  def loadHub =
-    s"./data-vault load-hubs -m $loadHubDataModel -c $loadHubConfig -i $folder/$archive -o out/hub"
+  def loadHub          = s"./data-vault load-hubs -m $loadHubDataModel -c $loadHubConfig -i $folder/$archive -o out/hub"
 
 }

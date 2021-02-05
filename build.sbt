@@ -1,7 +1,6 @@
 libraryDependencies ++= Seq(
   "dev.zio" %% "zio-nio-core" % "1.0.0-RC10",
   "dev.zio" %% "zio" % "1.0.4",
-  "dev.zio" %% "zio-macros" % "1.0.4",
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-csv" % "2.8.8",
   "info.picocli" % "picocli" % "4.2.0",
   "org.json4s" % "json4s-native_2.12" % "3.7.0-M8",
