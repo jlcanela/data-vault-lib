@@ -60,8 +60,10 @@ class UnitTest extends AnyFlatSpec with Matchers {
 
     val runtime = Runtime.default
     import datavault.service.Command
-     val deps = Repository.repository ++ (Repository.repository >>> Command.command)
-
+  //   val deps = Repository.repository ++ (Repository.repository >>> Command.command)
+    import datavault.service
+  val deps =  service.FileSystem.fileSystem >>> ( service.Repository.repository ++ service.FileSystem.fileSystem) >>> (service.Command.command ++ service.Repository.repository ++ service.FileSystem.fileSystem)
+  
     runtime.unsafeRun(task.provideLayer(deps)) shouldBe ()
     //task shouldBe zio.Task.none
   }

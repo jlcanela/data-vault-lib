@@ -14,10 +14,10 @@ object DataVault {
   def main(args: Array[String]): Unit = {
 
     val cmd                                        = Cli.parse(args)
-    val task: ZIO[service.Command with service.Repository, Throwable, Any] = service.Command.toZio(cmd)
+    val task: ZIO[service.Command with service.Repository with service.FileSystem, Throwable, Any] = service.Command.toZio(cmd)
     val runtime                                    = Runtime.default
 
-    val deps = service.Repository.repository ++ (service.Repository.repository >>> service.Command.command)
+    val deps =  service.FileSystem.fileSystem >>> ( service.Repository.repository ++ service.FileSystem.fileSystem) >>> (service.Command.command ++ service.Repository.repository ++ service.FileSystem.fileSystem)
     runtime.unsafeRun(task.provideLayer(deps))
   }
 }

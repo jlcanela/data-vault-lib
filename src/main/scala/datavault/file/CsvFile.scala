@@ -8,12 +8,6 @@ import com.fasterxml.jackson.databind.{ObjectWriter}
 
 import datavault.archive.FileInfo
 
-trait Processor {
-  def start(headers: Array[String]): Unit
-  def row(line: Array[String]): Unit
-  def end: Unit
-}
-
 case class CsvFile(inputStream: InputStream) {
 
   def firstLine: String = {

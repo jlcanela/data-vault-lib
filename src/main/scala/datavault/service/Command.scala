@@ -7,7 +7,7 @@ import zio.macros.accessible
 
 import datavault.archive.ZipArchive
 import datavault.extractor.Extractor
-import datavault.model.{HubConfig, Model}
+import datavault.service.Models.Hubs
 import datavault.vault.Hub
 import datavault._
 
@@ -16,12 +16,12 @@ object Command {
 
   // Service definition
   trait Service {
-    def genModel(input: Path, output: Path): ZIO[Repository, Throwable, Unit]
+    def genModel(input: Path, output: Path): ZIO[Repository with FileSystem, Throwable, Any]
     def extractFiles(input: Path, output: Path): Unit
-    def generateHubConfigTemplate(input: Path, output: Path): ZIO[Repository, Throwable, Unit]
-    def loadHubs(model: Path, config: Path, input: Path, output: Path): ZIO[Repository, Throwable, Unit]
+    def generateHubConfigTemplate(input: Path, output: Path): ZIO[Repository with FileSystem, Throwable, Any]
+    def loadHubs(model: Path, config: Path, input: Path, output: Path): ZIO[Repository with FileSystem, Throwable, Any]
 
-    def toZio(cmd: Cmd): ZIO[Repository, Throwable, Any]
+    def toZio(cmd: Cmd): ZIO[Repository with FileSystem, Throwable, Any]
   }
 
   // Module implementation
@@ -30,9 +30,9 @@ object Command {
      
       import datavault.service.Models.Source
 
-      def genModel(input: Path, output: Path) : ZIO[Repository, Throwable, Unit]= for {
+      def genModel(input: Path, output: Path) : ZIO[Repository with FileSystem, Throwable, Any]= for {
         _     <- ZIO.effect(println(s"Running app  $input -> $output"))
-        source = Model.fromArchive(new ZipArchive(input))
+        source = Source(new ZipArchive(input))
         _     <- Repository.saveSource(source, output)
         _     <- ZIO.effect(println(s"Done! "))
       } yield ()
@@ -43,13 +43,13 @@ object Command {
         val errorFound = result.exists(_.error.isDefined)
       }
 
-      def generateHubConfigTemplate(input: Path, output: Path) : ZIO[Repository, Throwable, Unit]= for {
+      def generateHubConfigTemplate(input: Path, output: Path) : ZIO[Repository with FileSystem, Throwable, Unit]= for {
         source <- Repository.loadSource(input)
-        hubs = HubConfig.fromSource(source)
+        hubs = Hubs.fromSource(source)
         _ <- Repository.saveHubs(hubs, output)
       } yield ()
 
-      def loadHubs(model: Path, config: Path, input: Path, output: Path) : ZIO[Repository, Throwable, Unit]= for {
+      def loadHubs(model: Path, config: Path, input: Path, output: Path) : ZIO[Repository with FileSystem, Throwable, Unit]= for {
          m       <- Repository.loadSource(model)
          c       <- Repository.loadHubs(config)
          archive = ZipArchive(input)
@@ -58,7 +58,7 @@ object Command {
 
       import zio._
 
-      def toZio(cmd: Cmd): ZIO[Repository, Throwable, Any] = cmd match {
+      def toZio(cmd: Cmd): ZIO[Repository with FileSystem, Throwable, Any] = cmd match {
         case GenerateModelFile(input, output) => genModel(input, output)
         case ExtractFiles(input, output)      => ZIO.effect(extractFiles(input, output))
         case GenerateHubConfigFile(input, output) => generateHubConfigTemplate(input, output)
