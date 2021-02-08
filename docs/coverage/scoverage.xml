@@ -1,7 +1,7 @@
 <scoverage 
-statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rate="87.50" version="1.0" timestamp="1612492910505">
+statement-count="258" statements-invoked="239" statement-rate="92.64" branch-rate="87.50" version="1.0" timestamp="1612571979991">
     <packages>
-        <package name="datavault" statement-count="67" statements-invoked="67" statement-rate="100.00">
+        <package name="datavault" statement-count="72" statements-invoked="72" statement-rate="100.00">
             <classes>
                 <class 
                 name="datavault.DataVaultCli" filename="datavault/Cli.scala" statement-count="15" statements-invoked="15" statement-rate="100.00" branch-rate="100.00">
@@ -197,43 +197,58 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                     </methods>
 </class>
                 <class 
-                name="datavault.DataVault" filename="datavault/DataVault.scala" statement-count="11" statements-invoked="11" statement-rate="100.00" branch-rate="100.00">
+                name="datavault.DataVault" filename="datavault/DataVault.scala" statement-count="16" statements-invoked="16" statement-rate="100.00" branch-rate="100.00">
                     <methods>
                         <method 
-                        name="datavault/DataVault/main" statement-count="11" statements-invoked="11" statement-rate="100.00" branch-rate="100.00">
+                        name="datavault/DataVault/main" statement-count="16" statements-invoked="16" statement-rate="100.00" branch-rate="100.00">
                             <statements>
                                 <statement 
-                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="609" end="632" line="20" branch="false" invocation-count="1" ignored="false">
+                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="678" end="699" line="22" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="541" end="633" line="20" branch="false" invocation-count="1" ignored="false">
+                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="824" end="824" line="25" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="656" end="679" line="21" branch="false" invocation-count="1" ignored="false">
+                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="732" end="753" line="23" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="673" end="673" line="21" branch="false" invocation-count="1" ignored="false">
+                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="789" end="831" line="25" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="655" end="655" line="21" branch="false" invocation-count="1" ignored="false">
+                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="754" end="754" line="23" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="429" end="455" line="17" branch="false" invocation-count="1" ignored="false">
+                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="757" end="778" line="23" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="571" end="571" line="20" branch="false" invocation-count="1" ignored="false">
+                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="619" end="779" line="22" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="575" end="632" line="20" branch="false" invocation-count="1" ignored="false">
+                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="453" end="479" line="17" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="673" end="673" line="21" branch="false" invocation-count="1" ignored="false">
+                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="807" end="830" line="25" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="653" end="699" line="22" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="675" end="675" line="22" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="824" end="824" line="25" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="729" end="729" line="23" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="806" end="806" line="25" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
                                 package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="336" end="351" line="16" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="638" end="680" line="21" branch="false" invocation-count="1" ignored="false">
+                                package="datavault" class="DataVault" class-type="Object" full-class-name="datavault.DataVault" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/DataVault.scala" method="main" start="713" end="778" line="23" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -249,6 +264,15 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                         <method 
                         name="datavault.archive/ZipFileInfo/name" statement-count="9" statements-invoked="9" statement-rate="100.00" branch-rate="100.00">
                             <statements>
+                                <statement 
+                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="name" start="364" end="377" line="13" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="name" start="322" end="378" line="13" branch="true" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="name" start="309" end="313" line="12" branch="false" invocation-count="1" ignored="false">
+</statement>
                                 <statement 
                                 package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="name" start="395" end="403" line="15" branch="true" invocation-count="1" ignored="false">
 </statement>
@@ -267,31 +291,34 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                                 <statement 
                                 package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="name" start="291" end="314" line="12" branch="false" invocation-count="1" ignored="false">
 </statement>
-                                <statement 
-                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="name" start="309" end="313" line="12" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="name" start="364" end="377" line="13" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="name" start="322" end="378" line="13" branch="true" invocation-count="1" ignored="false">
-</statement>
                             </statements>
 </method>
                         <method 
                         name="datavault.archive/ZipFileInfo/writeTo" statement-count="12" statements-invoked="12" statement-rate="100.00" branch-rate="100.00">
                             <statements>
                                 <statement 
-                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="writeTo" start="696" end="750" line="27" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="writeTo" start="729" end="731" line="27" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="writeTo" start="569" end="637" line="24" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="writeTo" start="732" end="747" line="27" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="writeTo" start="580" end="591" line="24" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="writeTo" start="644" end="653" line="25" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
                                 package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="writeTo" start="703" end="704" line="27" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
                                 package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="writeTo" start="705" end="728" line="27" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="writeTo" start="696" end="750" line="27" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="writeTo" start="569" end="637" line="24" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
                                 package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="writeTo" start="601" end="636" line="24" branch="false" invocation-count="1" ignored="false">
@@ -304,18 +331,6 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
 </statement>
                                 <statement 
                                 package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="writeTo" start="748" end="749" line="27" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="writeTo" start="729" end="731" line="27" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="writeTo" start="732" end="747" line="27" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="writeTo" start="580" end="591" line="24" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.archive" class="ZipFileInfo" class-type="Class" full-class-name="datavault.archive.ZipFileInfo" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="writeTo" start="644" end="653" line="25" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -360,6 +375,9 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                         name="datavault.archive/ZipArchive/nextStream" statement-count="5" statements-invoked="5" statement-rate="100.00" branch-rate="100.00">
                             <statements>
                                 <statement 
+                                package="datavault.archive" class="ZipArchive" class-type="Class" full-class-name="datavault.archive.ZipArchive" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="nextStream" start="1090" end="1102" line="44" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
                                 package="datavault.archive" class="ZipArchive" class-type="Class" full-class-name="datavault.archive.ZipArchive" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="nextStream" start="1132" end="1177" line="46" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
@@ -371,25 +389,22 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                                 <statement 
                                 package="datavault.archive" class="ZipArchive" class-type="Class" full-class-name="datavault.archive.ZipArchive" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="nextStream" start="1010" end="1028" line="41" branch="false" invocation-count="1" ignored="false">
 </statement>
-                                <statement 
-                                package="datavault.archive" class="ZipArchive" class-type="Class" full-class-name="datavault.archive.ZipArchive" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="nextStream" start="1090" end="1102" line="44" branch="false" invocation-count="1" ignored="false">
-</statement>
                             </statements>
 </method>
                         <method 
                         name="datavault.archive/ZipArchive/stream" statement-count="4" statements-invoked="4" statement-rate="100.00" branch-rate="100.00">
                             <statements>
                                 <statement 
-                                package="datavault.archive" class="ZipArchive" class-type="Class" full-class-name="datavault.archive.ZipArchive" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="stream" start="884" end="925" line="37" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.archive" class="ZipArchive" class-type="Class" full-class-name="datavault.archive.ZipArchive" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="stream" start="903" end="924" line="37" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
                                 package="datavault.archive" class="ZipArchive" class-type="Class" full-class-name="datavault.archive.ZipArchive" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="stream" start="957" end="961" line="38" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
                                 package="datavault.archive" class="ZipArchive" class-type="Class" full-class-name="datavault.archive.ZipArchive" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="stream" start="919" end="923" line="37" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.archive" class="ZipArchive" class-type="Class" full-class-name="datavault.archive.ZipArchive" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="stream" start="884" end="925" line="37" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.archive" class="ZipArchive" class-type="Class" full-class-name="datavault.archive.ZipArchive" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/archive/ZipArchive.scala" method="stream" start="903" end="924" line="37" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -406,13 +421,13 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                         name="datavault.extractor/FileExtractionStatus/ordering" statement-count="3" statements-invoked="3" statement-rate="100.00" branch-rate="100.00">
                             <statements>
                                 <statement 
+                                package="datavault.extractor" class="FileExtractionStatus" class-type="Object" full-class-name="datavault.extractor.FileExtractionStatus" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="ordering" start="526" end="526" line="24" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
                                 package="datavault.extractor" class="FileExtractionStatus" class-type="Object" full-class-name="datavault.extractor.FileExtractionStatus" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="ordering" start="527" end="537" line="24" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
                                 package="datavault.extractor" class="FileExtractionStatus" class-type="Object" full-class-name="datavault.extractor.FileExtractionStatus" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="ordering" start="515" end="538" line="24" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.extractor" class="FileExtractionStatus" class-type="Object" full-class-name="datavault.extractor.FileExtractionStatus" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="ordering" start="526" end="526" line="24" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -425,16 +440,34 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                         name="datavault.extractor/Extractor/extract" statement-count="17" statements-invoked="12" statement-rate="70.59" branch-rate="100.00">
                             <statements>
                                 <statement 
-                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="818" end="852" line="42" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="896" end="947" line="44" branch="false" invocation-count="0" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="1129" end="1135" line="51" branch="false" invocation-count="0" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="1018" end="1022" line="45" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="700" end="736" line="37" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="771" end="771" line="40" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="917" end="930" line="44" branch="false" invocation-count="0" ignored="false">
 </statement>
                                 <statement 
                                 package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="792" end="1037" line="43" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="700" end="1064" line="36" branch="true" invocation-count="1" ignored="false">
+                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="818" end="852" line="42" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
                                 package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="935" end="946" line="44" branch="false" invocation-count="0" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="700" end="1064" line="36" branch="true" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
                                 package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="1007" end="1016" line="45" branch="false" invocation-count="1" ignored="false">
@@ -446,10 +479,10 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                                 package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="992" end="1005" line="45" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="971" end="1023" line="45" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="838" end="851" line="42" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="838" end="851" line="42" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="971" end="1023" line="45" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
                                 package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="744" end="1064" line="48" branch="false" invocation-count="1" ignored="false">
@@ -457,29 +490,17 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                                 <statement 
                                 package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="932" end="933" line="44" branch="false" invocation-count="0" ignored="false">
 </statement>
-                                <statement 
-                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="771" end="771" line="40" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="896" end="947" line="44" branch="false" invocation-count="0" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="1129" end="1135" line="51" branch="false" invocation-count="0" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="700" end="736" line="37" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="1018" end="1022" line="45" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="extract" start="917" end="930" line="44" branch="false" invocation-count="0" ignored="false">
-</statement>
                             </statements>
 </method>
                         <method 
                         name="datavault.extractor/Extractor/listFiles" statement-count="7" statements-invoked="7" statement-rate="100.00" branch-rate="100.00">
                             <statements>
+                                <statement 
+                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="listFiles" start="1272" end="1283" line="58" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="listFiles" start="1219" end="1219" line="57" branch="false" invocation-count="1" ignored="false">
+</statement>
                                 <statement 
                                 package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="listFiles" start="1235" end="1290" line="58" branch="false" invocation-count="1" ignored="false">
 </statement>
@@ -495,12 +516,6 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                                 <statement 
                                 package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="listFiles" start="1191" end="1296" line="57" branch="false" invocation-count="1" ignored="false">
 </statement>
-                                <statement 
-                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="listFiles" start="1219" end="1219" line="57" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.extractor" class="Extractor" class-type="Object" full-class-name="datavault.extractor.Extractor" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="listFiles" start="1272" end="1283" line="58" branch="false" invocation-count="1" ignored="false">
-</statement>
                             </statements>
 </method>
                     </methods>
@@ -512,10 +527,10 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                         name="datavault.extractor/Error/error" statement-count="2" statements-invoked="0" statement-rate="0.00" branch-rate="0.00">
                             <statements>
                                 <statement 
-                                package="datavault.extractor" class="Error" class-type="Class" full-class-name="datavault.extractor.Error" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="error" start="398" end="411" line="19" branch="false" invocation-count="0" ignored="false">
+                                package="datavault.extractor" class="Error" class-type="Class" full-class-name="datavault.extractor.Error" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="error" start="403" end="410" line="19" branch="false" invocation-count="0" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.extractor" class="Error" class-type="Class" full-class-name="datavault.extractor.Error" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="error" start="403" end="410" line="19" branch="false" invocation-count="0" ignored="false">
+                                package="datavault.extractor" class="Error" class-type="Class" full-class-name="datavault.extractor.Error" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/extractor/Extractor.scala" method="error" start="398" end="411" line="19" branch="false" invocation-count="0" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -532,37 +547,37 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                         name="datavault.file/CsvFile/csvStream" statement-count="11" statements-invoked="9" statement-rate="81.82" branch-rate="50.00">
                             <statements>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="723" end="769" line="29" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="744" end="755" line="27" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="933" end="940" line="37" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="740" end="740" line="27" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="785" end="849" line="31" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="607" end="653" line="23" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="888" end="892" line="34" branch="false" invocation-count="0" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="817" end="824" line="31" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="701" end="716" line="27" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="669" end="733" line="25" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="856" end="856" line="33" branch="true" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="765" end="776" line="28" branch="true" invocation-count="0" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="837" end="848" line="31" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="772" end="776" line="28" branch="false" invocation-count="0" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="802" end="824" line="31" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="740" end="740" line="27" branch="true" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="860" end="871" line="33" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="585" end="600" line="21" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="856" end="856" line="33" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="721" end="732" line="25" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="881" end="892" line="34" branch="true" invocation-count="0" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="csvStream" start="686" end="708" line="25" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -570,19 +585,19 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                         name="datavault.file/CsvFile/firstLine" statement-count="5" statements-invoked="5" statement-rate="100.00" branch-rate="100.00">
                             <statements>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="firstLine" start="520" end="531" line="20" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="firstLine" start="382" end="416" line="14" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="firstLine" start="567" end="589" line="21" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="firstLine" start="478" end="493" line="16" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="firstLine" start="479" end="533" line="20" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="firstLine" start="404" end="415" line="14" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="firstLine" start="498" end="532" line="20" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="firstLine" start="451" end="473" line="15" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="firstLine" start="594" end="609" line="22" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="firstLine" start="363" end="417" line="14" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -590,28 +605,28 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                         name="datavault.file/CsvFile/stream" statement-count="8" statements-invoked="8" statement-rate="100.00" branch-rate="100.00">
                             <statements>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="stream" start="1006" end="1034" line="40" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="stream" start="890" end="918" line="34" branch="true" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="stream" start="1054" end="1066" line="42" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="stream" start="967" end="984" line="39" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="stream" start="1078" end="1101" line="45" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="stream" start="890" end="918" line="34" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="stream" start="1018" end="1025" line="40" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="stream" start="938" end="950" line="36" branch="true" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="stream" start="986" end="996" line="39" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="stream" start="938" end="950" line="36" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="stream" start="1006" end="1034" line="40" branch="true" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="stream" start="962" end="985" line="39" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="stream" start="1083" end="1100" line="45" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="stream" start="902" end="909" line="34" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="stream" start="1054" end="1066" line="42" branch="true" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFile" class-type="Class" full-class-name="datavault.file.CsvFile" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFile.scala" method="stream" start="870" end="880" line="33" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -624,6 +639,15 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                         name="datavault.file/CsvFileWriter/writeTo" statement-count="12" statements-invoked="12" statement-rate="100.00" branch-rate="100.00">
                             <statements>
                                 <statement 
+                                package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="375" end="455" line="13" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="714" end="720" line="20" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="571" end="611" line="17" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
                                 package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="310" end="325" line="10" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
@@ -633,31 +657,22 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                                 package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="431" end="454" line="13" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="752" end="800" line="21" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
                                 package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="474" end="487" line="14" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
                                 package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="722" end="728" line="20" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="391" end="410" line="13" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="752" end="800" line="21" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="375" end="381" line="13" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="391" end="410" line="13" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
                                 package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="702" end="747" line="20" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="375" end="455" line="13" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="714" end="720" line="20" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="571" end="611" line="17" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.file" class="CsvFileWriter" class-type="Class" full-class-name="datavault.file.CsvFileWriter" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/file/CsvFileWriter.scala" method="writeTo" start="375" end="381" line="13" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -665,22 +680,22 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
 </class>
             </classes>
         </package>
-        <package name="datavault.io" statement-count="12" statements-invoked="9" statement-rate="75.00">
+        <package name="datavault.io" statement-count="12" statements-invoked="3" statement-rate="25.00">
             <classes>
                 <class 
-                name="datavault.io.FileSystem" filename="datavault/io/FileSystem.scala" statement-count="10" statements-invoked="7" statement-rate="70.00" branch-rate="100.00">
+                name="datavault.io.FileSystem" filename="datavault/io/FileSystem.scala" statement-count="10" statements-invoked="2" statement-rate="20.00" branch-rate="100.00">
                     <methods>
                         <method 
-                        name="datavault.io/FileSystem/writer" statement-count="3" statements-invoked="3" statement-rate="100.00" branch-rate="100.00">
+                        name="datavault.io/FileSystem/writer" statement-count="3" statements-invoked="0" statement-rate="0.00" branch-rate="0.00">
                             <statements>
                                 <statement 
-                                package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="writer" start="876" end="888" line="35" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="writer" start="912" end="938" line="36" branch="false" invocation-count="0" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="writer" start="893" end="939" line="36" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="writer" start="876" end="888" line="35" branch="false" invocation-count="0" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="writer" start="912" end="938" line="36" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="writer" start="893" end="939" line="36" branch="false" invocation-count="0" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -688,21 +703,21 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                         name="datavault.io/FileSystem/open" statement-count="2" statements-invoked="2" statement-rate="100.00" branch-rate="100.00">
                             <statements>
                                 <statement 
-                                package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="open" start="510" end="519" line="20" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="open" start="524" end="537" line="21" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="open" start="524" end="537" line="21" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="open" start="510" end="519" line="20" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>
                         <method 
-                        name="datavault.io/FileSystem/create" statement-count="2" statements-invoked="2" statement-rate="100.00" branch-rate="100.00">
+                        name="datavault.io/FileSystem/create" statement-count="2" statements-invoked="0" statement-rate="0.00" branch-rate="0.00">
                             <statements>
                                 <statement 
-                                package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="create" start="799" end="814" line="31" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="create" start="799" end="814" line="31" branch="false" invocation-count="0" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="create" start="785" end="794" line="30" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="create" start="785" end="794" line="30" branch="false" invocation-count="0" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -710,26 +725,26 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                         name="datavault.io/FileSystem/readContent" statement-count="3" statements-invoked="0" statement-rate="0.00" branch-rate="0.00">
                             <statements>
                                 <statement 
+                                package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="readContent" start="602" end="623" line="24" branch="false" invocation-count="0" ignored="false">
+</statement>
+                                <statement 
                                 package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="readContent" start="716" end="726" line="26" branch="false" invocation-count="0" ignored="false">
 </statement>
                                 <statement 
                                 package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="readContent" start="650" end="711" line="25" branch="false" invocation-count="0" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.io" class="FileSystem" class-type="Object" full-class-name="datavault.io.FileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="readContent" start="602" end="623" line="24" branch="false" invocation-count="0" ignored="false">
 </statement>
                             </statements>
 </method>
                     </methods>
 </class>
                 <class 
-                name="datavault.io.LocalFileSystem" filename="datavault/io/FileSystem.scala" statement-count="2" statements-invoked="2" statement-rate="100.00" branch-rate="100.00">
+                name="datavault.io.LocalFileSystem" filename="datavault/io/FileSystem.scala" statement-count="2" statements-invoked="1" statement-rate="50.00" branch-rate="100.00">
                     <methods>
                         <method 
-                        name="datavault.io/LocalFileSystem/create" statement-count="1" statements-invoked="1" statement-rate="100.00" branch-rate="100.00">
+                        name="datavault.io/LocalFileSystem/create" statement-count="1" statements-invoked="0" statement-rate="0.00" branch-rate="0.00">
                             <statements>
                                 <statement 
-                                package="datavault.io" class="LocalFileSystem" class-type="Object" full-class-name="datavault.io.LocalFileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="create" start="364" end="405" line="13" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.io" class="LocalFileSystem" class-type="Object" full-class-name="datavault.io.LocalFileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="create" start="364" end="405" line="13" branch="false" invocation-count="0" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -738,218 +753,6 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                             <statements>
                                 <statement 
                                 package="datavault.io" class="LocalFileSystem" class-type="Object" full-class-name="datavault.io.LocalFileSystem" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/io/FileSystem.scala" method="open" start="296" end="336" line="12" branch="false" invocation-count="1" ignored="false">
-</statement>
-                            </statements>
-</method>
-                    </methods>
-</class>
-            </classes>
-        </package>
-        <package name="datavault.model" statement-count="51" statements-invoked="42" statement-rate="82.35">
-            <classes>
-                <class 
-                name="datavault.model.Model" filename="datavault/model/Model.scala" statement-count="20" statements-invoked="20" statement-rate="100.00" branch-rate="100.00">
-                    <methods>
-                        <method 
-                        name="datavault.model/Model/fromArchive" statement-count="18" statements-invoked="18" statement-rate="100.00" branch-rate="100.00">
-                            <statements>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="756" end="765" line="29" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="888" end="888" line="33" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="857" end="857" line="33" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="790" end="803" line="29" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="840" end="894" line="33" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="546" end="834" line="31" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="694" end="694" line="27" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="605" end="741" line="28" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="867" end="886" line="33" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="733" end="733" line="28" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="847" end="893" line="33" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="767" end="788" line="29" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="695" end="717" line="27" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="565" end="565" line="22" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="750" end="813" line="29" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="605" end="662" line="25" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="734" end="740" line="28" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="fromArchive" start="868" end="878" line="33" branch="false" invocation-count="1" ignored="false">
-</statement>
-                            </statements>
-</method>
-                        <method 
-                        name="datavault.model/Model/&lt;none&gt;" statement-count="2" statements-invoked="2" statement-rate="100.00" branch-rate="100.00">
-                            <statements>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="&lt;none&gt;" start="453" end="487" line="19" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="Model" class-type="Object" full-class-name="datavault.model.Model" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/Model.scala" method="&lt;none&gt;" start="475" end="486" line="19" branch="false" invocation-count="1" ignored="false">
-</statement>
-                            </statements>
-</method>
-                    </methods>
-</class>
-                <class 
-                name="datavault.model.HubConfig" filename="datavault/model/HubConfig.scala" statement-count="31" statements-invoked="22" statement-rate="70.97" branch-rate="100.00">
-                    <methods>
-                        <method 
-                        name="datavault.model/HubConfig/save" statement-count="4" statements-invoked="0" statement-rate="0.00" branch-rate="0.00">
-                            <statements>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="save" start="1224" end="1238" line="46" branch="false" invocation-count="0" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="save" start="1194" end="1219" line="45" branch="false" invocation-count="0" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="save" start="1205" end="1205" line="45" branch="false" invocation-count="0" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="save" start="1166" end="1189" line="44" branch="false" invocation-count="0" ignored="false">
-</statement>
-                            </statements>
-</method>
-                        <method 
-                        name="datavault.model/HubConfig/load" statement-count="5" statements-invoked="0" statement-rate="0.00" branch-rate="0.00">
-                            <statements>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="load" start="999" end="1060" line="38" branch="false" invocation-count="0" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="load" start="1076" end="1095" line="39" branch="false" invocation-count="0" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="load" start="957" end="978" line="37" branch="false" invocation-count="0" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="load" start="1086" end="1086" line="39" branch="false" invocation-count="0" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="load" start="1086" end="1086" line="39" branch="false" invocation-count="0" ignored="false">
-</statement>
-                            </statements>
-</method>
-                        <method 
-                        name="datavault.model/HubConfig/&lt;none&gt;" statement-count="4" statements-invoked="4" statement-rate="100.00" branch-rate="100.00">
-                            <statements>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="&lt;none&gt;" start="421" end="449" line="20" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="&lt;none&gt;" start="421" end="447" line="20" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="&lt;none&gt;" start="375" end="409" line="18" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="&lt;none&gt;" start="397" end="408" line="18" branch="false" invocation-count="1" ignored="false">
-</statement>
-                            </statements>
-</method>
-                        <method 
-                        name="datavault.model/HubConfig/detectName" statement-count="2" statements-invoked="2" statement-rate="100.00" branch-rate="100.00">
-                            <statements>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="detectName" start="549" end="553" line="23" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="detectName" start="518" end="528" line="22" branch="false" invocation-count="1" ignored="false">
-</statement>
-                            </statements>
-</method>
-                        <method 
-                        name="datavault.model/HubConfig/detectKey" statement-count="3" statements-invoked="3" statement-rate="100.00" branch-rate="100.00">
-                            <statements>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="detectKey" start="634" end="647" line="27" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="detectKey" start="614" end="648" line="27" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="detectKey" start="624" end="647" line="27" branch="false" invocation-count="1" ignored="false">
-</statement>
-                            </statements>
-</method>
-                        <method 
-                        name="datavault.model/HubConfig/fromTable" statement-count="7" statements-invoked="7" statement-rate="100.00" branch-rate="100.00">
-                            <statements>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="fromTable" start="798" end="808" line="32" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="fromTable" start="682" end="814" line="30" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="fromTable" start="727" end="814" line="31" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="fromTable" start="786" end="796" line="32" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="fromTable" start="751" end="764" line="31" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="fromTable" start="776" end="814" line="32" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="fromTable" start="711" end="721" line="30" branch="false" invocation-count="1" ignored="false">
-</statement>
-                            </statements>
-</method>
-                        <method 
-                        name="datavault.model/HubConfig/fromSource" statement-count="6" statements-invoked="6" statement-rate="100.00" branch-rate="100.00">
-                            <statements>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="fromSource" start="851" end="908" line="34" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="fromSource" start="897" end="906" line="34" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="fromSource" start="862" end="907" line="34" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="fromSource" start="896" end="896" line="34" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="fromSource" start="856" end="860" line="34" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.model" class="HubConfig" class-type="Object" full-class-name="datavault.model.HubConfig" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/model/HubConfig.scala" method="fromSource" start="897" end="906" line="34" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -966,6 +769,15 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                         name="datavault.vault/Hub/generate" statement-count="7" statements-invoked="7" statement-rate="100.00" branch-rate="100.00">
                             <statements>
                                 <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generate" start="2022" end="2107" line="55" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generate" start="2098" end="2106" line="55" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generate" start="2077" end="2085" line="55" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generate" start="2088" end="2096" line="55" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
@@ -977,77 +789,11 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                                 <statement 
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generate" start="2061" end="2086" line="55" branch="false" invocation-count="1" ignored="false">
 </statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generate" start="2022" end="2107" line="55" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generate" start="2098" end="2106" line="55" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generate" start="2077" end="2085" line="55" branch="false" invocation-count="1" ignored="false">
-</statement>
                             </statements>
 </method>
                         <method 
                         name="datavault.vault/Hub/generateHub" statement-count="28" statements-invoked="28" statement-rate="100.00" branch-rate="100.00">
                             <statements>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1348" end="1348" line="41" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="800" end="826" line="25" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1702" end="1709" line="45" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="817" end="824" line="25" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1455" end="1483" line="42" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1800" end="1851" line="47" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1757" end="1757" line="46" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1546" end="1555" line="43" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1534" end="1576" line="43" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1348" end="1348" line="41" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="814" end="816" line="25" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1568" end="1575" line="43" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1747" end="1787" line="46" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="802" end="803" line="25" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1838" end="1850" line="47" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1470" end="1482" line="42" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1612" end="1646" line="44" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="804" end="813" line="25" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1487" end="1497" line="42" branch="false" invocation-count="1" ignored="false">
-</statement>
                                 <statement 
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1766" end="1777" line="46" branch="false" invocation-count="1" ignored="false">
 </statement>
@@ -1055,7 +801,10 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="792" end="827" line="25" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1683" end="1710" line="45" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1487" end="1497" line="42" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="802" end="803" line="25" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1336" end="1851" line="41" branch="false" invocation-count="1" ignored="false">
@@ -1067,13 +816,67 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1782" end="1782" line="46" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1636" end="1645" line="44" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1801" end="1836" line="47" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1636" end="1645" line="44" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="825" end="826" line="25" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="800" end="826" line="25" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1348" end="1348" line="41" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1683" end="1710" line="45" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1800" end="1851" line="47" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1455" end="1483" line="42" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1702" end="1709" line="45" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="817" end="824" line="25" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1546" end="1555" line="43" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1757" end="1757" line="46" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1534" end="1576" line="43" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1348" end="1348" line="41" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="814" end="816" line="25" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1747" end="1787" line="46" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1568" end="1575" line="43" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1612" end="1646" line="44" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1838" end="1850" line="47" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="804" end="813" line="25" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHub" start="1470" end="1482" line="42" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -1089,15 +892,6 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                         name="datavault.vault/Hub/filesToProcess" statement-count="7" statements-invoked="7" statement-rate="100.00" branch-rate="100.00">
                             <statements>
                                 <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="filesToProcess" start="2511" end="2519" line="68" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="filesToProcess" start="2487" end="2498" line="67" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="filesToProcess" start="2486" end="2486" line="67" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="filesToProcess" start="2453" end="2470" line="66" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
@@ -1109,16 +903,25 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                                 <statement 
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="filesToProcess" start="2510" end="2510" line="68" branch="false" invocation-count="1" ignored="false">
 </statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="filesToProcess" start="2511" end="2519" line="68" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="filesToProcess" start="2487" end="2498" line="67" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="filesToProcess" start="2486" end="2486" line="67" branch="false" invocation-count="1" ignored="false">
+</statement>
                             </statements>
 </method>
                         <method 
                         name="datavault.vault/Hub/generateRow" statement-count="2" statements-invoked="2" statement-rate="100.00" branch-rate="100.00">
                             <statements>
                                 <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateRow" start="597" end="635" line="20" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateRow" start="657" end="686" line="21" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateRow" start="657" end="686" line="21" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateRow" start="597" end="635" line="20" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -1126,10 +929,10 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                         name="datavault.vault/Hub/writeFile" statement-count="2" statements-invoked="2" statement-rate="100.00" branch-rate="100.00">
                             <statements>
                                 <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="writeFile" start="940" end="984" line="28" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="writeFile" start="991" end="1011" line="29" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="writeFile" start="991" end="1011" line="29" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="writeFile" start="940" end="984" line="28" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -1137,10 +940,10 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                         name="datavault.vault/Hub/haveHubDefinition" statement-count="2" statements-invoked="2" statement-rate="100.00" branch-rate="100.00">
                             <statements>
                                 <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="haveHubDefinition" start="2169" end="2178" line="57" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="haveHubDefinition" start="2153" end="2179" line="57" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="haveHubDefinition" start="2153" end="2179" line="57" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="haveHubDefinition" start="2169" end="2178" line="57" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>
@@ -1148,28 +951,16 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                         name="datavault.vault/Hub/stripSuffix" statement-count="2" statements-invoked="2" statement-rate="100.00" branch-rate="100.00">
                             <statements>
                                 <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="stripSuffix" start="1229" end="1273" line="35" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="stripSuffix" start="1281" end="1324" line="37" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="stripSuffix" start="1281" end="1324" line="37" branch="false" invocation-count="1" ignored="false">
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="stripSuffix" start="1229" end="1273" line="35" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>
                         <method 
                         name="datavault.vault/Hub/generateHeader" statement-count="8" statements-invoked="8" statement-rate="100.00" branch-rate="100.00">
                             <statements>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHeader" start="488" end="501" line="18" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHeader" start="472" end="486" line="18" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHeader" start="421" end="442" line="18" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHeader" start="450" end="470" line="18" branch="false" invocation-count="1" ignored="false">
-</statement>
                                 <statement 
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHeader" start="407" end="502" line="18" branch="false" invocation-count="1" ignored="false">
 </statement>
@@ -1182,25 +973,52 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                                 <statement 
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHeader" start="413" end="448" line="18" branch="false" invocation-count="1" ignored="false">
 </statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHeader" start="488" end="501" line="18" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHeader" start="472" end="486" line="18" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHeader" start="421" end="442" line="18" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="generateHeader" start="450" end="470" line="18" branch="false" invocation-count="1" ignored="false">
+</statement>
                             </statements>
 </method>
                         <method 
                         name="datavault.vault/Hub/infoWithHub" statement-count="3" statements-invoked="3" statement-rate="100.00" branch-rate="100.00">
                             <statements>
                                 <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="infoWithHub" start="2218" end="2271" line="58" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="infoWithHub" start="2259" end="2270" line="58" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="infoWithHub" start="2237" end="2246" line="58" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="infoWithHub" start="2218" end="2271" line="58" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>
                         <method 
                         name="datavault.vault/Hub/process" statement-count="13" statements-invoked="12" statement-rate="92.31" branch-rate="100.00">
                             <statements>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="process" start="1963" end="1970" line="53" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="process" start="2658" end="2679" line="74" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="process" start="2640" end="2647" line="73" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="process" start="2532" end="2532" line="69" branch="false" invocation-count="1" ignored="false">
+</statement>
+                                <statement 
+                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="process" start="1949" end="1977" line="53" branch="false" invocation-count="1" ignored="false">
+</statement>
                                 <statement 
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="process" start="2424" end="2752" line="78" branch="false" invocation-count="1" ignored="false">
 </statement>
@@ -1217,9 +1035,6 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="process" start="1962" end="1962" line="53" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="process" start="2658" end="2679" line="74" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="process" start="2744" end="2751" line="78" branch="false" invocation-count="1" ignored="false">
 </statement>
                                 <statement 
@@ -1227,18 +1042,6 @@ statement-count="304" statements-invoked="282" statement-rate="92.76" branch-rat
 </statement>
                                 <statement 
                                 package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="process" start="2589" end="2609" line="71" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="process" start="1963" end="1970" line="53" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="process" start="2640" end="2647" line="73" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="process" start="2532" end="2532" line="69" branch="false" invocation-count="1" ignored="false">
-</statement>
-                                <statement 
-                                package="datavault.vault" class="Hub" class-type="Object" full-class-name="datavault.vault.Hub" source="/home/jlcanela/dev/github.com/jlcanela/data-vault-lib/src/main/scala/datavault/vault/Hub.scala" method="process" start="1949" end="1977" line="53" branch="false" invocation-count="1" ignored="false">
 </statement>
                             </statements>
 </method>

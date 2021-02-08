@@ -34,7 +34,7 @@
 </span>10 <span style=''>
 </span>11 <span style=''>object LocalFileSystem extends FileSystem {
 </span>12 <span style=''>  def open(path: Path)   = </span><span style='background: #AEF1AE'>java.nio.file.Files.newInputStream(path)</span><span style=''>
-</span>13 <span style=''>  def create(path: Path) = </span><span style='background: #AEF1AE'>java.nio.file.Files.newOutputStream(path)</span><span style=''>
+</span>13 <span style=''>  def create(path: Path) = </span><span style='background: #F0ADAD'>java.nio.file.Files.newOutputStream(path)</span><span style=''>
 </span>14 <span style=''>}
 </span>15 <span style=''>
 </span>16 <span style=''>object FileSystem {
@@ -51,13 +51,13 @@
 </span>27 <span style=''>    content
 </span>28 <span style=''>  }
 </span>29 <span style=''>  def create(path: Path) = {
-</span>30 <span style=''>    val fs = </span><span style='background: #AEF1AE'>get(path)</span><span style=''>
-</span>31 <span style=''>    </span><span style='background: #AEF1AE'>fs.create(path)</span><span style=''>
+</span>30 <span style=''>    val fs = </span><span style='background: #F0ADAD'>get(path)</span><span style=''>
+</span>31 <span style=''>    </span><span style='background: #F0ADAD'>fs.create(path)</span><span style=''>
 </span>32 <span style=''>  }
 </span>33 <span style=''>
 </span>34 <span style=''>  def writer(path: Path) = {
-</span>35 <span style=''>    val os: OutputStream = </span><span style='background: #AEF1AE'>create(path)</span><span style=''>
-</span>36 <span style=''>    </span><span style='background: #AEF1AE'>new BufferedWriter(new OutputStreamWriter(os))</span><span style=''>
+</span>35 <span style=''>    val os: OutputStream = </span><span style='background: #F0ADAD'>create(path)</span><span style=''>
+</span>36 <span style=''>    </span><span style='background: #F0ADAD'>new BufferedWriter(new OutputStreamWriter(os))</span><span style=''>
 </span>37 <span style=''>  }
 </span>38 <span style=''>
 </span>39 <span style=''>}
@@ -77,7 +77,7 @@
           12
         </td>
         <td>
-          167
+          172
         </td>
         <td>
           296
@@ -98,7 +98,7 @@
           13
         </td>
         <td>
-          168
+          173
         </td>
         <td>
           364
@@ -111,7 +111,7 @@
         <td>
           java.nio.file.Files.newOutputStream
         </td>
-        <td style="background: #AEF1AE">
+        <td style="background: #F0ADAD">
           java.nio.file.Files.newOutputStream(path)
         </td>
       </tr><tr>
@@ -119,7 +119,7 @@
           20
         </td>
         <td>
-          169
+          174
         </td>
         <td>
           510
@@ -140,7 +140,7 @@
           21
         </td>
         <td>
-          170
+          175
         </td>
         <td>
           524
@@ -161,7 +161,7 @@
           24
         </td>
         <td>
-          171
+          176
         </td>
         <td>
           602
@@ -182,7 +182,7 @@
           25
         </td>
         <td>
-          172
+          177
         </td>
         <td>
           650
@@ -203,7 +203,7 @@
           26
         </td>
         <td>
-          173
+          178
         </td>
         <td>
           716
@@ -224,7 +224,7 @@
           30
         </td>
         <td>
-          174
+          179
         </td>
         <td>
           785
@@ -237,7 +237,7 @@
         <td>
           datavault.io.FileSystem.get
         </td>
-        <td style="background: #AEF1AE">
+        <td style="background: #F0ADAD">
           FileSystem.this.get(path)
         </td>
       </tr><tr>
@@ -245,7 +245,7 @@
           31
         </td>
         <td>
-          175
+          180
         </td>
         <td>
           799
@@ -258,7 +258,7 @@
         <td>
           datavault.io.LocalFileSystem.create
         </td>
-        <td style="background: #AEF1AE">
+        <td style="background: #F0ADAD">
           fs.create(path)
         </td>
       </tr><tr>
@@ -266,7 +266,7 @@
           35
         </td>
         <td>
-          176
+          181
         </td>
         <td>
           876
@@ -279,7 +279,7 @@
         <td>
           datavault.io.FileSystem.create
         </td>
-        <td style="background: #AEF1AE">
+        <td style="background: #F0ADAD">
           FileSystem.this.create(path)
         </td>
       </tr><tr>
@@ -287,28 +287,7 @@
           36
         </td>
         <td>
-          178
-        </td>
-        <td>
-          893
-          -
-          939
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          java.io.BufferedWriter.&lt;init&gt;
-        </td>
-        <td style="background: #AEF1AE">
-          new java.io.BufferedWriter(new java.io.OutputStreamWriter(os))
-        </td>
-      </tr><tr>
-        <td>
-          36
-        </td>
-        <td>
-          177
+          182
         </td>
         <td>
           912
@@ -321,8 +300,29 @@
         <td>
           java.io.OutputStreamWriter.&lt;init&gt;
         </td>
-        <td style="background: #AEF1AE">
+        <td style="background: #F0ADAD">
           new java.io.OutputStreamWriter(os)
+        </td>
+      </tr><tr>
+        <td>
+          36
+        </td>
+        <td>
+          183
+        </td>
+        <td>
+          893
+          -
+          939
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.BufferedWriter.&lt;init&gt;
+        </td>
+        <td style="background: #F0ADAD">
+          new java.io.BufferedWriter(new java.io.OutputStreamWriter(os))
         </td>
       </tr>
     </table>
