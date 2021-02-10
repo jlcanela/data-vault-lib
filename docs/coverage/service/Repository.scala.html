@@ -1,0 +1,578 @@
+<html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title id="title">
+          service/Repository.scala.html
+        </title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/css/theme.default.min.css" type="text/css"/><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/js/jquery.tablesorter.min.js"></script><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" type="text/css"/><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script><script type="text/javascript">
+        $(document).ready(function() {$(".tablesorter").tablesorter();});
+      </script>
+        <style>
+          table.codegrid { font-family: monospace; font-size: 12px; width: auto!important; }table.statementlist { width: auto!important; font-size: 13px; } table.codegrid td { padding: 0!important; border: 0!important } table td.linenumber { width: 40px!important; } 
+        </style>
+      </head>
+      <body style="font-family: monospace;">
+        <ul class="nav nav-tabs">
+          <li>
+            <a href="#codegrid" data-toggle="tab">Codegrid</a>
+          </li>
+          <li>
+            <a href="#statementlist" data-toggle="tab">Statement List</a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active" id="codegrid">
+            <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault.service
+</span>2 <span style=''>
+</span>3 <span style=''>import zio._
+</span>4 <span style=''>//import zio.macros.accessible
+</span>5 <span style=''>
+</span>6 <span style=''>import java.io.{InputStream, OutputStream, BufferedWriter, OutputStreamWriter, Writer}
+</span>7 <span style=''>
+</span>8 <span style=''>import org.json4s.Formats._
+</span>9 <span style=''>import org.json4s._
+</span>10 <span style=''>import org.json4s.native.Serialization
+</span>11 <span style=''>import org.json4s.native.Serialization.{read, writePretty}
+</span>12 <span style=''>
+</span>13 <span style=''>//import Table.{Source}
+</span>14 <span style=''>
+</span>15 <span style=''>//@accessible
+</span>16 <span style=''>object Repository {
+</span>17 <span style=''>
+</span>18 <span style=''>  // Service definition
+</span>19 <span style=''>  trait Service {
+</span>20 <span style=''>
+</span>21 <span style=''>    // def loadHubs(path: Path) : ZIO[FileSystem, Throwable, Hubs]
+</span>22 <span style=''>    // def saveHubs(hubs: Hubs, path: Path) : ZIO[FileSystem, Throwable, Unit]
+</span>23 <span style=''>    def loadSource(is: InputStream): ZIO[Any, Throwable, Source]
+</span>24 <span style=''>    def saveSource(source: Source, os: OutputStream): ZIO[Any, Throwable, Unit]
+</span>25 <span style=''>  }
+</span>26 <span style=''>
+</span>27 <span style=''>  // Module implementation
+</span>28 <span style=''>  val live: ZLayer[Any, Nothing, Repository] = </span><span style='background: #AEF1AE'>ZLayer.succeed {
+</span>29 <span style=''></span><span style='background: #AEF1AE'>    new Service {
+</span>30 <span style=''></span><span style='background: #AEF1AE'>
+</span>31 <span style=''></span><span style='background: #AEF1AE'>      implicit val formats = Serialization.formats(NoTypeHints)
+</span>32 <span style=''></span><span style='background: #AEF1AE'>
+</span>33 <span style=''></span><span style='background: #AEF1AE'>      /*
+</span>34 <span style=''></span><span style='background: #AEF1AE'>      def loadHubs(path: Path) : ZIO[Any, Throwable, Hubs] = for {
+</span>35 <span style=''></span><span style='background: #AEF1AE'>        content &lt;- FileSystem.readFile(path)
+</span>36 <span style=''></span><span style='background: #AEF1AE'>      } yield read[Hubs](content)
+</span>37 <span style=''></span><span style='background: #AEF1AE'>
+</span>38 <span style=''></span><span style='background: #AEF1AE'>      def writeHubs(hubs: Hubs): java.io.BufferedWriter =&gt; zio.ZIO[Any,Throwable,Unit] = (w: java.io.BufferedWriter) =&gt; ZIO.effect(writePretty(hubs, w))
+</span>39 <span style=''></span><span style='background: #AEF1AE'>
+</span>40 <span style=''></span><span style='background: #AEF1AE'>      def saveHubs(hubs: Hubs, path: Path): ZIO[FileSystem, Throwable, Unit] =
+</span>41 <span style=''></span><span style='background: #AEF1AE'>        FileSystem.saveContent(path)(writeHubs(hubs))
+</span>42 <span style=''></span><span style='background: #AEF1AE'>       */
+</span>43 <span style=''></span><span style='background: #AEF1AE'>
+</span>44 <span style=''></span><span style='background: #AEF1AE'>      def writer(os: OutputStream): ZIO[Any, Nothing, BufferedWriter] =
+</span>45 <span style=''></span><span style='background: #AEF1AE'>        ZIO.effectTotal(new BufferedWriter(new OutputStreamWriter(os)))
+</span>46 <span style=''></span><span style='background: #AEF1AE'>
+</span>47 <span style=''></span><span style='background: #AEF1AE'>      def closeWriter(w: Writer): URIO[Any, Any] = ZIO.effectTotal(w.close)
+</span>48 <span style=''></span><span style='background: #AEF1AE'>
+</span>49 <span style=''></span><span style='background: #AEF1AE'>      def saveContent(
+</span>50 <span style=''></span><span style='background: #AEF1AE'>          os: OutputStream
+</span>51 <span style=''></span><span style='background: #AEF1AE'>      )(
+</span>52 <span style=''></span><span style='background: #AEF1AE'>          use: BufferedWriter =&gt; ZIO[Any, Throwable, Unit]
+</span>53 <span style=''></span><span style='background: #AEF1AE'>      ) = //:  Writer =&gt; ZIO[Any, Throwable, Unit] =&gt; zio.ZIO[Any,Throwable, Unit]=
+</span>54 <span style=''></span><span style='background: #AEF1AE'>        writer(os).bracket(closeWriter _)(use)
+</span>55 <span style=''></span><span style='background: #AEF1AE'>
+</span>56 <span style=''></span><span style='background: #AEF1AE'>      def loadSource(is: InputStream): ZIO[Any, Throwable, Source] =
+</span>57 <span style=''></span><span style='background: #AEF1AE'>        </span><span style='background: #F0ADAD'>ZIO.effect(read[Source](is))</span><span style='background: #AEF1AE'>
+</span>58 <span style=''></span><span style='background: #AEF1AE'>
+</span>59 <span style=''></span><span style='background: #AEF1AE'>      def writeSource(source: Source)(writer: java.io.Writer): ZIO[Any, Nothing, Unit] =
+</span>60 <span style=''></span><span style='background: #AEF1AE'>        ZIO.effectTotal(
+</span>61 <span style=''></span><span style='background: #AEF1AE'>          writePretty(source, writer).close()
+</span>62 <span style=''></span><span style='background: #AEF1AE'>        )
+</span>63 <span style=''></span><span style='background: #AEF1AE'>
+</span>64 <span style=''></span><span style='background: #AEF1AE'>      def saveSource(source: Source, os: OutputStream): ZIO[Any, Throwable, Unit] =
+</span>65 <span style=''></span><span style='background: #AEF1AE'>        saveContent(os)(writeSource(source))
+</span>66 <span style=''></span><span style='background: #AEF1AE'>
+</span>67 <span style=''></span><span style='background: #AEF1AE'>    }
+</span>68 <span style=''></span><span style='background: #AEF1AE'>  }</span><span style=''>
+</span>69 <span style=''>
+</span>70 <span style=''>  def saveSource(source: Source, os: OutputStream): ZIO[Repository, Throwable, Unit] =
+</span>71 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.saveSource(source, os))</span><span style=''>
+</span>72 <span style=''>}
+</span></pre>
+          </div>
+          <div class="tab-pane" id="statementlist">
+            <table cellspacing="0" cellpadding="0" class="table statementlist">
+      <tr>
+        <th>Line</th>
+        <th>Stmt Id</th>
+        <th>Pos</th>
+        <th>Tree</th>
+        <th>Symbol</th>
+        <th>Code</th>
+      </tr><tr>
+        <td>
+          28
+        </td>
+        <td>
+          314
+        </td>
+        <td>
+          780
+          -
+          2224
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          zio.ZLayer.succeed
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZLayer.succeed[datavault.service.Repository.Service]({
+  final class $anon extends AnyRef with datavault.service.Repository.Service {
+    def &lt;init&gt;(): &lt;$anon: datavault.service.Repository.Service&gt; = {
+      $anon.super.&lt;init&gt;();
+      ()
+    };
+    private[this] val formats: org.json4s.Formats{val dateFormat: org.json4s.DateFormat; val typeHints: org.json4s.TypeHints} = org.json4s.native.Serialization.formats(org.json4s.NoTypeHints);
+    implicit &lt;stable&gt; &lt;accessor&gt; private def formats: org.json4s.Formats{val dateFormat: org.json4s.DateFormat; val typeHints: org.json4s.TypeHints} = $anon.this.formats;
+    private def writer(os: java.io.OutputStream): zio.ZIO[Any,Nothing,java.io.BufferedWriter] = zio.ZIO.effectTotal[java.io.BufferedWriter](new java.io.BufferedWriter(new java.io.OutputStreamWriter(os)));
+    private def closeWriter(w: java.io.Writer): zio.URIO[Any,Any] = zio.ZIO.effectTotal[Unit](w.close());
+    private def saveContent(os: java.io.OutputStream)(use: java.io.BufferedWriter =&gt; zio.ZIO[Any,Throwable,Unit]): zio.ZIO[Any with Any,Throwable,Unit] = $anon.this.writer(os).bracket.apply[Any]({
+  ((w: java.io.Writer) =&gt; $anon.this.closeWriter(w))
+}).apply[Any with Any, Throwable, Unit](use);
+    def loadSource(is: java.io.InputStream): zio.ZIO[Any,Throwable,datavault.service.Source] = zio.ZIO.effect[datavault.service.Source](org.json4s.native.Serialization.read[datavault.service.Source](org.json4s.`package`.stream2JsonInput(is))($anon.this.formats, scala.reflect.ManifestFactory.classType[datavault.service.Source](classOf[datavault.service.Source])));
+    private def writeSource(source: datavault.service.Source)(writer: java.io.Writer): zio.ZIO[Any,Nothing,Unit] = zio.ZIO.effectTotal[Unit](org.json4s.native.Serialization.writePretty[datavault.service.Source, java.io.Writer](source, writer)($anon.this.formats).close());
+    def saveSource(source: datavault.service.Source, os: java.io.OutputStream): zio.ZIO[Any,Throwable,Unit] = $anon.this.saveContent(os)({
+      ((writer: java.io.Writer) =&gt; $anon.this.writeSource(source)(writer))
+    })
+  };
+  new $anon()
+})((izumi.reflect.Tag.apply[datavault.service.Repository.Service](classOf[java.lang.Object], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((-1949442165: Int), (&quot;\u0004\u0000\u0001$datavault.service.Repository.Service\u0001\u0002\u0003\u0000\u0000\u001Cdatavault.service.Repository\u0001\u0001&quot;: String), (&quot;\u0000\u0001\u0004\u0000\u0001$datavault.service.Repository.Service\u0001\u0002\u0003\u0000\u0000\u001Cdatavault.service.Repository\u0001\u0001\u0001\u0004\u0000\u0001\u0090\u0002\u0001\u0002\u0003\u0090\u0002\u0001\u0000\u0001)datavault.service.Repository.&lt;refinement&gt;\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0002\u0003\u0090\u0002&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.service.Repository.Service]))
+        </td>
+      </tr><tr>
+        <td>
+          29
+        </td>
+        <td>
+          313
+        </td>
+        <td>
+          801
+          -
+          804
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.service.Repository.$anon.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new $anon()
+        </td>
+      </tr><tr>
+        <td>
+          31
+        </td>
+        <td>
+          297
+        </td>
+        <td>
+          845
+          -
+          879
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          org.json4s.Serialization.formats
+        </td>
+        <td style="background: #AEF1AE">
+          org.json4s.native.Serialization.formats(org.json4s.NoTypeHints)
+        </td>
+      </tr><tr>
+        <td>
+          31
+        </td>
+        <td>
+          296
+        </td>
+        <td>
+          867
+          -
+          878
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          org.json4s.NoTypeHints
+        </td>
+        <td style="background: #AEF1AE">
+          org.json4s.NoTypeHints
+        </td>
+      </tr><tr>
+        <td>
+          45
+        </td>
+        <td>
+          298
+        </td>
+        <td>
+          1450
+          -
+          1476
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.OutputStreamWriter.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new java.io.OutputStreamWriter(os)
+        </td>
+      </tr><tr>
+        <td>
+          45
+        </td>
+        <td>
+          300
+        </td>
+        <td>
+          1415
+          -
+          1478
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.effectTotal
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.effectTotal[java.io.BufferedWriter](new java.io.BufferedWriter(new java.io.OutputStreamWriter(os)))
+        </td>
+      </tr><tr>
+        <td>
+          45
+        </td>
+        <td>
+          299
+        </td>
+        <td>
+          1431
+          -
+          1477
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.BufferedWriter.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new java.io.BufferedWriter(new java.io.OutputStreamWriter(os))
+        </td>
+      </tr><tr>
+        <td>
+          47
+        </td>
+        <td>
+          301
+        </td>
+        <td>
+          1547
+          -
+          1554
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.Writer.close
+        </td>
+        <td style="background: #AEF1AE">
+          w.close()
+        </td>
+      </tr><tr>
+        <td>
+          47
+        </td>
+        <td>
+          302
+        </td>
+        <td>
+          1531
+          -
+          1555
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.effectTotal
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.effectTotal[Unit](w.close())
+        </td>
+      </tr><tr>
+        <td>
+          54
+        </td>
+        <td>
+          303
+        </td>
+        <td>
+          1767
+          -
+          1805
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.BracketRelease.apply
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.writer(os).bracket.apply[Any]({
+  ((w: java.io.Writer) =&gt; $anon.this.closeWriter(w))
+}).apply[Any with Any, Throwable, Unit](use)
+        </td>
+      </tr><tr>
+        <td>
+          57
+        </td>
+        <td>
+          304
+        </td>
+        <td>
+          1908
+          -
+          1910
+        </td>
+        <td>
+          ApplyImplicitView
+        </td>
+        <td>
+          org.json4s.stream2JsonInput
+        </td>
+        <td style="background: #F0ADAD">
+          org.json4s.`package`.stream2JsonInput(is)
+        </td>
+      </tr><tr>
+        <td>
+          57
+        </td>
+        <td>
+          307
+        </td>
+        <td>
+          1895
+          -
+          1911
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          org.json4s.native.Serialization.read
+        </td>
+        <td style="background: #F0ADAD">
+          org.json4s.native.Serialization.read[datavault.service.Source](org.json4s.`package`.stream2JsonInput(is))($anon.this.formats, scala.reflect.ManifestFactory.classType[datavault.service.Source](classOf[datavault.service.Source]))
+        </td>
+      </tr><tr>
+        <td>
+          57
+        </td>
+        <td>
+          306
+        </td>
+        <td>
+          1907
+          -
+          1907
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.reflect.ManifestFactory.classType
+        </td>
+        <td style="background: #F0ADAD">
+          scala.reflect.ManifestFactory.classType[datavault.service.Source](classOf[datavault.service.Source])
+        </td>
+      </tr><tr>
+        <td>
+          57
+        </td>
+        <td>
+          308
+        </td>
+        <td>
+          1884
+          -
+          1912
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.effect
+        </td>
+        <td style="background: #F0ADAD">
+          zio.ZIO.effect[datavault.service.Source](org.json4s.native.Serialization.read[datavault.service.Source](org.json4s.`package`.stream2JsonInput(is))($anon.this.formats, scala.reflect.ManifestFactory.classType[datavault.service.Source](classOf[datavault.service.Source])))
+        </td>
+      </tr><tr>
+        <td>
+          57
+        </td>
+        <td>
+          305
+        </td>
+        <td>
+          1907
+          -
+          1907
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.Repository.$anon.formats
+        </td>
+        <td style="background: #F0ADAD">
+          $anon.this.formats
+        </td>
+      </tr><tr>
+        <td>
+          60
+        </td>
+        <td>
+          310
+        </td>
+        <td>
+          2011
+          -
+          2083
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.effectTotal
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.effectTotal[Unit](org.json4s.native.Serialization.writePretty[datavault.service.Source, java.io.Writer](source, writer)($anon.this.formats).close())
+        </td>
+      </tr><tr>
+        <td>
+          61
+        </td>
+        <td>
+          309
+        </td>
+        <td>
+          2038
+          -
+          2073
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.io.Writer.close
+        </td>
+        <td style="background: #AEF1AE">
+          org.json4s.native.Serialization.writePretty[datavault.service.Source, java.io.Writer](source, writer)($anon.this.formats).close()
+        </td>
+      </tr><tr>
+        <td>
+          65
+        </td>
+        <td>
+          312
+        </td>
+        <td>
+          2177
+          -
+          2213
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.service.Repository.$anon.saveContent
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.saveContent(os)({
+  ((writer: java.io.Writer) =&gt; $anon.this.writeSource(source)(writer))
+})
+        </td>
+      </tr><tr>
+        <td>
+          65
+        </td>
+        <td>
+          311
+        </td>
+        <td>
+          2193
+          -
+          2212
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.service.Repository.$anon.writeSource
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.writeSource(source)(writer)
+        </td>
+      </tr><tr>
+        <td>
+          71
+        </td>
+        <td>
+          316
+        </td>
+        <td>
+          2317
+          -
+          2358
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.accessM[datavault.service.Repository].apply[Throwable, Unit](((x$1: datavault.service.Repository) =&gt; zio.this.Has.HasSyntax[datavault.service.Repository](x$1).get[datavault.service.Repository.Service](scala.Predef.$conforms[datavault.service.Repository], (izumi.reflect.Tag.apply[datavault.service.Repository.Service](classOf[datavault.service.Repository$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((-1949442165: Int), (&quot;\u0004\u0000\u0001$datavault.service.Repository.Service\u0001\u0002\u0003\u0000\u0000\u001Cdatavault.service.Repository\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.service.Repository.Service])).saveSource(source, os)))
+        </td>
+      </tr><tr>
+        <td>
+          71
+        </td>
+        <td>
+          315
+        </td>
+        <td>
+          2329
+          -
+          2357
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.service.Repository.Service.saveSource
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.Has.HasSyntax[datavault.service.Repository](x$1).get[datavault.service.Repository.Service](scala.Predef.$conforms[datavault.service.Repository], (izumi.reflect.Tag.apply[datavault.service.Repository.Service](classOf[datavault.service.Repository$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((-1949442165: Int), (&quot;\u0004\u0000\u0001$datavault.service.Repository.Service\u0001\u0002\u0003\u0000\u0000\u001Cdatavault.service.Repository\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.service.Repository.Service])).saveSource(source, os)
+        </td>
+      </tr>
+    </table>
+          </div>
+        </div>
+      </body>
+    </html>
