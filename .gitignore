@@ -5,6 +5,8 @@
 .metals
 .semanticgraphs
 .vscode
+.scannerwork
+.sonar-project.properties
 
 target
 project/project

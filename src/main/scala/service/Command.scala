@@ -1,14 +1,15 @@
 package datavault.service
 
 import zio._
-import zio.macros.accessible
 
-import zio.stream._
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Files, Path}
 
 import zio.console.Console
 
-@accessible
+sealed trait CommandResult
+object CommandNotRecognized                 extends CommandResult
+case class GenModelResult(success: Boolean) extends CommandResult
+
 object Command {
 
   //type MyDeps = Archive with Table with Console
@@ -17,10 +18,14 @@ object Command {
   trait Service {
     def execute(
         cmd: Cmd
-    ): ZIO[Archive with Table with Csv with Console with Repository, Throwable, Unit]
+    ): ZIO[Archive with Table with Csv with Console with Repository, Throwable, CommandResult]
     def execute(
         args: Array[String]
-    ): ZIO[Archive with Table with Cli with Csv with Console with Repository, Throwable, Unit]
+    ): ZIO[
+      Archive with Table with Cli with Csv with Console with Repository,
+      Throwable,
+      CommandResult
+    ]
   }
 
   // Module implementation
@@ -31,30 +36,45 @@ object Command {
         def genModel(
             input: Path,
             output: Path
-        ): ZIO[Archive with Table with Csv with Console with Repository, Nothing, Unit] = for {
-          _           <- console.putStrLn("gen model v1")
-          inputStream <- IO(Files.newInputStream(input)).orDie
-          stream      <- Archive.readCsvTableInfo(inputStream)
-          source      <- stream.run(Table.source).orDie
-          os          <- IO(Files.newOutputStream(output)).orDie
-          _           <- Repository.saveSource(source, os).orDie
-        } yield ()
+        ): ZIO[Archive with Table with Csv with Console with Repository, Throwable, CommandResult] =
+          for {
+            _           <- console.putStrLn("gen model v1")
+            inputStream <- IO(Files.newInputStream(input))
+            stream      <- Archive.readCsvTableInfo(inputStream)
+            sink        <- Table.source
+            source      <- stream.run(sink)
+            os          <- IO(Files.newOutputStream(output))
+            _           <- Repository.saveSource(source, os)
+          } yield GenModelResult(true)
 
         def execute(
             cmd: Cmd
-        ): ZIO[Archive with Table with Csv with Console with Repository, Throwable, Unit] =
+        ): ZIO[Archive with Table with Csv with Console with Repository, Throwable, CommandResult] =
           cmd match {
             case gmf: GenerateModelFile => genModel(gmf.inputPath, gmf.outputPath)
-            case _                      => console.putStrLn("execute")
+            case _                      => ZIO.succeed(CommandNotRecognized)
           }
 
         def execute(
             args: Array[String]
-        ): ZIO[Archive with Table with Cli with Csv with Console with Repository, Throwable, Unit] =
+        ): ZIO[
+          Archive with Table with Cli with Csv with Console with Repository,
+          Throwable,
+          CommandResult
+        ] =
           for {
-            cmd <- Cli.parseAndShowUsage(args)
-            _   <- execute(cmd)
-          } yield ()
+            cmd    <- Cli.parseAndShowUsage(args)
+            result <- execute(cmd)
+          } yield result
       }
     }
+
+  def execute(
+      args: Array[String]
+  ): ZIO[
+    Command with Archive with Table with Cli with Csv with Console with Repository,
+    Throwable,
+    CommandResult
+  ] =
+    ZIO.accessM(_.get.execute(args))
 }

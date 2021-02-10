@@ -2,6 +2,11 @@ package datavault.service
 
 import org.rogach.scallop._
 
+trait WithInputOutput { this: ScallopConf =>
+  def input: ScallopOption[String]
+  def output: ScallopOption[String]
+}
+
 class Conf(args: Seq[String], onError: (Throwable, Scallop) => Unit) extends ScallopConf(args) {
   version("datavault.lib 1.0.0 (c) 2021 Jean-Luc CANELA")
   banner("""Usage: datavault.lib [gen-model|gen-hubconfig|extract-files|load-hubs] ...

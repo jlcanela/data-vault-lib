@@ -1,0 +1,778 @@
+<html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title id="title">
+          service/Table.scala.html
+        </title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/css/theme.default.min.css" type="text/css"/><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/js/jquery.tablesorter.min.js"></script><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" type="text/css"/><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script><script type="text/javascript">
+        $(document).ready(function() {$(".tablesorter").tablesorter();});
+      </script>
+        <style>
+          table.codegrid { font-family: monospace; font-size: 12px; width: auto!important; }table.statementlist { width: auto!important; font-size: 13px; } table.codegrid td { padding: 0!important; border: 0!important } table td.linenumber { width: 40px!important; } 
+        </style>
+      </head>
+      <body style="font-family: monospace;">
+        <ul class="nav nav-tabs">
+          <li>
+            <a href="#codegrid" data-toggle="tab">Codegrid</a>
+          </li>
+          <li>
+            <a href="#statementlist" data-toggle="tab">Statement List</a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active" id="codegrid">
+            <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault.service
+</span>2 <span style=''>
+</span>3 <span style=''>import zio._
+</span>4 <span style=''>import zio.stream._
+</span>5 <span style=''>
+</span>6 <span style=''>import zio.console.Console
+</span>7 <span style=''>
+</span>8 <span style=''>import org.apache.spark.sql.types.StructType
+</span>9 <span style=''>
+</span>10 <span style=''>case class Source(tables: Map[String, TableInfo])
+</span>11 <span style=''>object Source {
+</span>12 <span style=''>  def apply(archive: String, seq: Seq[(String, StructType)]): Source = {
+</span>13 <span style=''>    val m = </span><span style='background: #AEF1AE'>seq.map { case (name, struct) =&gt;
+</span>14 <span style=''></span><span style='background: #AEF1AE'>      TableInfo(archive, name, struct)
+</span>15 <span style=''></span><span style='background: #AEF1AE'>    } map (m =&gt; (m.name, m))</span><span style=''>
+</span>16 <span style=''>    </span><span style='background: #AEF1AE'>Source(tables = m.toMap)</span><span style=''>
+</span>17 <span style=''>  }
+</span>18 <span style=''>}
+</span>19 <span style=''>
+</span>20 <span style=''>case class TableInfo(
+</span>21 <span style=''>    name: String,
+</span>22 <span style=''>    archive: String,
+</span>23 <span style=''>    path: String,
+</span>24 <span style=''>    columns: Seq[(String, String)]
+</span>25 <span style=''>)
+</span>26 <span style=''>object TableInfo {
+</span>27 <span style=''>  def apply(archive: String, name: String, struct: StructType): TableInfo = {
+</span>28 <span style=''>    </span><span style='background: #AEF1AE'>TableInfo(
+</span>29 <span style=''></span><span style='background: #AEF1AE'>      name.replace(&quot;.csv&quot;, &quot;&quot;),
+</span>30 <span style=''></span><span style='background: #AEF1AE'>      archive,
+</span>31 <span style=''></span><span style='background: #AEF1AE'>      name,
+</span>32 <span style=''></span><span style='background: #AEF1AE'>      struct.fields.map(sf =&gt; (sf.name, sf.dataType.toString))
+</span>33 <span style=''></span><span style='background: #AEF1AE'>    )</span><span style=''>
+</span>34 <span style=''>  }
+</span>35 <span style=''>}
+</span>36 <span style=''>
+</span>37 <span style=''>object Table {
+</span>38 <span style=''>
+</span>39 <span style=''>  type TInfo = (String, StructType)
+</span>40 <span style=''>
+</span>41 <span style=''>  // Service definition
+</span>42 <span style=''>  trait Service {
+</span>43 <span style=''>    def source: ZIO[Any, Throwable, ZSink[Any, Nothing, TInfo, TInfo, Source]]
+</span>44 <span style=''>  }
+</span>45 <span style=''>
+</span>46 <span style=''>  // Module implementation
+</span>47 <span style=''>  val live: ZLayer[Console, Nothing, Table] = </span><span style='background: #AEF1AE'>ZLayer.succeed {
+</span>48 <span style=''></span><span style='background: #AEF1AE'>    new Service {
+</span>49 <span style=''></span><span style='background: #AEF1AE'>
+</span>50 <span style=''></span><span style='background: #AEF1AE'>      val emptyList                            = List[TInfo]()
+</span>51 <span style=''></span><span style='background: #AEF1AE'>      def addList(acc: List[TInfo], st: TInfo) = st :: acc
+</span>52 <span style=''></span><span style='background: #AEF1AE'>
+</span>53 <span style=''></span><span style='background: #AEF1AE'>      def createSource: Sink[Nothing, TInfo, TInfo, Source] =
+</span>54 <span style=''></span><span style='background: #AEF1AE'>        ZSink.foldLeft(emptyList)(addList).map(Source(&quot;archive&quot;, _))
+</span>55 <span style=''></span><span style='background: #AEF1AE'>
+</span>56 <span style=''></span><span style='background: #AEF1AE'>      def source: ZIO[Any, Throwable, ZSink[Any, Nothing, TInfo, TInfo, Source]] = ZIO.succeed(
+</span>57 <span style=''></span><span style='background: #AEF1AE'>        createSource
+</span>58 <span style=''></span><span style='background: #AEF1AE'>      )
+</span>59 <span style=''></span><span style='background: #AEF1AE'>    }
+</span>60 <span style=''></span><span style='background: #AEF1AE'>  }</span><span style=''>
+</span>61 <span style=''>
+</span>62 <span style=''>  def source: ZIO[Table, Throwable, ZSink[Any, Nothing, TInfo, TInfo, Source]] =
+</span>63 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.source)</span><span style=''>
+</span>64 <span style=''>}
+</span></pre>
+          </div>
+          <div class="tab-pane" id="statementlist">
+            <table cellspacing="0" cellpadding="0" class="table statementlist">
+      <tr>
+        <th>Line</th>
+        <th>Stmt Id</th>
+        <th>Pos</th>
+        <th>Tree</th>
+        <th>Symbol</th>
+        <th>Code</th>
+      </tr><tr>
+        <td>
+          13
+        </td>
+        <td>
+          275
+        </td>
+        <td>
+          294
+          -
+          294
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.collection.Seq.canBuildFrom
+        </td>
+        <td style="background: #AEF1AE">
+          collection.this.Seq.canBuildFrom[datavault.service.TableInfo]
+        </td>
+      </tr><tr>
+        <td>
+          14
+        </td>
+        <td>
+          274
+        </td>
+        <td>
+          325
+          -
+          357
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.service.TableInfo.apply
+        </td>
+        <td style="background: #AEF1AE">
+          TableInfo.apply(archive, name, struct)
+        </td>
+      </tr><tr>
+        <td>
+          15
+        </td>
+        <td>
+          277
+        </td>
+        <td>
+          374
+          -
+          385
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Tuple2.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Tuple2.apply[String, datavault.service.TableInfo](m.name, m)
+        </td>
+      </tr><tr>
+        <td>
+          15
+        </td>
+        <td>
+          276
+        </td>
+        <td>
+          375
+          -
+          381
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.TableInfo.name
+        </td>
+        <td style="background: #AEF1AE">
+          m.name
+        </td>
+      </tr><tr>
+        <td>
+          15
+        </td>
+        <td>
+          279
+        </td>
+        <td>
+          286
+          -
+          386
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          scala.collection.TraversableLike.map
+        </td>
+        <td style="background: #AEF1AE">
+          seq.map[datavault.service.TableInfo, Seq[datavault.service.TableInfo]](((x0$1: (String, org.apache.spark.sql.types.StructType)) =&gt; x0$1 match {
+  case (_1: String, _2: org.apache.spark.sql.types.StructType)(String, org.apache.spark.sql.types.StructType)((name @ _), (struct @ _)) =&gt; TableInfo.apply(archive, name, struct)
+}))(collection.this.Seq.canBuildFrom[datavault.service.TableInfo]).map[(String, datavault.service.TableInfo), Seq[(String, datavault.service.TableInfo)]](((m: datavault.service.TableInfo) =&gt; scala.Tuple2.apply[String, datavault.service.TableInfo](m.name, m)))(collection.this.Seq.canBuildFrom[(String, datavault.service.TableInfo)])
+        </td>
+      </tr><tr>
+        <td>
+          15
+        </td>
+        <td>
+          278
+        </td>
+        <td>
+          364
+          -
+          364
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.collection.Seq.canBuildFrom
+        </td>
+        <td style="background: #AEF1AE">
+          collection.this.Seq.canBuildFrom[(String, datavault.service.TableInfo)]
+        </td>
+      </tr><tr>
+        <td>
+          16
+        </td>
+        <td>
+          280
+        </td>
+        <td>
+          409
+          -
+          409
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.Predef.$conforms
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.$conforms[(String, datavault.service.TableInfo)]
+        </td>
+      </tr><tr>
+        <td>
+          16
+        </td>
+        <td>
+          282
+        </td>
+        <td>
+          391
+          -
+          415
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.service.Source.apply
+        </td>
+        <td style="background: #AEF1AE">
+          Source.apply(m.toMap[String, datavault.service.TableInfo](scala.Predef.$conforms[(String, datavault.service.TableInfo)]))
+        </td>
+      </tr><tr>
+        <td>
+          16
+        </td>
+        <td>
+          281
+        </td>
+        <td>
+          407
+          -
+          414
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          scala.collection.TraversableOnce.toMap
+        </td>
+        <td style="background: #AEF1AE">
+          m.toMap[String, datavault.service.TableInfo](scala.Predef.$conforms[(String, datavault.service.TableInfo)])
+        </td>
+      </tr><tr>
+        <td>
+          28
+        </td>
+        <td>
+          291
+        </td>
+        <td>
+          640
+          -
+          778
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.service.TableInfo.apply
+        </td>
+        <td style="background: #AEF1AE">
+          TableInfo.apply(name.replace(&quot;.csv&quot;, &quot;&quot;), archive, name, scala.Predef.refArrayOps[org.apache.spark.sql.types.StructField](struct.fields).map[(String, String), Seq[(String, String)]](((sf: org.apache.spark.sql.types.StructField) =&gt; scala.Tuple2.apply[String, String](sf.name, sf.dataType.toString())))(scala.this.Array.fallbackCanBuildFrom[(String, String)](Predef.this.DummyImplicit.dummyImplicit)))
+        </td>
+      </tr><tr>
+        <td>
+          29
+        </td>
+        <td>
+          283
+        </td>
+        <td>
+          657
+          -
+          681
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.lang.String.replace
+        </td>
+        <td style="background: #AEF1AE">
+          name.replace(&quot;.csv&quot;, &quot;&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          32
+        </td>
+        <td>
+          286
+        </td>
+        <td>
+          750
+          -
+          770
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.lang.Object.toString
+        </td>
+        <td style="background: #AEF1AE">
+          sf.dataType.toString()
+        </td>
+      </tr><tr>
+        <td>
+          32
+        </td>
+        <td>
+          289
+        </td>
+        <td>
+          733
+          -
+          733
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          scala.FallbackArrayBuilding.fallbackCanBuildFrom
+        </td>
+        <td style="background: #AEF1AE">
+          scala.this.Array.fallbackCanBuildFrom[(String, String)](Predef.this.DummyImplicit.dummyImplicit)
+        </td>
+      </tr><tr>
+        <td>
+          32
+        </td>
+        <td>
+          285
+        </td>
+        <td>
+          741
+          -
+          748
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          org.apache.spark.sql.types.StructField.name
+        </td>
+        <td style="background: #AEF1AE">
+          sf.name
+        </td>
+      </tr><tr>
+        <td>
+          32
+        </td>
+        <td>
+          288
+        </td>
+        <td>
+          733
+          -
+          733
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.Predef.DummyImplicit.dummyImplicit
+        </td>
+        <td style="background: #AEF1AE">
+          Predef.this.DummyImplicit.dummyImplicit
+        </td>
+      </tr><tr>
+        <td>
+          32
+        </td>
+        <td>
+          290
+        </td>
+        <td>
+          716
+          -
+          772
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          scala.collection.TraversableLike.map
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.refArrayOps[org.apache.spark.sql.types.StructField](struct.fields).map[(String, String), Seq[(String, String)]](((sf: org.apache.spark.sql.types.StructField) =&gt; scala.Tuple2.apply[String, String](sf.name, sf.dataType.toString())))(scala.this.Array.fallbackCanBuildFrom[(String, String)](Predef.this.DummyImplicit.dummyImplicit))
+        </td>
+      </tr><tr>
+        <td>
+          32
+        </td>
+        <td>
+          284
+        </td>
+        <td>
+          716
+          -
+          729
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          org.apache.spark.sql.types.StructType.fields
+        </td>
+        <td style="background: #AEF1AE">
+          struct.fields
+        </td>
+      </tr><tr>
+        <td>
+          32
+        </td>
+        <td>
+          287
+        </td>
+        <td>
+          740
+          -
+          771
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Tuple2.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Tuple2.apply[String, String](sf.name, sf.dataType.toString())
+        </td>
+      </tr><tr>
+        <td>
+          47
+        </td>
+        <td>
+          301
+        </td>
+        <td>
+          1038
+          -
+          1463
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          zio.ZLayer.succeed
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZLayer.succeed[datavault.service.Table.Service]({
+  final class $anon extends AnyRef with datavault.service.Table.Service {
+    def &lt;init&gt;(): &lt;$anon: datavault.service.Table.Service&gt; = {
+      $anon.super.&lt;init&gt;();
+      ()
+    };
+    private[this] val emptyList: List[(String, org.apache.spark.sql.types.StructType)] = scala.collection.immutable.Nil;
+    &lt;stable&gt; &lt;accessor&gt; private def emptyList: List[(String, org.apache.spark.sql.types.StructType)] = $anon.this.emptyList;
+    private def addList(acc: List[datavault.service.Table.TInfo], st: datavault.service.Table.TInfo): List[datavault.service.Table.TInfo] = {
+      &lt;synthetic&gt; &lt;artifact&gt; val x$1: datavault.service.Table.TInfo = st;
+      acc.::[datavault.service.Table.TInfo](x$1)
+    };
+    private def createSource: zio.stream.Sink[Nothing,datavault.service.Table.TInfo,datavault.service.Table.TInfo,datavault.service.Source] = zio.stream.ZSink.foldLeft[datavault.service.Table.TInfo, List[(String, org.apache.spark.sql.types.StructType)]]($anon.this.emptyList)({
+  ((acc: List[datavault.service.Table.TInfo], st: datavault.service.Table.TInfo) =&gt; $anon.this.addList(acc, st))
+}).map[datavault.service.Source](((x$2: List[(String, org.apache.spark.sql.types.StructType)]) =&gt; Source.apply(&quot;archive&quot;, x$2)));
+    def source: zio.ZIO[Any,Throwable,zio.stream.ZSink[Any,Nothing,datavault.service.Table.TInfo,datavault.service.Table.TInfo,datavault.service.Source]] = zio.ZIO.succeed[zio.stream.Sink[Nothing,datavault.service.Table.TInfo,datavault.service.Table.TInfo,datavault.service.Source]]($anon.this.createSource)
+  };
+  new $anon()
+})((izumi.reflect.Tag.apply[datavault.service.Table.Service](classOf[java.lang.Object], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1334107115: Int), (&quot;\u0004\u0000\u0001\u001Fdatavault.service.Table.Service\u0001\u0002\u0003\u0000\u0000\u0017datavault.service.Table\u0001\u0001&quot;: String), (&quot;\u0000\u0001\u0004\u0000\u0001\u001Fdatavault.service.Table.Service\u0001\u0002\u0003\u0000\u0000\u0017datavault.service.Table\u0001\u0001\u0001\u0004\u0000\u0001\u0090\u0002\u0001\u0002\u0003\u0090\u0002\u0001\u0000\u0001$datavault.service.Table.&lt;refinement&gt;\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0002\u0003\u0090\u0002&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.service.Table.Service]))
+        </td>
+      </tr><tr>
+        <td>
+          48
+        </td>
+        <td>
+          300
+        </td>
+        <td>
+          1059
+          -
+          1062
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.service.Table.$anon.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new $anon()
+        </td>
+      </tr><tr>
+        <td>
+          50
+        </td>
+        <td>
+          292
+        </td>
+        <td>
+          1123
+          -
+          1136
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.collection.immutable.Nil
+        </td>
+        <td style="background: #AEF1AE">
+          scala.collection.immutable.Nil
+        </td>
+      </tr><tr>
+        <td>
+          51
+        </td>
+        <td>
+          293
+        </td>
+        <td>
+          1189
+          -
+          1195
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.collection.immutable.List.::
+        </td>
+        <td style="background: #AEF1AE">
+          acc.::[datavault.service.Table.TInfo](x$1)
+        </td>
+      </tr><tr>
+        <td>
+          54
+        </td>
+        <td>
+          295
+        </td>
+        <td>
+          1293
+          -
+          1300
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.service.Table.$anon.addList
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.addList(acc, st)
+        </td>
+      </tr><tr>
+        <td>
+          54
+        </td>
+        <td>
+          294
+        </td>
+        <td>
+          1282
+          -
+          1291
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.Table.$anon.emptyList
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.emptyList
+        </td>
+      </tr><tr>
+        <td>
+          54
+        </td>
+        <td>
+          297
+        </td>
+        <td>
+          1267
+          -
+          1327
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.stream.ZSink.map
+        </td>
+        <td style="background: #AEF1AE">
+          zio.stream.ZSink.foldLeft[datavault.service.Table.TInfo, List[(String, org.apache.spark.sql.types.StructType)]]($anon.this.emptyList)({
+  ((acc: List[datavault.service.Table.TInfo], st: datavault.service.Table.TInfo) =&gt; $anon.this.addList(acc, st))
+}).map[datavault.service.Source](((x$2: List[(String, org.apache.spark.sql.types.StructType)]) =&gt; Source.apply(&quot;archive&quot;, x$2)))
+        </td>
+      </tr><tr>
+        <td>
+          54
+        </td>
+        <td>
+          296
+        </td>
+        <td>
+          1306
+          -
+          1326
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.service.Source.apply
+        </td>
+        <td style="background: #AEF1AE">
+          Source.apply(&quot;archive&quot;, x$2)
+        </td>
+      </tr><tr>
+        <td>
+          56
+        </td>
+        <td>
+          299
+        </td>
+        <td>
+          1412
+          -
+          1453
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.succeed
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.succeed[zio.stream.Sink[Nothing,datavault.service.Table.TInfo,datavault.service.Table.TInfo,datavault.service.Source]]($anon.this.createSource)
+        </td>
+      </tr><tr>
+        <td>
+          57
+        </td>
+        <td>
+          298
+        </td>
+        <td>
+          1433
+          -
+          1445
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.Table.$anon.createSource
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.createSource
+        </td>
+      </tr><tr>
+        <td>
+          63
+        </td>
+        <td>
+          304
+        </td>
+        <td>
+          1550
+          -
+          1575
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.accessM[datavault.service.Table].apply[Throwable, zio.stream.ZSink[Any,Nothing,datavault.service.Table.TInfo,datavault.service.Table.TInfo,datavault.service.Source]](((x$3: datavault.service.Table) =&gt; zio.this.Has.HasSyntax[datavault.service.Table](x$3).get[datavault.service.Table.Service](scala.Predef.$conforms[datavault.service.Table], (izumi.reflect.Tag.apply[datavault.service.Table.Service](classOf[datavault.service.Table$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1334107115: Int), (&quot;\u0004\u0000\u0001\u001Fdatavault.service.Table.Service\u0001\u0002\u0003\u0000\u0000\u0017datavault.service.Table\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.service.Table.Service])).source))
+        </td>
+      </tr><tr>
+        <td>
+          63
+        </td>
+        <td>
+          303
+        </td>
+        <td>
+          1562
+          -
+          1574
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.Table.Service.source
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.Has.HasSyntax[datavault.service.Table](x$3).get[datavault.service.Table.Service](scala.Predef.$conforms[datavault.service.Table], (izumi.reflect.Tag.apply[datavault.service.Table.Service](classOf[datavault.service.Table$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1334107115: Int), (&quot;\u0004\u0000\u0001\u001Fdatavault.service.Table.Service\u0001\u0002\u0003\u0000\u0000\u0017datavault.service.Table\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.service.Table.Service])).source
+        </td>
+      </tr><tr>
+        <td>
+          63
+        </td>
+        <td>
+          302
+        </td>
+        <td>
+          1564
+          -
+          1564
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.Predef.$conforms
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.$conforms[datavault.service.Table]
+        </td>
+      </tr>
+    </table>
+          </div>
+        </div>
+      </body>
+    </html>

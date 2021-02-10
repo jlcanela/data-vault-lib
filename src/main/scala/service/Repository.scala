@@ -1,21 +1,18 @@
 package datavault.service
 
 import zio._
-import zio.macros.accessible
+//import zio.macros.accessible
 
 import java.io.{InputStream, OutputStream, BufferedWriter, OutputStreamWriter, Writer}
-import java.nio.file.Path
 
 import org.json4s.Formats._
-import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.native.Serialization
-import org.json4s.native.Serialization.{read, write, writePretty}
-import org.json4s.native.JsonMethods._
+import org.json4s.native.Serialization.{read, writePretty}
 
-import Table.{Source}
+//import Table.{Source}
 
-@accessible
+//@accessible
 object Repository {
 
   // Service definition
@@ -61,7 +58,7 @@ object Repository {
 
       def writeSource(source: Source)(writer: java.io.Writer): ZIO[Any, Nothing, Unit] =
         ZIO.effectTotal(
-          writePretty(source, writer)
+          writePretty(source, writer).close()
         )
 
       def saveSource(source: Source, os: OutputStream): ZIO[Any, Throwable, Unit] =
@@ -69,4 +66,7 @@ object Repository {
 
     }
   }
+
+  def saveSource(source: Source, os: OutputStream): ZIO[Repository, Throwable, Unit] =
+    ZIO.accessM(_.get.saveSource(source, os))
 }
