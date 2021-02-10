@@ -44,9 +44,9 @@
 </span>20 <span style=''>    ): ZIO[Csv, Nothing, ZStream[Csv with Console, Throwable, Csv.TableInfo]]
 </span>21 <span style=''>
 </span>22 <span style=''>    def writeCsvFiles(
-</span>23 <span style=''>          is: InputStream,
-</span>24 <span style=''>          destination: Path
-</span>25 <span style=''>      ): ZIO[Csv with Console, Throwable, Unit] 
+</span>23 <span style=''>        is: InputStream,
+</span>24 <span style=''>        destination: Path
+</span>25 <span style=''>    ): ZIO[Csv with Console, Throwable, Unit]
 </span>26 <span style=''>  }
 </span>27 <span style=''>
 </span>28 <span style=''>  // Module implementation
@@ -81,41 +81,44 @@
 </span>57 <span style=''></span><span style='background: #AEF1AE'>        }
 </span>58 <span style=''></span><span style='background: #AEF1AE'>      } yield stream
 </span>59 <span style=''></span><span style='background: #AEF1AE'>
-</span>60 <span style=''></span><span style='background: #AEF1AE'>      def writeFile(zis: ZipInputStream, destination: Path): ZIO[Csv with Console, Throwable, Option[Unit]] =
-</span>61 <span style=''></span><span style='background: #AEF1AE'>        for {
-</span>62 <span style=''></span><span style='background: #AEF1AE'>          fi: Option[FileInfo] &lt;- nextFileInfo(zis)
-</span>63 <span style=''></span><span style='background: #AEF1AE'>          ok &lt;- fi match {
-</span>64 <span style=''></span><span style='background: #AEF1AE'>            case None =&gt; ZIO.succeed(None)
-</span>65 <span style=''></span><span style='background: #AEF1AE'>            case Some(fi2) =&gt;
-</span>66 <span style=''></span><span style='background: #AEF1AE'>              for {
-</span>67 <span style=''></span><span style='background: #AEF1AE'>                _ &lt;- IO(Files.copy(fi2._2, destination.resolve(fi2._1.getName), REPLACE_EXISTING))
-</span>68 <span style=''></span><span style='background: #AEF1AE'>              } yield Some(())
-</span>69 <span style=''></span><span style='background: #AEF1AE'>          }
-</span>70 <span style=''></span><span style='background: #AEF1AE'>        } yield ok
-</span>71 <span style=''></span><span style='background: #AEF1AE'>
-</span>72 <span style=''></span><span style='background: #AEF1AE'>
-</span>73 <span style=''></span><span style='background: #AEF1AE'>      def writeCsvFiles(
-</span>74 <span style=''></span><span style='background: #AEF1AE'>          is: InputStream,
-</span>75 <span style=''></span><span style='background: #AEF1AE'>          destination: Path
-</span>76 <span style=''></span><span style='background: #AEF1AE'>      ): ZIO[Csv with Console, Throwable, Unit] = for {
-</span>77 <span style=''></span><span style='background: #AEF1AE'>        zis &lt;- ZIO.effectTotal(new ZipInputStream(is))
-</span>78 <span style=''></span><span style='background: #AEF1AE'>        stream = ZStream.repeatEffect(writeFile(zis, destination)).takeWhile(_.isDefined)
-</span>79 <span style=''></span><span style='background: #AEF1AE'>        _ &lt;- stream.run(Sink.drain)
-</span>80 <span style=''></span><span style='background: #AEF1AE'>      } yield ()
-</span>81 <span style=''></span><span style='background: #AEF1AE'>    }
-</span>82 <span style=''></span><span style='background: #AEF1AE'>  }</span><span style=''>
-</span>83 <span style=''>
-</span>84 <span style=''>  def readCsvTableInfo(
-</span>85 <span style=''>      is: InputStream
-</span>86 <span style=''>  ): ZIO[Archive with Csv, Nothing, ZStream[Csv with Console, Throwable, Csv.TableInfo]] =
-</span>87 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.readCsvTableInfo(is))</span><span style=''>
-</span>88 <span style=''>
-</span>89 <span style=''>  def writeCsvFiles(
-</span>90 <span style=''>      is: InputStream, destination: Path
-</span>91 <span style=''>  ): ZIO[Archive with Csv with Console, Throwable, Unit] =
-</span>92 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.writeCsvFiles(is, destination))</span><span style=''>
-</span>93 <span style=''>
-</span>94 <span style=''>}
+</span>60 <span style=''></span><span style='background: #AEF1AE'>      def writeFile(
+</span>61 <span style=''></span><span style='background: #AEF1AE'>          zis: ZipInputStream,
+</span>62 <span style=''></span><span style='background: #AEF1AE'>          destination: Path
+</span>63 <span style=''></span><span style='background: #AEF1AE'>      ): ZIO[Csv with Console, Throwable, Option[Unit]] =
+</span>64 <span style=''></span><span style='background: #AEF1AE'>        for {
+</span>65 <span style=''></span><span style='background: #AEF1AE'>          fi: Option[FileInfo] &lt;- nextFileInfo(zis)
+</span>66 <span style=''></span><span style='background: #AEF1AE'>          ok &lt;- fi match {
+</span>67 <span style=''></span><span style='background: #AEF1AE'>            case None =&gt; ZIO.succeed(None)
+</span>68 <span style=''></span><span style='background: #AEF1AE'>            case Some(fi2) =&gt;
+</span>69 <span style=''></span><span style='background: #AEF1AE'>              for {
+</span>70 <span style=''></span><span style='background: #AEF1AE'>                _ &lt;- IO(Files.copy(fi2._2, destination.resolve(fi2._1.getName), REPLACE_EXISTING))
+</span>71 <span style=''></span><span style='background: #AEF1AE'>              } yield Some(())
+</span>72 <span style=''></span><span style='background: #AEF1AE'>          }
+</span>73 <span style=''></span><span style='background: #AEF1AE'>        } yield ok
+</span>74 <span style=''></span><span style='background: #AEF1AE'>
+</span>75 <span style=''></span><span style='background: #AEF1AE'>      def writeCsvFiles(
+</span>76 <span style=''></span><span style='background: #AEF1AE'>          is: InputStream,
+</span>77 <span style=''></span><span style='background: #AEF1AE'>          destination: Path
+</span>78 <span style=''></span><span style='background: #AEF1AE'>      ): ZIO[Csv with Console, Throwable, Unit] = for {
+</span>79 <span style=''></span><span style='background: #AEF1AE'>        zis &lt;- ZIO.effectTotal(new ZipInputStream(is))
+</span>80 <span style=''></span><span style='background: #AEF1AE'>        stream = ZStream.repeatEffect(writeFile(zis, destination)).takeWhile(_.isDefined)
+</span>81 <span style=''></span><span style='background: #AEF1AE'>        _ &lt;- stream.run(Sink.drain)
+</span>82 <span style=''></span><span style='background: #AEF1AE'>      } yield ()
+</span>83 <span style=''></span><span style='background: #AEF1AE'>    }
+</span>84 <span style=''></span><span style='background: #AEF1AE'>  }</span><span style=''>
+</span>85 <span style=''>
+</span>86 <span style=''>  def readCsvTableInfo(
+</span>87 <span style=''>      is: InputStream
+</span>88 <span style=''>  ): ZIO[Archive with Csv, Nothing, ZStream[Csv with Console, Throwable, Csv.TableInfo]] =
+</span>89 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.readCsvTableInfo(is))</span><span style=''>
+</span>90 <span style=''>
+</span>91 <span style=''>  def writeCsvFiles(
+</span>92 <span style=''>      is: InputStream,
+</span>93 <span style=''>      destination: Path
+</span>94 <span style=''>  ): ZIO[Archive with Csv with Console, Throwable, Unit] =
+</span>95 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.writeCsvFiles(is, destination))</span><span style=''>
+</span>96 <span style=''>
+</span>97 <span style=''>}
 </span></pre>
           </div>
           <div class="tab-pane" id="statementlist">
@@ -135,9 +138,9 @@
           62
         </td>
         <td>
-          679
+          672
           -
-          2466
+          2486
         </td>
         <td>
           ApplyToImplicitArgs
@@ -210,9 +213,9 @@
           61
         </td>
         <td>
-          700
+          693
           -
-          703
+          696
         </td>
         <td>
           Apply
@@ -231,9 +234,9 @@
           23
         </td>
         <td>
-          800
+          793
           -
-          931
+          924
         </td>
         <td>
           Apply
@@ -255,9 +258,9 @@
           19
         </td>
         <td>
-          820
+          813
           -
-          838
+          831
         </td>
         <td>
           Apply
@@ -276,9 +279,9 @@
           20
         </td>
         <td>
-          870
+          863
           -
-          874
+          867
         </td>
         <td>
           Select
@@ -297,9 +300,9 @@
           22
         </td>
         <td>
-          898
+          891
           -
-          913
+          906
         </td>
         <td>
           Apply
@@ -318,9 +321,9 @@
           21
         </td>
         <td>
-          903
+          896
           -
-          912
+          905
         </td>
         <td>
           Apply
@@ -339,9 +342,9 @@
           30
         </td>
         <td>
-          1041
+          1034
           -
-          1316
+          1309
         </td>
         <td>
           Apply
@@ -366,9 +369,9 @@
           24
         </td>
         <td>
-          1093
+          1086
           -
-          1093
+          1086
         </td>
         <td>
           TypeApply
@@ -387,9 +390,9 @@
           29
         </td>
         <td>
-          1109
+          1102
           -
-          1316
+          1309
         </td>
         <td>
           Apply
@@ -411,9 +414,9 @@
           26
         </td>
         <td>
-          1151
+          1144
           -
-          1168
+          1161
         </td>
         <td>
           Apply
@@ -432,9 +435,9 @@
           25
         </td>
         <td>
-          1163
+          1156
           -
-          1167
+          1160
         </td>
         <td>
           Select
@@ -453,9 +456,9 @@
           28
         </td>
         <td>
-          1212
+          1205
           -
-          1285
+          1278
         </td>
         <td>
           Apply
@@ -474,9 +477,9 @@
           27
         </td>
         <td>
-          1277
+          1270
           -
-          1285
+          1278
         </td>
         <td>
           Apply
@@ -495,9 +498,9 @@
           31
         </td>
         <td>
-          1491
+          1484
           -
-          1513
+          1506
         </td>
         <td>
           Apply
@@ -516,9 +519,9 @@
           37
         </td>
         <td>
-          1454
+          1447
           -
-          1662
+          1655
         </td>
         <td>
           Apply
@@ -558,9 +561,9 @@
           36
         </td>
         <td>
-          1468
+          1461
           -
-          1468
+          1461
         </td>
         <td>
           Apply
@@ -579,9 +582,9 @@
           32
         </td>
         <td>
-          1553
+          1546
           -
-          1567
+          1560
         </td>
         <td>
           Apply
@@ -600,9 +603,9 @@
           35
         </td>
         <td>
-          1532
+          1525
           -
-          1641
+          1634
         </td>
         <td>
           Apply
@@ -637,9 +640,9 @@
           34
         </td>
         <td>
-          1600
+          1593
           -
-          1600
+          1593
         </td>
         <td>
           Apply
@@ -658,9 +661,9 @@
           33
         </td>
         <td>
-          1579
+          1572
           -
-          1590
+          1583
         </td>
         <td>
           Select
@@ -673,15 +676,15 @@
         </td>
       </tr><tr>
         <td>
-          62
+          65
         </td>
         <td>
           38
         </td>
         <td>
-          1822
+          1843
           -
-          1839
+          1860
         </td>
         <td>
           Apply
@@ -694,15 +697,15 @@
         </td>
       </tr><tr>
         <td>
-          62
+          65
         </td>
         <td>
           40
         </td>
         <td>
-          1834
+          1855
           -
-          1834
+          1855
         </td>
         <td>
           TypeApply
@@ -715,15 +718,15 @@
         </td>
       </tr><tr>
         <td>
-          62
+          65
         </td>
         <td>
           39
         </td>
         <td>
-          1834
+          1855
           -
-          1834
+          1855
         </td>
         <td>
           Literal
@@ -736,15 +739,15 @@
         </td>
       </tr><tr>
         <td>
-          62
+          65
         </td>
         <td>
           51
         </td>
         <td>
-          1782
+          1803
           -
-          2120
+          2141
         </td>
         <td>
           Apply
@@ -763,15 +766,15 @@
         </td>
       </tr><tr>
         <td>
-          63
+          66
         </td>
         <td>
           50
         </td>
         <td>
-          1850
+          1871
           -
-          2120
+          2141
         </td>
         <td>
           Apply
@@ -787,15 +790,15 @@
         </td>
       </tr><tr>
         <td>
-          64
+          67
         </td>
         <td>
           41
         </td>
         <td>
-          1904
+          1925
           -
-          1908
+          1929
         </td>
         <td>
           Select
@@ -808,15 +811,15 @@
         </td>
       </tr><tr>
         <td>
-          64
+          67
         </td>
         <td>
           42
         </td>
         <td>
-          1892
+          1913
           -
-          1909
+          1930
         </td>
         <td>
           Apply
@@ -829,15 +832,15 @@
         </td>
       </tr><tr>
         <td>
-          67
+          70
         </td>
         <td>
           44
         </td>
         <td>
-          2023
+          2044
           -
-          2037
+          2058
         </td>
         <td>
           Apply
@@ -850,15 +853,15 @@
         </td>
       </tr><tr>
         <td>
-          67
+          70
         </td>
         <td>
           47
         </td>
         <td>
-          1984
+          2005
           -
-          2057
+          2078
         </td>
         <td>
           Apply
@@ -871,15 +874,15 @@
         </td>
       </tr><tr>
         <td>
-          67
+          70
         </td>
         <td>
           46
         </td>
         <td>
-          2040
+          2061
           -
-          2056
+          2077
         </td>
         <td>
           Literal
@@ -892,15 +895,15 @@
         </td>
       </tr><tr>
         <td>
-          67
+          70
         </td>
         <td>
           49
         </td>
         <td>
-          1954
+          1975
           -
-          2089
+          2110
         </td>
         <td>
           Apply
@@ -913,15 +916,15 @@
         </td>
       </tr><tr>
         <td>
-          67
+          70
         </td>
         <td>
           43
         </td>
         <td>
-          1995
+          2016
           -
-          2001
+          2022
         </td>
         <td>
           Select
@@ -934,15 +937,15 @@
         </td>
       </tr><tr>
         <td>
-          67
+          70
         </td>
         <td>
           45
         </td>
         <td>
-          2003
+          2024
           -
-          2038
+          2059
         </td>
         <td>
           Apply
@@ -955,15 +958,15 @@
         </td>
       </tr><tr>
         <td>
-          68
+          71
         </td>
         <td>
           48
         </td>
         <td>
-          2081
+          2102
           -
-          2089
+          2110
         </td>
         <td>
           Apply
@@ -976,15 +979,15 @@
         </td>
       </tr><tr>
         <td>
-          77
+          79
         </td>
         <td>
           56
         </td>
         <td>
-          2267
+          2287
           -
-          2267
+          2287
         </td>
         <td>
           Apply
@@ -997,15 +1000,15 @@
         </td>
       </tr><tr>
         <td>
-          77
+          79
         </td>
         <td>
           52
         </td>
         <td>
-          2290
+          2310
           -
-          2312
+          2332
         </td>
         <td>
           Apply
@@ -1018,15 +1021,15 @@
         </td>
       </tr><tr>
         <td>
-          77
+          79
         </td>
         <td>
           60
         </td>
         <td>
-          2253
+          2273
           -
-          2456
+          2476
         </td>
         <td>
           Apply
@@ -1044,15 +1047,15 @@
         </td>
       </tr><tr>
         <td>
-          78
+          80
         </td>
         <td>
           53
         </td>
         <td>
-          2352
+          2372
           -
-          2379
+          2399
         </td>
         <td>
           Apply
@@ -1065,15 +1068,15 @@
         </td>
       </tr><tr>
         <td>
-          78
+          80
         </td>
         <td>
           55
         </td>
         <td>
-          2331
+          2351
           -
-          2403
+          2423
         </td>
         <td>
           Apply
@@ -1086,15 +1089,15 @@
         </td>
       </tr><tr>
         <td>
-          78
+          80
         </td>
         <td>
           54
         </td>
         <td>
-          2391
+          2411
           -
-          2402
+          2422
         </td>
         <td>
           Select
@@ -1107,15 +1110,15 @@
         </td>
       </tr><tr>
         <td>
-          79
+          81
         </td>
         <td>
           59
         </td>
         <td>
-          2412
+          2432
           -
-          2456
+          2476
         </td>
         <td>
           Apply
@@ -1128,15 +1131,15 @@
         </td>
       </tr><tr>
         <td>
-          79
+          81
         </td>
         <td>
           57
         </td>
         <td>
-          2428
+          2448
           -
-          2438
+          2458
         </td>
         <td>
           Select
@@ -1149,15 +1152,15 @@
         </td>
       </tr><tr>
         <td>
-          80
+          82
         </td>
         <td>
           58
         </td>
         <td>
-          2454
+          2474
           -
-          2456
+          2476
         </td>
         <td>
           Literal
@@ -1170,15 +1173,15 @@
         </td>
       </tr><tr>
         <td>
-          87
+          89
         </td>
         <td>
           64
         </td>
         <td>
-          2609
+          2629
           -
-          2648
+          2668
         </td>
         <td>
           Apply
@@ -1191,15 +1194,15 @@
         </td>
       </tr><tr>
         <td>
-          87
+          89
         </td>
         <td>
           63
         </td>
         <td>
-          2621
+          2641
           -
-          2647
+          2667
         </td>
         <td>
           Apply
@@ -1212,15 +1215,15 @@
         </td>
       </tr><tr>
         <td>
-          92
+          95
         </td>
         <td>
           65
         </td>
         <td>
-          2787
+          2813
           -
-          2823
+          2849
         </td>
         <td>
           Apply
@@ -1233,15 +1236,15 @@
         </td>
       </tr><tr>
         <td>
-          92
+          95
         </td>
         <td>
           66
         </td>
         <td>
-          2775
+          2801
           -
-          2824
+          2850
         </td>
         <td>
           Apply
