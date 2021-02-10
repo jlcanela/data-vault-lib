@@ -1,0 +1,886 @@
+<html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title id="title">
+          service/Command.scala.html
+        </title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/css/theme.default.min.css" type="text/css"/><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/js/jquery.tablesorter.min.js"></script><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" type="text/css"/><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script><script type="text/javascript">
+        $(document).ready(function() {$(".tablesorter").tablesorter();});
+      </script>
+        <style>
+          table.codegrid { font-family: monospace; font-size: 12px; width: auto!important; }table.statementlist { width: auto!important; font-size: 13px; } table.codegrid td { padding: 0!important; border: 0!important } table td.linenumber { width: 40px!important; } 
+        </style>
+      </head>
+      <body style="font-family: monospace;">
+        <ul class="nav nav-tabs">
+          <li>
+            <a href="#codegrid" data-toggle="tab">Codegrid</a>
+          </li>
+          <li>
+            <a href="#statementlist" data-toggle="tab">Statement List</a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active" id="codegrid">
+            <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault.service
+</span>2 <span style=''>
+</span>3 <span style=''>import zio._
+</span>4 <span style=''>
+</span>5 <span style=''>import java.nio.file.{Files, Path}
+</span>6 <span style=''>
+</span>7 <span style=''>import zio.console.Console
+</span>8 <span style=''>
+</span>9 <span style=''>sealed trait CommandResult
+</span>10 <span style=''>object CommandNotRecognized                 extends CommandResult
+</span>11 <span style=''>case class GenModelResult(success: Boolean) extends CommandResult
+</span>12 <span style=''>case class ExtractFilesResult(success: Boolean) extends CommandResult
+</span>13 <span style=''>
+</span>14 <span style=''>object Command {
+</span>15 <span style=''>
+</span>16 <span style=''>  //type MyDeps = Archive with Table with Console
+</span>17 <span style=''>  // type MyDeps = Archive with Table with Csv with Console
+</span>18 <span style=''>  // Service definition
+</span>19 <span style=''>  trait Service {
+</span>20 <span style=''>    def execute(
+</span>21 <span style=''>        cmd: Cmd
+</span>22 <span style=''>    ): ZIO[Archive with Table with Csv with Console with Repository, Throwable, CommandResult]
+</span>23 <span style=''>    def execute(
+</span>24 <span style=''>        args: Array[String]
+</span>25 <span style=''>    ): ZIO[
+</span>26 <span style=''>      Archive with Table with Cli with Csv with Console with Repository,
+</span>27 <span style=''>      Throwable,
+</span>28 <span style=''>      CommandResult
+</span>29 <span style=''>    ]
+</span>30 <span style=''>  }
+</span>31 <span style=''>
+</span>32 <span style=''>  // Module implementation
+</span>33 <span style=''>  val live: ZLayer[Archive with Table with Csv with Console with Repository, Nothing, Command] =
+</span>34 <span style=''>    </span><span style='background: #AEF1AE'>ZLayer.succeed {
+</span>35 <span style=''></span><span style='background: #AEF1AE'>      new Service {
+</span>36 <span style=''></span><span style='background: #AEF1AE'>
+</span>37 <span style=''></span><span style='background: #AEF1AE'>        def extractFiles(
+</span>38 <span style=''></span><span style='background: #AEF1AE'>            input: Path,
+</span>39 <span style=''></span><span style='background: #AEF1AE'>            output: Path
+</span>40 <span style=''></span><span style='background: #AEF1AE'>        ): ZIO[Archive with Table with Csv with Console with Repository, Throwable, CommandResult] =
+</span>41 <span style=''></span><span style='background: #AEF1AE'>          for {
+</span>42 <span style=''></span><span style='background: #AEF1AE'>            _           &lt;- console.putStrLn(&quot;extract files&quot;)
+</span>43 <span style=''></span><span style='background: #AEF1AE'>            inputStream &lt;- IO(Files.newInputStream(input))
+</span>44 <span style=''></span><span style='background: #AEF1AE'>            _ &lt;- IO(Files.createDirectories(output))
+</span>45 <span style=''></span><span style='background: #AEF1AE'>            _      &lt;- Archive.writeCsvFiles(inputStream, output)
+</span>46 <span style=''></span><span style='background: #AEF1AE'>          } yield ExtractFilesResult(true)
+</span>47 <span style=''></span><span style='background: #AEF1AE'>
+</span>48 <span style=''></span><span style='background: #AEF1AE'>        def genModel(
+</span>49 <span style=''></span><span style='background: #AEF1AE'>            input: Path,
+</span>50 <span style=''></span><span style='background: #AEF1AE'>            output: Path
+</span>51 <span style=''></span><span style='background: #AEF1AE'>        ): ZIO[Archive with Table with Csv with Console with Repository, Throwable, CommandResult] =
+</span>52 <span style=''></span><span style='background: #AEF1AE'>          for {
+</span>53 <span style=''></span><span style='background: #AEF1AE'>            _           &lt;- console.putStrLn(&quot;gen model v1&quot;)
+</span>54 <span style=''></span><span style='background: #AEF1AE'>            inputStream &lt;- IO(Files.newInputStream(input))
+</span>55 <span style=''></span><span style='background: #AEF1AE'>            stream      &lt;- Archive.readCsvTableInfo(inputStream)
+</span>56 <span style=''></span><span style='background: #AEF1AE'>            sink        &lt;- Table.source
+</span>57 <span style=''></span><span style='background: #AEF1AE'>            source      &lt;- stream.run(sink)
+</span>58 <span style=''></span><span style='background: #AEF1AE'>            _ &lt;- IO(Files.createDirectories(output.getParent()))
+</span>59 <span style=''></span><span style='background: #AEF1AE'>            os          &lt;- IO(Files.newOutputStream(output))
+</span>60 <span style=''></span><span style='background: #AEF1AE'>            _           &lt;- Repository.saveSource(source, os)
+</span>61 <span style=''></span><span style='background: #AEF1AE'>          } yield GenModelResult(true)
+</span>62 <span style=''></span><span style='background: #AEF1AE'>
+</span>63 <span style=''></span><span style='background: #AEF1AE'>        def execute(
+</span>64 <span style=''></span><span style='background: #AEF1AE'>            cmd: Cmd
+</span>65 <span style=''></span><span style='background: #AEF1AE'>        ): ZIO[Archive with Table with Csv with Console with Repository, Throwable, CommandResult] =
+</span>66 <span style=''></span><span style='background: #AEF1AE'>          cmd match {
+</span>67 <span style=''></span><span style='background: #AEF1AE'>            case ef: ExtractFiles =&gt; extractFiles(ef.inputPath, ef.outputPath)
+</span>68 <span style=''></span><span style='background: #AEF1AE'>            case gmf: GenerateModelFile =&gt; genModel(gmf.inputPath, gmf.outputPath)
+</span>69 <span style=''></span><span style='background: #AEF1AE'>            case _                      =&gt; </span><span style='background: #F0ADAD'>ZIO.succeed(CommandNotRecognized)</span><span style='background: #AEF1AE'>
+</span>70 <span style=''></span><span style='background: #AEF1AE'>          }
+</span>71 <span style=''></span><span style='background: #AEF1AE'>
+</span>72 <span style=''></span><span style='background: #AEF1AE'>        def execute(
+</span>73 <span style=''></span><span style='background: #AEF1AE'>            args: Array[String]
+</span>74 <span style=''></span><span style='background: #AEF1AE'>        ): ZIO[
+</span>75 <span style=''></span><span style='background: #AEF1AE'>          Archive with Table with Cli with Csv with Console with Repository,
+</span>76 <span style=''></span><span style='background: #AEF1AE'>          Throwable,
+</span>77 <span style=''></span><span style='background: #AEF1AE'>          CommandResult
+</span>78 <span style=''></span><span style='background: #AEF1AE'>        ] =
+</span>79 <span style=''></span><span style='background: #AEF1AE'>          for {
+</span>80 <span style=''></span><span style='background: #AEF1AE'>            cmd    &lt;- Cli.parseAndShowUsage(args)
+</span>81 <span style=''></span><span style='background: #AEF1AE'>            result &lt;- execute(cmd)
+</span>82 <span style=''></span><span style='background: #AEF1AE'>          } yield result
+</span>83 <span style=''></span><span style='background: #AEF1AE'>      }
+</span>84 <span style=''></span><span style='background: #AEF1AE'>    }</span><span style=''>
+</span>85 <span style=''>
+</span>86 <span style=''>  def execute(
+</span>87 <span style=''>      args: Array[String]
+</span>88 <span style=''>  ): ZIO[
+</span>89 <span style=''>    Command with Archive with Table with Cli with Csv with Console with Repository,
+</span>90 <span style=''>    Throwable,
+</span>91 <span style=''>    CommandResult
+</span>92 <span style=''>  ] =
+</span>93 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.execute(args))</span><span style=''>
+</span>94 <span style=''>}
+</span></pre>
+          </div>
+          <div class="tab-pane" id="statementlist">
+            <table cellspacing="0" cellpadding="0" class="table statementlist">
+      <tr>
+        <th>Line</th>
+        <th>Stmt Id</th>
+        <th>Pos</th>
+        <th>Tree</th>
+        <th>Symbol</th>
+        <th>Code</th>
+      </tr><tr>
+        <td>
+          34
+        </td>
+        <td>
+          274
+        </td>
+        <td>
+          940
+          -
+          2896
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          zio.ZLayer.succeed
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZLayer.succeed[datavault.service.Command.Service]({
+  final class $anon extends AnyRef with datavault.service.Command.Service {
+    def &lt;init&gt;(): &lt;$anon: datavault.service.Command.Service&gt; = {
+      $anon.super.&lt;init&gt;();
+      ()
+    };
+    private def extractFiles(input: java.nio.file.Path, output: java.nio.file.Path): zio.ZIO[datavault.service.Archive with datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository,Throwable,datavault.service.CommandResult] = zio.console.`package`.putStrLn(&quot;extract files&quot;).flatMap[datavault.service.Archive with datavault.service.Csv with zio.console.Console, Throwable, datavault.service.ExtractFilesResult](((_: Unit) =&gt; zio.IO.apply[java.io.InputStream](java.nio.file.Files.newInputStream(input)).flatMap[datavault.service.Archive with datavault.service.Csv with zio.console.Console, Throwable, datavault.service.ExtractFilesResult](((inputStream: java.io.InputStream) =&gt; zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(output)).flatMap[datavault.service.Archive with datavault.service.Csv with zio.console.Console, Throwable, datavault.service.ExtractFilesResult](((_: java.nio.file.Path) =&gt; Archive.writeCsvFiles(inputStream, output).map[datavault.service.ExtractFilesResult](((_: Unit) =&gt; ExtractFilesResult.apply(true)))))))));
+    private def genModel(input: java.nio.file.Path, output: java.nio.file.Path): zio.ZIO[datavault.service.Archive with datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository,Throwable,datavault.service.CommandResult] = zio.console.`package`.putStrLn(&quot;gen model v1&quot;).flatMap[datavault.service.Archive with datavault.service.Csv with datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((_: Unit) =&gt; zio.IO.apply[java.io.InputStream](java.nio.file.Files.newInputStream(input)).flatMap[datavault.service.Archive with datavault.service.Csv with datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((inputStream: java.io.InputStream) =&gt; Archive.readCsvTableInfo(inputStream).flatMap[datavault.service.Archive with datavault.service.Csv with datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((stream: zio.stream.ZStream[datavault.service.Csv with zio.console.Console,Throwable,datavault.service.Csv.TableInfo]) =&gt; Table.source.flatMap[datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((sink: zio.stream.ZSink[Any,Nothing,datavault.service.Table.TInfo,datavault.service.Table.TInfo,datavault.service.Source]) =&gt; stream.run[datavault.service.Csv with zio.console.Console, Throwable, datavault.service.Source](sink).flatMap[datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((source: datavault.service.Source) =&gt; zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(output.getParent())).flatMap[datavault.service.Repository, Throwable, datavault.service.GenModelResult](((_: java.nio.file.Path) =&gt; zio.IO.apply[java.io.OutputStream](java.nio.file.Files.newOutputStream(output)).flatMap[datavault.service.Repository, Throwable, datavault.service.GenModelResult](((os: java.io.OutputStream) =&gt; Repository.saveSource(source, os).map[datavault.service.GenModelResult](((_: Unit) =&gt; GenModelResult.apply(true)))))))))))))))));
+    def execute(cmd: datavault.service.Cmd): zio.ZIO[datavault.service.Archive with datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository,Throwable,datavault.service.CommandResult] = cmd match {
+      case (ef @ (_: datavault.service.ExtractFiles)) =&gt; $anon.this.extractFiles(ef.inputPath, ef.outputPath)
+      case (gmf @ (_: datavault.service.GenerateModelFile)) =&gt; $anon.this.genModel(gmf.inputPath, gmf.outputPath)
+      case _ =&gt; zio.ZIO.succeed[datavault.service.CommandNotRecognized.type](CommandNotRecognized)
+    };
+    def execute(args: Array[String]): zio.ZIO[datavault.service.Archive with datavault.service.Table with datavault.service.Cli with datavault.service.Csv with zio.console.Console with datavault.service.Repository,Throwable,datavault.service.CommandResult] = Cli.parseAndShowUsage(args).flatMap[datavault.service.Cli with zio.console.Console with datavault.service.Archive with datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.CommandResult](((cmd: datavault.service.Cmd) =&gt; $anon.this.execute(cmd).map[datavault.service.CommandResult](((result: datavault.service.CommandResult) =&gt; result))))
+  };
+  new $anon()
+})((izumi.reflect.Tag.apply[datavault.service.Command.Service](classOf[java.lang.Object], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((-1508532439: Int), (&quot;\u0004\u0000\u0001!datavault.service.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.service.Command\u0001\u0001&quot;: String), (&quot;\u0000\u0001\u0004\u0000\u0001!datavault.service.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.service.Command\u0001\u0001\u0001\u0004\u0000\u0001\u0090\u0002\u0001\u0002\u0003\u0090\u0002\u0001\u0000\u0001&amp;datavault.service.Command.&lt;refinement&gt;\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0002\u0003\u0090\u0002&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.service.Command.Service]))
+        </td>
+      </tr><tr>
+        <td>
+          35
+        </td>
+        <td>
+          273
+        </td>
+        <td>
+          963
+          -
+          966
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.service.Command.$anon.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new $anon()
+        </td>
+      </tr><tr>
+        <td>
+          42
+        </td>
+        <td>
+          249
+        </td>
+        <td>
+          1165
+          -
+          1451
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.console.`package`.putStrLn(&quot;extract files&quot;).flatMap[datavault.service.Archive with datavault.service.Csv with zio.console.Console, Throwable, datavault.service.ExtractFilesResult](((_: Unit) =&gt; zio.IO.apply[java.io.InputStream](java.nio.file.Files.newInputStream(input)).flatMap[datavault.service.Archive with datavault.service.Csv with zio.console.Console, Throwable, datavault.service.ExtractFilesResult](((inputStream: java.io.InputStream) =&gt; zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(output)).flatMap[datavault.service.Archive with datavault.service.Csv with zio.console.Console, Throwable, datavault.service.ExtractFilesResult](((_: java.nio.file.Path) =&gt; Archive.writeCsvFiles(inputStream, output).map[datavault.service.ExtractFilesResult](((_: Unit) =&gt; ExtractFilesResult.apply(true)))))))))
+        </td>
+      </tr><tr>
+        <td>
+          42
+        </td>
+        <td>
+          242
+        </td>
+        <td>
+          1215
+          -
+          1230
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;extract files&quot;
+        </td>
+      </tr><tr>
+        <td>
+          43
+        </td>
+        <td>
+          243
+        </td>
+        <td>
+          1262
+          -
+          1289
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Files.newInputStream
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Files.newInputStream(input)
+        </td>
+      </tr><tr>
+        <td>
+          43
+        </td>
+        <td>
+          248
+        </td>
+        <td>
+          1244
+          -
+          1451
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.IO.apply[java.io.InputStream](java.nio.file.Files.newInputStream(input)).flatMap[datavault.service.Archive with datavault.service.Csv with zio.console.Console, Throwable, datavault.service.ExtractFilesResult](((inputStream: java.io.InputStream) =&gt; zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(output)).flatMap[datavault.service.Archive with datavault.service.Csv with zio.console.Console, Throwable, datavault.service.ExtractFilesResult](((_: java.nio.file.Path) =&gt; Archive.writeCsvFiles(inputStream, output).map[datavault.service.ExtractFilesResult](((_: Unit) =&gt; ExtractFilesResult.apply(true)))))))
+        </td>
+      </tr><tr>
+        <td>
+          44
+        </td>
+        <td>
+          244
+        </td>
+        <td>
+          1311
+          -
+          1342
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Files.createDirectories
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Files.createDirectories(output)
+        </td>
+      </tr><tr>
+        <td>
+          44
+        </td>
+        <td>
+          247
+        </td>
+        <td>
+          1303
+          -
+          1451
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(output)).flatMap[datavault.service.Archive with datavault.service.Csv with zio.console.Console, Throwable, datavault.service.ExtractFilesResult](((_: java.nio.file.Path) =&gt; Archive.writeCsvFiles(inputStream, output).map[datavault.service.ExtractFilesResult](((_: Unit) =&gt; ExtractFilesResult.apply(true)))))
+        </td>
+      </tr><tr>
+        <td>
+          45
+        </td>
+        <td>
+          246
+        </td>
+        <td>
+          1356
+          -
+          1451
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          Archive.writeCsvFiles(inputStream, output).map[datavault.service.ExtractFilesResult](((_: Unit) =&gt; ExtractFilesResult.apply(true)))
+        </td>
+      </tr><tr>
+        <td>
+          46
+        </td>
+        <td>
+          245
+        </td>
+        <td>
+          1427
+          -
+          1451
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.service.ExtractFilesResult.apply
+        </td>
+        <td style="background: #AEF1AE">
+          ExtractFilesResult.apply(true)
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          250
+        </td>
+        <td>
+          1686
+          -
+          1700
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;gen model v1&quot;
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          263
+        </td>
+        <td>
+          1636
+          -
+          2135
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.console.`package`.putStrLn(&quot;gen model v1&quot;).flatMap[datavault.service.Archive with datavault.service.Csv with datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((_: Unit) =&gt; zio.IO.apply[java.io.InputStream](java.nio.file.Files.newInputStream(input)).flatMap[datavault.service.Archive with datavault.service.Csv with datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((inputStream: java.io.InputStream) =&gt; Archive.readCsvTableInfo(inputStream).flatMap[datavault.service.Archive with datavault.service.Csv with datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((stream: zio.stream.ZStream[datavault.service.Csv with zio.console.Console,Throwable,datavault.service.Csv.TableInfo]) =&gt; Table.source.flatMap[datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((sink: zio.stream.ZSink[Any,Nothing,datavault.service.Table.TInfo,datavault.service.Table.TInfo,datavault.service.Source]) =&gt; stream.run[datavault.service.Csv with zio.console.Console, Throwable, datavault.service.Source](sink).flatMap[datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((source: datavault.service.Source) =&gt; zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(output.getParent())).flatMap[datavault.service.Repository, Throwable, datavault.service.GenModelResult](((_: java.nio.file.Path) =&gt; zio.IO.apply[java.io.OutputStream](java.nio.file.Files.newOutputStream(output)).flatMap[datavault.service.Repository, Throwable, datavault.service.GenModelResult](((os: java.io.OutputStream) =&gt; Repository.saveSource(source, os).map[datavault.service.GenModelResult](((_: Unit) =&gt; GenModelResult.apply(true)))))))))))))))))
+        </td>
+      </tr><tr>
+        <td>
+          54
+        </td>
+        <td>
+          262
+        </td>
+        <td>
+          1714
+          -
+          2135
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.IO.apply[java.io.InputStream](java.nio.file.Files.newInputStream(input)).flatMap[datavault.service.Archive with datavault.service.Csv with datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((inputStream: java.io.InputStream) =&gt; Archive.readCsvTableInfo(inputStream).flatMap[datavault.service.Archive with datavault.service.Csv with datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((stream: zio.stream.ZStream[datavault.service.Csv with zio.console.Console,Throwable,datavault.service.Csv.TableInfo]) =&gt; Table.source.flatMap[datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((sink: zio.stream.ZSink[Any,Nothing,datavault.service.Table.TInfo,datavault.service.Table.TInfo,datavault.service.Source]) =&gt; stream.run[datavault.service.Csv with zio.console.Console, Throwable, datavault.service.Source](sink).flatMap[datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((source: datavault.service.Source) =&gt; zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(output.getParent())).flatMap[datavault.service.Repository, Throwable, datavault.service.GenModelResult](((_: java.nio.file.Path) =&gt; zio.IO.apply[java.io.OutputStream](java.nio.file.Files.newOutputStream(output)).flatMap[datavault.service.Repository, Throwable, datavault.service.GenModelResult](((os: java.io.OutputStream) =&gt; Repository.saveSource(source, os).map[datavault.service.GenModelResult](((_: Unit) =&gt; GenModelResult.apply(true)))))))))))))))
+        </td>
+      </tr><tr>
+        <td>
+          54
+        </td>
+        <td>
+          251
+        </td>
+        <td>
+          1732
+          -
+          1759
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Files.newInputStream
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Files.newInputStream(input)
+        </td>
+      </tr><tr>
+        <td>
+          55
+        </td>
+        <td>
+          261
+        </td>
+        <td>
+          1773
+          -
+          2135
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          Archive.readCsvTableInfo(inputStream).flatMap[datavault.service.Archive with datavault.service.Csv with datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((stream: zio.stream.ZStream[datavault.service.Csv with zio.console.Console,Throwable,datavault.service.Csv.TableInfo]) =&gt; Table.source.flatMap[datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((sink: zio.stream.ZSink[Any,Nothing,datavault.service.Table.TInfo,datavault.service.Table.TInfo,datavault.service.Source]) =&gt; stream.run[datavault.service.Csv with zio.console.Console, Throwable, datavault.service.Source](sink).flatMap[datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((source: datavault.service.Source) =&gt; zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(output.getParent())).flatMap[datavault.service.Repository, Throwable, datavault.service.GenModelResult](((_: java.nio.file.Path) =&gt; zio.IO.apply[java.io.OutputStream](java.nio.file.Files.newOutputStream(output)).flatMap[datavault.service.Repository, Throwable, datavault.service.GenModelResult](((os: java.io.OutputStream) =&gt; Repository.saveSource(source, os).map[datavault.service.GenModelResult](((_: Unit) =&gt; GenModelResult.apply(true)))))))))))))
+        </td>
+      </tr><tr>
+        <td>
+          56
+        </td>
+        <td>
+          260
+        </td>
+        <td>
+          1838
+          -
+          2135
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          Table.source.flatMap[datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((sink: zio.stream.ZSink[Any,Nothing,datavault.service.Table.TInfo,datavault.service.Table.TInfo,datavault.service.Source]) =&gt; stream.run[datavault.service.Csv with zio.console.Console, Throwable, datavault.service.Source](sink).flatMap[datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((source: datavault.service.Source) =&gt; zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(output.getParent())).flatMap[datavault.service.Repository, Throwable, datavault.service.GenModelResult](((_: java.nio.file.Path) =&gt; zio.IO.apply[java.io.OutputStream](java.nio.file.Files.newOutputStream(output)).flatMap[datavault.service.Repository, Throwable, datavault.service.GenModelResult](((os: java.io.OutputStream) =&gt; Repository.saveSource(source, os).map[datavault.service.GenModelResult](((_: Unit) =&gt; GenModelResult.apply(true)))))))))))
+        </td>
+      </tr><tr>
+        <td>
+          57
+        </td>
+        <td>
+          259
+        </td>
+        <td>
+          1878
+          -
+          2135
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          stream.run[datavault.service.Csv with zio.console.Console, Throwable, datavault.service.Source](sink).flatMap[datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.GenModelResult](((source: datavault.service.Source) =&gt; zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(output.getParent())).flatMap[datavault.service.Repository, Throwable, datavault.service.GenModelResult](((_: java.nio.file.Path) =&gt; zio.IO.apply[java.io.OutputStream](java.nio.file.Files.newOutputStream(output)).flatMap[datavault.service.Repository, Throwable, datavault.service.GenModelResult](((os: java.io.OutputStream) =&gt; Repository.saveSource(source, os).map[datavault.service.GenModelResult](((_: Unit) =&gt; GenModelResult.apply(true)))))))))
+        </td>
+      </tr><tr>
+        <td>
+          58
+        </td>
+        <td>
+          253
+        </td>
+        <td>
+          1930
+          -
+          1973
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Files.createDirectories
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Files.createDirectories(output.getParent())
+        </td>
+      </tr><tr>
+        <td>
+          58
+        </td>
+        <td>
+          258
+        </td>
+        <td>
+          1922
+          -
+          2135
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(output.getParent())).flatMap[datavault.service.Repository, Throwable, datavault.service.GenModelResult](((_: java.nio.file.Path) =&gt; zio.IO.apply[java.io.OutputStream](java.nio.file.Files.newOutputStream(output)).flatMap[datavault.service.Repository, Throwable, datavault.service.GenModelResult](((os: java.io.OutputStream) =&gt; Repository.saveSource(source, os).map[datavault.service.GenModelResult](((_: Unit) =&gt; GenModelResult.apply(true)))))))
+        </td>
+      </tr><tr>
+        <td>
+          58
+        </td>
+        <td>
+          252
+        </td>
+        <td>
+          1954
+          -
+          1972
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Path.getParent
+        </td>
+        <td style="background: #AEF1AE">
+          output.getParent()
+        </td>
+      </tr><tr>
+        <td>
+          59
+        </td>
+        <td>
+          254
+        </td>
+        <td>
+          2005
+          -
+          2034
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Files.newOutputStream
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Files.newOutputStream(output)
+        </td>
+      </tr><tr>
+        <td>
+          59
+        </td>
+        <td>
+          257
+        </td>
+        <td>
+          1987
+          -
+          2135
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.IO.apply[java.io.OutputStream](java.nio.file.Files.newOutputStream(output)).flatMap[datavault.service.Repository, Throwable, datavault.service.GenModelResult](((os: java.io.OutputStream) =&gt; Repository.saveSource(source, os).map[datavault.service.GenModelResult](((_: Unit) =&gt; GenModelResult.apply(true)))))
+        </td>
+      </tr><tr>
+        <td>
+          60
+        </td>
+        <td>
+          256
+        </td>
+        <td>
+          2048
+          -
+          2135
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          Repository.saveSource(source, os).map[datavault.service.GenModelResult](((_: Unit) =&gt; GenModelResult.apply(true)))
+        </td>
+      </tr><tr>
+        <td>
+          61
+        </td>
+        <td>
+          255
+        </td>
+        <td>
+          2115
+          -
+          2135
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.service.GenModelResult.apply
+        </td>
+        <td style="background: #AEF1AE">
+          GenModelResult.apply(true)
+        </td>
+      </tr><tr>
+        <td>
+          67
+        </td>
+        <td>
+          265
+        </td>
+        <td>
+          2366
+          -
+          2379
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.ExtractFiles.outputPath
+        </td>
+        <td style="background: #AEF1AE">
+          ef.outputPath
+        </td>
+      </tr><tr>
+        <td>
+          67
+        </td>
+        <td>
+          264
+        </td>
+        <td>
+          2352
+          -
+          2364
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.ExtractFiles.inputPath
+        </td>
+        <td style="background: #AEF1AE">
+          ef.inputPath
+        </td>
+      </tr><tr>
+        <td>
+          67
+        </td>
+        <td>
+          266
+        </td>
+        <td>
+          2339
+          -
+          2380
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.service.Command.$anon.extractFiles
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.extractFiles(ef.inputPath, ef.outputPath)
+        </td>
+      </tr><tr>
+        <td>
+          68
+        </td>
+        <td>
+          268
+        </td>
+        <td>
+          2448
+          -
+          2462
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.GenerateModelFile.outputPath
+        </td>
+        <td style="background: #AEF1AE">
+          gmf.outputPath
+        </td>
+      </tr><tr>
+        <td>
+          68
+        </td>
+        <td>
+          267
+        </td>
+        <td>
+          2433
+          -
+          2446
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.GenerateModelFile.inputPath
+        </td>
+        <td style="background: #AEF1AE">
+          gmf.inputPath
+        </td>
+      </tr><tr>
+        <td>
+          68
+        </td>
+        <td>
+          269
+        </td>
+        <td>
+          2424
+          -
+          2463
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.service.Command.$anon.genModel
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.genModel(gmf.inputPath, gmf.outputPath)
+        </td>
+      </tr><tr>
+        <td>
+          69
+        </td>
+        <td>
+          270
+        </td>
+        <td>
+          2507
+          -
+          2540
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.succeed
+        </td>
+        <td style="background: #F0ADAD">
+          zio.ZIO.succeed[datavault.service.CommandNotRecognized.type](CommandNotRecognized)
+        </td>
+      </tr><tr>
+        <td>
+          80
+        </td>
+        <td>
+          272
+        </td>
+        <td>
+          2767
+          -
+          2882
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          Cli.parseAndShowUsage(args).flatMap[datavault.service.Cli with zio.console.Console with datavault.service.Archive with datavault.service.Table with datavault.service.Csv with zio.console.Console with datavault.service.Repository, Throwable, datavault.service.CommandResult](((cmd: datavault.service.Cmd) =&gt; $anon.this.execute(cmd).map[datavault.service.CommandResult](((result: datavault.service.CommandResult) =&gt; result))))
+        </td>
+      </tr><tr>
+        <td>
+          81
+        </td>
+        <td>
+          271
+        </td>
+        <td>
+          2835
+          -
+          2882
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.execute(cmd).map[datavault.service.CommandResult](((result: datavault.service.CommandResult) =&gt; result))
+        </td>
+      </tr><tr>
+        <td>
+          93
+        </td>
+        <td>
+          276
+        </td>
+        <td>
+          3076
+          -
+          3108
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.accessM[datavault.service.Command with datavault.service.Archive with datavault.service.Table with datavault.service.Cli with datavault.service.Csv with zio.console.Console with datavault.service.Repository].apply[Throwable, datavault.service.CommandResult](((x$1: datavault.service.Command with datavault.service.Archive with datavault.service.Table with datavault.service.Cli with datavault.service.Csv with zio.console.Console with datavault.service.Repository) =&gt; zio.this.Has.HasSyntax[datavault.service.Command with datavault.service.Archive with datavault.service.Table with datavault.service.Cli with datavault.service.Csv with zio.console.Console with datavault.service.Repository](x$1).get[datavault.service.Command.Service](scala.Predef.$conforms[datavault.service.Command with datavault.service.Archive with datavault.service.Table with datavault.service.Cli with datavault.service.Csv with zio.console.Console with datavault.service.Repository], (izumi.reflect.Tag.apply[datavault.service.Command.Service](classOf[datavault.service.Command$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((-1508532439: Int), (&quot;\u0004\u0000\u0001!datavault.service.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.service.Command\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.service.Command.Service])).execute(args)))
+        </td>
+      </tr><tr>
+        <td>
+          93
+        </td>
+        <td>
+          275
+        </td>
+        <td>
+          3088
+          -
+          3107
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.service.Command.Service.execute
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.Has.HasSyntax[datavault.service.Command with datavault.service.Archive with datavault.service.Table with datavault.service.Cli with datavault.service.Csv with zio.console.Console with datavault.service.Repository](x$1).get[datavault.service.Command.Service](scala.Predef.$conforms[datavault.service.Command with datavault.service.Archive with datavault.service.Table with datavault.service.Cli with datavault.service.Csv with zio.console.Console with datavault.service.Repository], (izumi.reflect.Tag.apply[datavault.service.Command.Service](classOf[datavault.service.Command$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((-1508532439: Int), (&quot;\u0004\u0000\u0001!datavault.service.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.service.Command\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.service.Command.Service])).execute(args)
+        </td>
+      </tr>
+    </table>
+          </div>
+        </div>
+      </body>
+    </html>

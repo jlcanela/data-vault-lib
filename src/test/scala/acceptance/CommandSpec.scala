@@ -1,4 +1,4 @@
-package unit
+package acceptance
 
 import zio._
 import zio.test.Assertion._
@@ -7,30 +7,21 @@ import zio.test._
 import zio.console.Console
 
 import datavault.service.{Command, Csv, Archive, Cli, Table, Repository}
-import datavault.service.{CommandResult}
+import datavault.service.{CommandResult, ExtractFilesResult, GenModelResult}
 
-object UnitTest extends DefaultRunnableSpec with Fixture {
-
+object CommandSpec extends DefaultRunnableSpec with Fixture {
   val deps =
     Console.live >+> Cli.live >+> Csv.live >+> Archive.live >+> Table.live >+> Repository.live >+> Command.live
+  def run(args: Array[String]): ZIO[Any, Throwable, CommandResult] =
+    Command.execute(args).provideLayer(deps)
 
-  def run(args1: Array[String]): ZIO[Any, Throwable, CommandResult] =
-    Command.execute(args1).provideLayer(deps)
-
-  def cli(args: Array[String]) = Cli.parseAndShowUsage(args).provideLayer(deps)
-
-  def spec = suite("Cli Unit tests")(
-    cliFixtures.map {
-      case (title, Nil, result) =>
-        testM(s"""${title} should fail""") {
-          assertM(cli(Array()))(equalTo(result))
-        }
-
-      case (title, cmd :: tail, result) =>
-        testM(s"""${cmd} ${title}: ${tail.mkString(",")}""") {
-          assertM(cli((cmd :: tail).toArray))(equalTo(result))
-        }
-    }: _*
+  def spec = suite("Command")(
+    testM("'extract-files' must succeed") {
+      assertM(run(cmdExtractFilesSuccessArgs))(equalTo(ExtractFilesResult(true)))
+    },
+    testM("'gen-model' must succeed") {
+      assertM(run(cmdGenModelSuccessArgs))(equalTo(GenModelResult(true)))
+    }
   )
 
   /*
