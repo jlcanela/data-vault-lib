@@ -21,9 +21,12 @@ case class TableInfo(
     name: String,
     archive: String,
     path: String,
-    columns: Seq[(String, String)]
+    columns: Seq[TableInfo.Column]
 )
 object TableInfo {
+
+  type Column = (String, String)
+
   def apply(archive: String, name: String, struct: StructType): TableInfo = {
     TableInfo(
       name.replace(".csv", ""),

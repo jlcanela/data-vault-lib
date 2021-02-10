@@ -33,72 +33,75 @@
 </span>9 <span style=''>  def inputPath: Path  = </span><span style='background: #AEF1AE'>Paths.get(input)</span><span style=''>
 </span>10 <span style=''>  def outputPath: Path = </span><span style='background: #AEF1AE'>Paths.get(output)</span><span style=''>
 </span>11 <span style=''>}
-</span>12 <span style=''>case class GenerateHubConfigFile(input: String, output: String)                   extends Cmd
-</span>13 <span style=''>case class ExtractFiles(input: String, output: String)                            extends Cmd {
-</span>14 <span style=''>    def inputPath: Path  = </span><span style='background: #AEF1AE'>Paths.get(input)</span><span style=''>
-</span>15 <span style=''>  def outputPath: Path = </span><span style='background: #AEF1AE'>Paths.get(output)</span><span style=''>
-</span>16 <span style=''>}
-</span>17 <span style=''>case class LoadHubs(model: String, config: String, input: String, output: String) extends Cmd
-</span>18 <span style=''>object ErrorCmd                                                                   extends Cmd
-</span>19 <span style=''>
-</span>20 <span style=''>import zio._
-</span>21 <span style=''>import zio.console.Console
+</span>12 <span style=''>case class GenerateHubConfigFile(input: String, output: String) extends Cmd{
+</span>13 <span style=''>  def inputPath: Path  = </span><span style='background: #AEF1AE'>Paths.get(input)</span><span style=''>
+</span>14 <span style=''>  def outputPath: Path = </span><span style='background: #AEF1AE'>Paths.get(output)</span><span style=''>
+</span>15 <span style=''>}
+</span>16 <span style=''>case class ExtractFiles(input: String, output: String) extends Cmd {
+</span>17 <span style=''>  def inputPath: Path  = </span><span style='background: #AEF1AE'>Paths.get(input)</span><span style=''>
+</span>18 <span style=''>  def outputPath: Path = </span><span style='background: #AEF1AE'>Paths.get(output)</span><span style=''>
+</span>19 <span style=''>}
+</span>20 <span style=''>case class LoadHubs(model: String, config: String, input: String, output: String) extends Cmd
+</span>21 <span style=''>object ErrorCmd                                                                   extends Cmd
 </span>22 <span style=''>
-</span>23 <span style=''>object Cli {
-</span>24 <span style=''>
-</span>25 <span style=''>  trait Service {
-</span>26 <span style=''>    def parseAndShowUsage(args: Array[String]): ZIO[Console, Throwable, Cmd]
-</span>27 <span style=''>  }
-</span>28 <span style=''>
-</span>29 <span style=''>  val live: ZLayer[Console, Nothing, Cli] = </span><span style='background: #AEF1AE'>ZLayer.succeed {
-</span>30 <span style=''></span><span style='background: #AEF1AE'>    new Service {
-</span>31 <span style=''></span><span style='background: #AEF1AE'>
-</span>32 <span style=''></span><span style='background: #AEF1AE'>      def withInputOutput(wio: WithInputOutput) = for {
-</span>33 <span style=''></span><span style='background: #AEF1AE'>        input  &lt;- wio.input.toOption
-</span>34 <span style=''></span><span style='background: #AEF1AE'>        output &lt;- wio.output.toOption
-</span>35 <span style=''></span><span style='background: #AEF1AE'>      } yield (input, output)
-</span>36 <span style=''></span><span style='background: #AEF1AE'>
-</span>37 <span style=''></span><span style='background: #AEF1AE'>      def extractFiles(conf: Conf) = for {
-</span>38 <span style=''></span><span style='background: #AEF1AE'>        (input, output) &lt;- withInputOutput(conf.extractFiles)
-</span>39 <span style=''></span><span style='background: #AEF1AE'>      } yield ExtractFiles(input, output)
-</span>40 <span style=''></span><span style='background: #AEF1AE'>
-</span>41 <span style=''></span><span style='background: #AEF1AE'>      def genModel(conf: Conf) = for {
-</span>42 <span style=''></span><span style='background: #AEF1AE'>        (input, output) &lt;- withInputOutput(conf.genModel)
-</span>43 <span style=''></span><span style='background: #AEF1AE'>      } yield GenerateModelFile(input, output)
-</span>44 <span style=''></span><span style='background: #AEF1AE'>
-</span>45 <span style=''></span><span style='background: #AEF1AE'>      def genHubConfig(conf: Conf) = for {
-</span>46 <span style=''></span><span style='background: #AEF1AE'>        (input, output) &lt;- withInputOutput(conf.genHubConfig)
-</span>47 <span style=''></span><span style='background: #AEF1AE'>      } yield GenerateHubConfigFile(input, output)
-</span>48 <span style=''></span><span style='background: #AEF1AE'>
-</span>49 <span style=''></span><span style='background: #AEF1AE'>      def loadHubs(conf: Conf) = for {
-</span>50 <span style=''></span><span style='background: #AEF1AE'>        (input, output) &lt;- withInputOutput(conf.loadHubs)
-</span>51 <span style=''></span><span style='background: #AEF1AE'>      } yield LoadHubs(&quot;model&quot;, &quot;config&quot;, input, output)
-</span>52 <span style=''></span><span style='background: #AEF1AE'>
-</span>53 <span style=''></span><span style='background: #AEF1AE'>      def cmd(conf: Conf) = conf.subcommand match {
-</span>54 <span style=''></span><span style='background: #AEF1AE'>        case Some(conf.genModel)     =&gt; genModel(conf)
-</span>55 <span style=''></span><span style='background: #AEF1AE'>        case Some(conf.genHubConfig) =&gt; genHubConfig(conf)
-</span>56 <span style=''></span><span style='background: #AEF1AE'>        case Some(conf.extractFiles) =&gt; extractFiles(conf)
-</span>57 <span style=''></span><span style='background: #AEF1AE'>        case Some(conf.loadHubs)     =&gt; loadHubs(conf)
-</span>58 <span style=''></span><span style='background: #AEF1AE'>        case _                       =&gt; </span><span style='background: #F0ADAD'>None</span><span style='background: #AEF1AE'>
-</span>59 <span style=''></span><span style='background: #AEF1AE'>      }
-</span>60 <span style=''></span><span style='background: #AEF1AE'>
-</span>61 <span style=''></span><span style='background: #AEF1AE'>      def parse(args: Array[String]): ZIO[Any, String, Cmd] = IO.effectAsync[String, Cmd] {
-</span>62 <span style=''></span><span style='background: #AEF1AE'>        callback =&gt;
-</span>63 <span style=''></span><span style='background: #AEF1AE'>          val conf =
-</span>64 <span style=''></span><span style='background: #AEF1AE'>            new Conf(args, (_, builder: Scallop) =&gt; callback(IO.fail(builder.help)))
-</span>65 <span style=''></span><span style='background: #AEF1AE'>          callback(IO.succeed(cmd(conf).getOrElse(ErrorCmd)))
-</span>66 <span style=''></span><span style='background: #AEF1AE'>      }
-</span>67 <span style=''></span><span style='background: #AEF1AE'>
-</span>68 <span style=''></span><span style='background: #AEF1AE'>      def parseAndShowUsage(args: Array[String]): ZIO[Console, Throwable, Cmd] = parse(args)
-</span>69 <span style=''></span><span style='background: #AEF1AE'>        .tapError(err =&gt; console.putStrLn(err))
-</span>70 <span style=''></span><span style='background: #AEF1AE'>        .catchAll(_ =&gt; ZIO.succeed(ErrorCmd))
-</span>71 <span style=''></span><span style='background: #AEF1AE'>    }
-</span>72 <span style=''></span><span style='background: #AEF1AE'>  }</span><span style=''>
-</span>73 <span style=''>
-</span>74 <span style=''>  def parseAndShowUsage(args: Array[String]): ZIO[Cli with Console, Throwable, Cmd] =
-</span>75 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.parseAndShowUsage(args))</span><span style=''>
+</span>23 <span style=''>import zio._
+</span>24 <span style=''>import zio.console.Console
+</span>25 <span style=''>
+</span>26 <span style=''>object Cli {
+</span>27 <span style=''>
+</span>28 <span style=''>  trait Service {
+</span>29 <span style=''>    def parseAndShowUsage(args: Array[String]): ZIO[Console, Throwable, Cmd]
+</span>30 <span style=''>  }
+</span>31 <span style=''>
+</span>32 <span style=''>  val live: ZLayer[Console, Nothing, Cli] = </span><span style='background: #AEF1AE'>ZLayer.succeed {
+</span>33 <span style=''></span><span style='background: #AEF1AE'>    new Service {
+</span>34 <span style=''></span><span style='background: #AEF1AE'>
+</span>35 <span style=''></span><span style='background: #AEF1AE'>      def withInputOutput(wio: WithInputOutput) = for {
+</span>36 <span style=''></span><span style='background: #AEF1AE'>        input  &lt;- wio.input.toOption
+</span>37 <span style=''></span><span style='background: #AEF1AE'>        output &lt;- wio.output.toOption
+</span>38 <span style=''></span><span style='background: #AEF1AE'>      } yield (input, output)
+</span>39 <span style=''></span><span style='background: #AEF1AE'>
+</span>40 <span style=''></span><span style='background: #AEF1AE'>      def extractFiles(conf: Conf) = for {
+</span>41 <span style=''></span><span style='background: #AEF1AE'>        (input, output) &lt;- withInputOutput(conf.extractFiles)
+</span>42 <span style=''></span><span style='background: #AEF1AE'>      } yield ExtractFiles(input, output)
+</span>43 <span style=''></span><span style='background: #AEF1AE'>
+</span>44 <span style=''></span><span style='background: #AEF1AE'>      def genModel(conf: Conf) = for {
+</span>45 <span style=''></span><span style='background: #AEF1AE'>        (input, output) &lt;- withInputOutput(conf.genModel)
+</span>46 <span style=''></span><span style='background: #AEF1AE'>      } yield GenerateModelFile(input, output)
+</span>47 <span style=''></span><span style='background: #AEF1AE'>
+</span>48 <span style=''></span><span style='background: #AEF1AE'>      def genHubConfig(conf: Conf) = for {
+</span>49 <span style=''></span><span style='background: #AEF1AE'>        (input, output) &lt;- withInputOutput(conf.genHubConfig)
+</span>50 <span style=''></span><span style='background: #AEF1AE'>      } yield GenerateHubConfigFile(input, output)
+</span>51 <span style=''></span><span style='background: #AEF1AE'>
+</span>52 <span style=''></span><span style='background: #AEF1AE'>      def loadHubs(conf: Conf) = for {
+</span>53 <span style=''></span><span style='background: #AEF1AE'>        (input, output) &lt;- withInputOutput(conf.loadHubs)
+</span>54 <span style=''></span><span style='background: #AEF1AE'>      } yield LoadHubs(&quot;model&quot;, &quot;config&quot;, input, output)
+</span>55 <span style=''></span><span style='background: #AEF1AE'>
+</span>56 <span style=''></span><span style='background: #AEF1AE'>      def cmd(conf: Conf) = conf.subcommand match {
+</span>57 <span style=''></span><span style='background: #AEF1AE'>        case Some(conf.genModel)     =&gt; genModel(conf)
+</span>58 <span style=''></span><span style='background: #AEF1AE'>        case Some(conf.genHubConfig) =&gt; genHubConfig(conf)
+</span>59 <span style=''></span><span style='background: #AEF1AE'>        case Some(conf.extractFiles) =&gt; extractFiles(conf)
+</span>60 <span style=''></span><span style='background: #AEF1AE'>        case Some(conf.loadHubs)     =&gt; loadHubs(conf)
+</span>61 <span style=''></span><span style='background: #AEF1AE'>        case _                       =&gt; </span><span style='background: #F0ADAD'>None</span><span style='background: #AEF1AE'>
+</span>62 <span style=''></span><span style='background: #AEF1AE'>      }
+</span>63 <span style=''></span><span style='background: #AEF1AE'>
+</span>64 <span style=''></span><span style='background: #AEF1AE'>      def parse(args: Array[String]): ZIO[Any, String, Cmd] = IO.effectAsync[String, Cmd] {
+</span>65 <span style=''></span><span style='background: #AEF1AE'>        callback =&gt;
+</span>66 <span style=''></span><span style='background: #AEF1AE'>          val conf =
+</span>67 <span style=''></span><span style='background: #AEF1AE'>            new Conf(args, (_, builder: Scallop) =&gt; callback(IO.fail(builder.help)))
+</span>68 <span style=''></span><span style='background: #AEF1AE'>          callback(IO.succeed(cmd(conf).getOrElse(ErrorCmd)))
+</span>69 <span style=''></span><span style='background: #AEF1AE'>      }
+</span>70 <span style=''></span><span style='background: #AEF1AE'>
+</span>71 <span style=''></span><span style='background: #AEF1AE'>      def parseAndShowUsage(args: Array[String]): ZIO[Console, Throwable, Cmd] = parse(args)
+</span>72 <span style=''></span><span style='background: #AEF1AE'>        .tapError(err =&gt; console.putStrLn(err))
+</span>73 <span style=''></span><span style='background: #AEF1AE'>        .catchAll(_ =&gt; ZIO.succeed(ErrorCmd))
+</span>74 <span style=''></span><span style='background: #AEF1AE'>    }
+</span>75 <span style=''></span><span style='background: #AEF1AE'>  }</span><span style=''>
 </span>76 <span style=''>
-</span>77 <span style=''>}
+</span>77 <span style=''>  def parseAndShowUsage(args: Array[String]): ZIO[Cli with Console, Throwable, Cmd] =
+</span>78 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.parseAndShowUsage(args))</span><span style=''>
+</span>79 <span style=''>
+</span>80 <span style=''>}
 </span></pre>
           </div>
           <div class="tab-pane" id="statementlist">
@@ -196,36 +199,99 @@
         </td>
       </tr><tr>
         <td>
-          14
+          13
         </td>
         <td>
           71
         </td>
         <td>
-          497
+          382
           -
-          502
+          387
         </td>
         <td>
           Select
         </td>
         <td>
-          datavault.service.ExtractFiles.input
+          datavault.service.GenerateHubConfigFile.input
         </td>
         <td style="background: #AEF1AE">
-          ExtractFiles.this.input
+          GenerateHubConfigFile.this.input
+        </td>
+      </tr><tr>
+        <td>
+          13
+        </td>
+        <td>
+          72
+        </td>
+        <td>
+          372
+          -
+          388
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Paths.get
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Paths.get(GenerateHubConfigFile.this.input)
         </td>
       </tr><tr>
         <td>
           14
         </td>
         <td>
-          72
+          74
         </td>
         <td>
-          487
+          414
           -
-          503
+          431
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Paths.get
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Paths.get(GenerateHubConfigFile.this.output)
+        </td>
+      </tr><tr>
+        <td>
+          14
+        </td>
+        <td>
+          73
+        </td>
+        <td>
+          424
+          -
+          430
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.service.GenerateHubConfigFile.output
+        </td>
+        <td style="background: #AEF1AE">
+          GenerateHubConfigFile.this.output
+        </td>
+      </tr><tr>
+        <td>
+          17
+        </td>
+        <td>
+          76
+        </td>
+        <td>
+          528
+          -
+          544
         </td>
         <td>
           Apply
@@ -238,36 +304,36 @@
         </td>
       </tr><tr>
         <td>
-          15
+          17
         </td>
         <td>
-          74
+          75
         </td>
         <td>
-          529
+          538
           -
-          546
+          543
         </td>
         <td>
-          Apply
+          Select
         </td>
         <td>
-          java.nio.file.Paths.get
+          datavault.service.ExtractFiles.input
         </td>
         <td style="background: #AEF1AE">
-          java.nio.file.Paths.get(ExtractFiles.this.output)
+          ExtractFiles.this.input
         </td>
       </tr><tr>
         <td>
-          15
+          18
         </td>
         <td>
-          73
+          77
         </td>
         <td>
-          539
+          580
           -
-          545
+          586
         </td>
         <td>
           Select
@@ -280,15 +346,36 @@
         </td>
       </tr><tr>
         <td>
-          29
+          18
         </td>
         <td>
-          114
+          78
         </td>
         <td>
-          937
+          570
           -
-          2559
+          587
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Paths.get
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Paths.get(ExtractFiles.this.output)
+        </td>
+      </tr><tr>
+        <td>
+          32
+        </td>
+        <td>
+          118
+        </td>
+        <td>
+          978
+          -
+          2600
         </td>
         <td>
           ApplyToImplicitArgs
@@ -346,15 +433,15 @@
         </td>
       </tr><tr>
         <td>
-          30
+          33
         </td>
         <td>
-          113
+          117
         </td>
         <td>
-          958
+          999
           -
-          961
+          1002
         </td>
         <td>
           Apply
@@ -367,15 +454,15 @@
         </td>
       </tr><tr>
         <td>
-          33
+          36
         </td>
         <td>
-          77
+          81
         </td>
         <td>
-          1023
+          1064
           -
-          1133
+          1174
         </td>
         <td>
           Apply
@@ -388,15 +475,15 @@
         </td>
       </tr><tr>
         <td>
-          34
+          37
         </td>
         <td>
-          76
+          80
         </td>
         <td>
-          1074
+          1115
           -
-          1133
+          1174
         </td>
         <td>
           Apply
@@ -409,15 +496,15 @@
         </td>
       </tr><tr>
         <td>
-          35
+          38
         </td>
         <td>
-          75
+          79
         </td>
         <td>
-          1118
+          1159
           -
-          1133
+          1174
         </td>
         <td>
           Apply
@@ -430,15 +517,15 @@
         </td>
       </tr><tr>
         <td>
-          38
+          41
         </td>
         <td>
-          79
+          83
         </td>
         <td>
-          1172
+          1213
           -
-          1281
+          1322
         </td>
         <td>
           Apply
@@ -456,15 +543,15 @@
         </td>
       </tr><tr>
         <td>
-          39
+          42
         </td>
         <td>
-          78
+          82
         </td>
         <td>
-          1254
+          1295
           -
-          1281
+          1322
         </td>
         <td>
           Apply
@@ -477,15 +564,36 @@
         </td>
       </tr><tr>
         <td>
-          42
+          45
         </td>
         <td>
-          83
+          85
         </td>
         <td>
-          1316
+          1405
           -
-          1426
+          1405
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          true
+        </td>
+      </tr><tr>
+        <td>
+          45
+        </td>
+        <td>
+          87
+        </td>
+        <td>
+          1357
+          -
+          1467
         </td>
         <td>
           Apply
@@ -503,15 +611,15 @@
         </td>
       </tr><tr>
         <td>
-          42
+          45
         </td>
         <td>
-          80
+          84
         </td>
         <td>
-          1365
+          1406
           -
-          1378
+          1419
         </td>
         <td>
           Select
@@ -524,36 +632,15 @@
         </td>
       </tr><tr>
         <td>
-          42
+          46
         </td>
         <td>
-          81
+          86
         </td>
         <td>
-          1364
+          1435
           -
-          1364
-        </td>
-        <td>
-          Literal
-        </td>
-        <td>
-          &lt;nosymbol&gt;
-        </td>
-        <td style="background: #AEF1AE">
-          true
-        </td>
-      </tr><tr>
-        <td>
-          43
-        </td>
-        <td>
-          82
-        </td>
-        <td>
-          1394
-          -
-          1426
+          1467
         </td>
         <td>
           Apply
@@ -566,15 +653,15 @@
         </td>
       </tr><tr>
         <td>
-          46
+          49
         </td>
         <td>
-          85
+          89
         </td>
         <td>
-          1513
+          1554
           -
-          1513
+          1554
         </td>
         <td>
           Literal
@@ -587,15 +674,15 @@
         </td>
       </tr><tr>
         <td>
-          46
+          49
         </td>
         <td>
-          87
+          91
         </td>
         <td>
-          1465
+          1506
           -
-          1583
+          1624
         </td>
         <td>
           Apply
@@ -613,15 +700,15 @@
         </td>
       </tr><tr>
         <td>
-          46
+          49
         </td>
         <td>
-          84
+          88
         </td>
         <td>
-          1514
+          1555
           -
-          1531
+          1572
         </td>
         <td>
           Select
@@ -634,15 +721,15 @@
         </td>
       </tr><tr>
         <td>
-          47
+          50
         </td>
         <td>
-          86
+          90
         </td>
         <td>
-          1547
+          1588
           -
-          1583
+          1624
         </td>
         <td>
           Apply
@@ -655,36 +742,36 @@
         </td>
       </tr><tr>
         <td>
-          50
+          53
         </td>
         <td>
-          89
+          92
         </td>
         <td>
-          1666
+          1708
           -
-          1666
+          1721
         </td>
         <td>
-          Literal
+          Select
         </td>
         <td>
-          &lt;nosymbol&gt;
+          datavault.service.Conf.loadHubs
         </td>
         <td style="background: #AEF1AE">
-          true
+          conf.loadHubs
         </td>
       </tr><tr>
         <td>
-          50
+          53
         </td>
         <td>
-          91
+          95
         </td>
         <td>
-          1618
+          1659
           -
-          1738
+          1779
         </td>
         <td>
           Apply
@@ -702,36 +789,36 @@
         </td>
       </tr><tr>
         <td>
-          50
+          53
         </td>
         <td>
-          88
+          93
         </td>
         <td>
-          1667
+          1707
           -
-          1680
+          1707
         </td>
         <td>
-          Select
+          Literal
         </td>
         <td>
-          datavault.service.Conf.loadHubs
+          &lt;nosymbol&gt;
         </td>
         <td style="background: #AEF1AE">
-          conf.loadHubs
+          true
         </td>
       </tr><tr>
         <td>
-          51
+          54
         </td>
         <td>
-          90
+          94
         </td>
         <td>
-          1696
+          1737
           -
-          1738
+          1779
         </td>
         <td>
           Apply
@@ -744,15 +831,15 @@
         </td>
       </tr><tr>
         <td>
-          53
+          56
         </td>
         <td>
-          92
+          96
         </td>
         <td>
-          1768
+          1809
           -
-          1783
+          1824
         </td>
         <td>
           Select
@@ -765,15 +852,15 @@
         </td>
       </tr><tr>
         <td>
-          54
+          57
         </td>
         <td>
-          93
+          97
         </td>
         <td>
-          1832
+          1873
           -
-          1846
+          1887
         </td>
         <td>
           Apply
@@ -786,15 +873,15 @@
         </td>
       </tr><tr>
         <td>
-          55
+          58
         </td>
         <td>
-          94
+          98
         </td>
         <td>
-          1887
+          1928
           -
-          1905
+          1946
         </td>
         <td>
           Apply
@@ -807,15 +894,15 @@
         </td>
       </tr><tr>
         <td>
-          56
+          59
         </td>
         <td>
-          95
+          99
         </td>
         <td>
-          1946
+          1987
           -
-          1964
+          2005
         </td>
         <td>
           Apply
@@ -828,15 +915,15 @@
         </td>
       </tr><tr>
         <td>
-          57
+          60
         </td>
         <td>
-          96
+          100
         </td>
         <td>
-          2005
+          2046
           -
-          2019
+          2060
         </td>
         <td>
           Apply
@@ -849,15 +936,15 @@
         </td>
       </tr><tr>
         <td>
-          58
+          61
         </td>
         <td>
-          97
+          101
         </td>
         <td>
-          2060
+          2101
           -
-          2064
+          2105
         </td>
         <td>
           Select
@@ -870,39 +957,15 @@
         </td>
       </tr><tr>
         <td>
-          61
+          64
         </td>
         <td>
-          107
+          110
         </td>
         <td>
-          2136
+          2191
           -
-          2361
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          zio.IO.effectAsync
-        </td>
-        <td style="background: #AEF1AE">
-          zio.IO.effectAsync[String, datavault.service.Cmd](((callback: zio.IO[String,datavault.service.Cmd] =&gt; Unit) =&gt; {
-  val conf: datavault.service.Conf = new Conf(scala.Predef.wrapRefArray[String](args), ((x$5: Throwable, builder: org.rogach.scallop.Scallop) =&gt; callback.apply(zio.IO.fail[String](builder.help))));
-  callback.apply(zio.IO.succeed[datavault.service.Cmd]($anon.this.cmd(conf).getOrElse[datavault.service.Cmd](ErrorCmd)))
-}), zio.IO.effectAsync$default$2[String, datavault.service.Cmd])
-        </td>
-      </tr><tr>
-        <td>
-          61
-        </td>
-        <td>
-          106
-        </td>
-        <td>
-          2150
-          -
-          2150
+          2191
         </td>
         <td>
           TypeApply
@@ -918,54 +981,36 @@
           64
         </td>
         <td>
-          101
+          111
         </td>
         <td>
-          2259
+          2177
           -
-          2290
+          2402
         </td>
         <td>
           Apply
         </td>
         <td>
-          scala.Function1.apply
+          zio.IO.effectAsync
         </td>
         <td style="background: #AEF1AE">
-          callback.apply(zio.IO.fail[String](builder.help))
+          zio.IO.effectAsync[String, datavault.service.Cmd](((callback: zio.IO[String,datavault.service.Cmd] =&gt; Unit) =&gt; {
+  val conf: datavault.service.Conf = new Conf(scala.Predef.wrapRefArray[String](args), ((x$5: Throwable, builder: org.rogach.scallop.Scallop) =&gt; callback.apply(zio.IO.fail[String](builder.help))));
+  callback.apply(zio.IO.succeed[datavault.service.Cmd]($anon.this.cmd(conf).getOrElse[datavault.service.Cmd](ErrorCmd)))
+}), zio.IO.effectAsync$default$2[String, datavault.service.Cmd])
         </td>
       </tr><tr>
         <td>
-          64
+          67
         </td>
         <td>
-          98
+          104
         </td>
         <td>
-          2228
+          2309
           -
-          2232
-        </td>
-        <td>
-          ApplyImplicitView
-        </td>
-        <td>
-          scala.LowPriorityImplicits.wrapRefArray
-        </td>
-        <td style="background: #AEF1AE">
-          scala.Predef.wrapRefArray[String](args)
-        </td>
-      </tr><tr>
-        <td>
-          64
-        </td>
-        <td>
-          100
-        </td>
-        <td>
-          2268
-          -
-          2289
+          2330
         </td>
         <td>
           Apply
@@ -978,36 +1023,15 @@
         </td>
       </tr><tr>
         <td>
-          64
+          67
         </td>
         <td>
-          99
+          106
         </td>
         <td>
-          2276
+          2260
           -
-          2288
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          org.rogach.scallop.Scallop.help
-        </td>
-        <td style="background: #AEF1AE">
-          builder.help
-        </td>
-      </tr><tr>
-        <td>
-          64
-        </td>
-        <td>
-          102
-        </td>
-        <td>
-          2219
-          -
-          2291
+          2332
         </td>
         <td>
           Apply
@@ -1020,36 +1044,78 @@
         </td>
       </tr><tr>
         <td>
-          65
-        </td>
-        <td>
-          104
-        </td>
-        <td>
-          2311
-          -
-          2352
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          zio.IO.succeed
-        </td>
-        <td style="background: #AEF1AE">
-          zio.IO.succeed[datavault.service.Cmd]($anon.this.cmd(conf).getOrElse[datavault.service.Cmd](ErrorCmd))
-        </td>
-      </tr><tr>
-        <td>
-          65
+          67
         </td>
         <td>
           103
         </td>
         <td>
-          2322
+          2317
           -
-          2351
+          2329
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          org.rogach.scallop.Scallop.help
+        </td>
+        <td style="background: #AEF1AE">
+          builder.help
+        </td>
+      </tr><tr>
+        <td>
+          67
+        </td>
+        <td>
+          105
+        </td>
+        <td>
+          2300
+          -
+          2331
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Function1.apply
+        </td>
+        <td style="background: #AEF1AE">
+          callback.apply(zio.IO.fail[String](builder.help))
+        </td>
+      </tr><tr>
+        <td>
+          67
+        </td>
+        <td>
+          102
+        </td>
+        <td>
+          2269
+          -
+          2273
+        </td>
+        <td>
+          ApplyImplicitView
+        </td>
+        <td>
+          scala.LowPriorityImplicits.wrapRefArray
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.wrapRefArray[String](args)
+        </td>
+      </tr><tr>
+        <td>
+          68
+        </td>
+        <td>
+          107
+        </td>
+        <td>
+          2363
+          -
+          2392
         </td>
         <td>
           Apply
@@ -1062,15 +1128,15 @@
         </td>
       </tr><tr>
         <td>
-          65
+          68
         </td>
         <td>
-          105
+          109
         </td>
         <td>
-          2302
+          2343
           -
-          2353
+          2394
         </td>
         <td>
           Apply
@@ -1083,15 +1149,36 @@
         </td>
       </tr><tr>
         <td>
-          69
+          68
         </td>
         <td>
-          109
+          108
         </td>
         <td>
-          2473
+          2352
           -
-          2473
+          2393
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.IO.succeed
+        </td>
+        <td style="background: #AEF1AE">
+          zio.IO.succeed[datavault.service.Cmd]($anon.this.cmd(conf).getOrElse[datavault.service.Cmd](ErrorCmd))
+        </td>
+      </tr><tr>
+        <td>
+          72
+        </td>
+        <td>
+          113
+        </td>
+        <td>
+          2514
+          -
+          2514
         </td>
         <td>
           TypeApply
@@ -1104,15 +1191,15 @@
         </td>
       </tr><tr>
         <td>
-          69
+          72
         </td>
         <td>
-          108
+          112
         </td>
         <td>
-          2481
+          2522
           -
-          2502
+          2543
         </td>
         <td>
           Apply
@@ -1125,36 +1212,15 @@
         </td>
       </tr><tr>
         <td>
-          70
+          73
         </td>
         <td>
-          110
+          116
         </td>
         <td>
-          2527
+          2485
           -
-          2548
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          zio.ZIO.succeed
-        </td>
-        <td style="background: #AEF1AE">
-          zio.ZIO.succeed[datavault.service.ErrorCmd.type](ErrorCmd)
-        </td>
-      </tr><tr>
-        <td>
-          70
-        </td>
-        <td>
-          112
-        </td>
-        <td>
-          2444
-          -
-          2549
+          2590
         </td>
         <td>
           ApplyToImplicitArgs
@@ -1167,15 +1233,15 @@
         </td>
       </tr><tr>
         <td>
-          70
+          73
         </td>
         <td>
-          111
+          115
         </td>
         <td>
-          2521
+          2562
           -
-          2521
+          2562
         </td>
         <td>
           TypeApply
@@ -1188,36 +1254,36 @@
         </td>
       </tr><tr>
         <td>
-          75
+          73
         </td>
         <td>
-          116
+          114
         </td>
         <td>
-          2651
+          2568
           -
-          2693
+          2589
         </td>
         <td>
           Apply
         </td>
         <td>
-          zio.ZIO.AccessMPartiallyApplied.apply
+          zio.ZIO.succeed
         </td>
         <td style="background: #AEF1AE">
-          zio.ZIO.accessM[datavault.service.Cli with zio.console.Console].apply[Throwable, datavault.service.Cmd](((x$7: datavault.service.Cli with zio.console.Console) =&gt; zio.this.Has.HasSyntax[datavault.service.Cli with zio.console.Console](x$7).get[datavault.service.Cli.Service](scala.Predef.$conforms[datavault.service.Cli with zio.console.Console], (izumi.reflect.Tag.apply[datavault.service.Cli.Service](classOf[datavault.service.Cli$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((-1552464769: Int), (&quot;\u0004\u0000\u0001\u001Ddatavault.service.Cli.Service\u0001\u0002\u0003\u0000\u0000\u0015datavault.service.Cli\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.service.Cli.Service])).parseAndShowUsage(args)))
+          zio.ZIO.succeed[datavault.service.ErrorCmd.type](ErrorCmd)
         </td>
       </tr><tr>
         <td>
-          75
+          78
         </td>
         <td>
-          115
+          119
         </td>
         <td>
-          2663
+          2704
           -
-          2692
+          2733
         </td>
         <td>
           Apply
@@ -1227,6 +1293,27 @@
         </td>
         <td style="background: #AEF1AE">
           zio.this.Has.HasSyntax[datavault.service.Cli with zio.console.Console](x$7).get[datavault.service.Cli.Service](scala.Predef.$conforms[datavault.service.Cli with zio.console.Console], (izumi.reflect.Tag.apply[datavault.service.Cli.Service](classOf[datavault.service.Cli$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((-1552464769: Int), (&quot;\u0004\u0000\u0001\u001Ddatavault.service.Cli.Service\u0001\u0002\u0003\u0000\u0000\u0015datavault.service.Cli\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.service.Cli.Service])).parseAndShowUsage(args)
+        </td>
+      </tr><tr>
+        <td>
+          78
+        </td>
+        <td>
+          120
+        </td>
+        <td>
+          2692
+          -
+          2734
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.accessM[datavault.service.Cli with zio.console.Console].apply[Throwable, datavault.service.Cmd](((x$7: datavault.service.Cli with zio.console.Console) =&gt; zio.this.Has.HasSyntax[datavault.service.Cli with zio.console.Console](x$7).get[datavault.service.Cli.Service](scala.Predef.$conforms[datavault.service.Cli with zio.console.Console], (izumi.reflect.Tag.apply[datavault.service.Cli.Service](classOf[datavault.service.Cli$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((-1552464769: Int), (&quot;\u0004\u0000\u0001\u001Ddatavault.service.Cli.Service\u0001\u0002\u0003\u0000\u0000\u0015datavault.service.Cli\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.service.Cli.Service])).parseAndShowUsage(args)))
         </td>
       </tr>
     </table>

@@ -9,6 +9,7 @@ import zio.console.Console
 sealed trait CommandResult
 object CommandNotRecognized                     extends CommandResult
 case class GenModelResult(success: Boolean)     extends CommandResult
+case class GenHubConfigResult(success: Boolean) extends CommandResult
 case class ExtractFilesResult(success: Boolean) extends CommandResult
 
 object Command {
@@ -60,12 +61,25 @@ object Command {
             _           <- Repository.saveSource(source, os)
           } yield GenModelResult(true)
 
+        def genHubConfig(
+            input: Path,
+            output: Path
+        ): ZIO[Archive with Table with Csv with Console with Repository, Throwable, CommandResult] =
+          for {
+            inputStream <- IO(Files.newInputStream(input))
+            source <- Repository.loadSource(inputStream)
+            hubs = Hubs.fromSource(source)
+            os          <- IO(Files.newOutputStream(output))
+            _ <- Repository.saveHubs(hubs, os)
+          } yield GenHubConfigResult(true)
+
         def execute(
             cmd: Cmd
         ): ZIO[Archive with Table with Csv with Console with Repository, Throwable, CommandResult] =
           cmd match {
             case ef: ExtractFiles       => extractFiles(ef.inputPath, ef.outputPath)
             case gmf: GenerateModelFile => genModel(gmf.inputPath, gmf.outputPath)
+            case ghc: GenerateHubConfigFile => genHubConfig(ghc.inputPath, ghc.outputPath)
             case _                      => ZIO.succeed(CommandNotRecognized)
           }
 

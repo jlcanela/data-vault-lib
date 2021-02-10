@@ -7,7 +7,7 @@ import zio.test._
 import zio.console.Console
 
 import datavault.service.{Command, Csv, Archive, Cli, Table, Repository}
-import datavault.service.{CommandResult, ExtractFilesResult, GenModelResult}
+import datavault.service.{CommandResult, ExtractFilesResult, GenModelResult, GenHubConfigResult}
 
 object CommandSpec extends DefaultRunnableSpec with Fixture {
   val deps =
@@ -21,6 +21,9 @@ object CommandSpec extends DefaultRunnableSpec with Fixture {
     },
     testM("'gen-model' must succeed") {
       assertM(run(cmdGenModelSuccessArgs))(equalTo(GenModelResult(true)))
+    },
+    testM("'gen-hubconfig' must succeed") {
+      assertM(run(cmdGenHubconfigSuccessArgs))(equalTo(GenHubConfigResult(true)))
     }
   )
 

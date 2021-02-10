@@ -9,7 +9,10 @@ case class GenerateModelFile(input: String, output: String) extends Cmd {
   def inputPath: Path  = Paths.get(input)
   def outputPath: Path = Paths.get(output)
 }
-case class GenerateHubConfigFile(input: String, output: String) extends Cmd
+case class GenerateHubConfigFile(input: String, output: String) extends Cmd{
+  def inputPath: Path  = Paths.get(input)
+  def outputPath: Path = Paths.get(output)
+}
 case class ExtractFiles(input: String, output: String) extends Cmd {
   def inputPath: Path  = Paths.get(input)
   def outputPath: Path = Paths.get(output)

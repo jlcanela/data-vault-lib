@@ -22,6 +22,8 @@ object Repository {
     // def saveHubs(hubs: Hubs, path: Path) : ZIO[FileSystem, Throwable, Unit]
     def loadSource(is: InputStream): ZIO[Any, Throwable, Source]
     def saveSource(source: Source, os: OutputStream): ZIO[Any, Throwable, Unit]
+
+    def saveHubs(hubs: Hubs, os: OutputStream): ZIO[Any, Throwable, Unit]
   }
 
   // Module implementation
@@ -64,9 +66,23 @@ object Repository {
       def saveSource(source: Source, os: OutputStream): ZIO[Any, Throwable, Unit] =
         saveContent(os)(writeSource(source))
 
+      def writeHubs(hubs: Hubs)(writer: java.io.Writer): ZIO[Any, Nothing, Unit] =
+        ZIO.effectTotal(
+          writePretty(hubs, writer).close()
+        )
+      // def writeHubs(hubs: Hubs): java.io.BufferedWriter => zio.ZIO[Any,Throwable,Unit] = (w: java.io.BufferedWriter) => ZIO.effect(writePretty(hubs, w))
+//
+      def saveHubs(hubs: Hubs, os: OutputStream): ZIO[Any, Throwable, Unit] =
+        saveContent(os)(writeHubs(hubs))
     }
   }
 
+  def loadSource(is: InputStream): ZIO[Repository, Throwable, Source] =
+    ZIO.accessM(_.get.loadSource(is))
+
   def saveSource(source: Source, os: OutputStream): ZIO[Repository, Throwable, Unit] =
     ZIO.accessM(_.get.saveSource(source, os))
+
+  def saveHubs(hubs: Hubs, os: OutputStream): ZIO[Repository, Throwable, Unit] =
+    ZIO.accessM(_.get.saveHubs(hubs, os))
 }
