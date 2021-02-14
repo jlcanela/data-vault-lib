@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.{MappingIterator, ObjectWriter}
 
 object ExtractLoad {
 
-    case class Table(headers: Array[String], rows: Stream[Any, Array[String]]) {
+    final case class Table(headers: Array[String], rows: Stream[Any, Array[String]]) {
       def writer: ObjectWriter = {
         val mapper = new CsvMapper();
         val builder = headers.foldLeft(CsvSchema.builder())((builder, name) => builder.addColumn(name))
@@ -37,7 +37,7 @@ object ExtractLoad {
         
     }
 
-    case class File(inputStream: InputStream, name: String, path: String) {
+    final case class File(inputStream: InputStream, name: String, path: String) {
       def asTable: ZIO[Any, Throwable, Table] = {
         
         def it : MappingIterator[Array[String]]= {
