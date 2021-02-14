@@ -9,8 +9,8 @@ import datavault.Datavault
 object CommandSpec extends DefaultRunnableSpec {
   val deps = Datavault.deps
 
-  val SUCCESS = 0
-  val FAILURE = 1
+  val SUCCESS                                            = 0
+  val FAILURE                                            = 1
   def run(args: Array[String]): ZIO[Any, Throwable, Int] = Datavault.cmd(args).provideLayer(deps)
 
   def spec = suite("Command")(
