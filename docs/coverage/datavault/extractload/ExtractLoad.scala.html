@@ -1,0 +1,3377 @@
+<html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title id="title">
+          datavault/extractload/ExtractLoad.scala.html
+        </title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/css/theme.default.min.css" type="text/css"/><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/js/jquery.tablesorter.min.js"></script><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" type="text/css"/><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script><script type="text/javascript">
+        $(document).ready(function() {$(".tablesorter").tablesorter();});
+      </script>
+        <style>
+          table.codegrid { font-family: monospace; font-size: 12px; width: auto!important; }table.statementlist { width: auto!important; font-size: 13px; } table.codegrid td { padding: 0!important; border: 0!important } table td.linenumber { width: 40px!important; } 
+        </style>
+      </head>
+      <body style="font-family: monospace;">
+        <ul class="nav nav-tabs">
+          <li>
+            <a href="#codegrid" data-toggle="tab">Codegrid</a>
+          </li>
+          <li>
+            <a href="#statementlist" data-toggle="tab">Statement List</a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active" id="codegrid">
+            <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault.extractload
+</span>2 <span style=''>
+</span>3 <span style=''>import zio._
+</span>4 <span style=''>import zio.stream._
+</span>5 <span style=''>import zio.console.Console
+</span>6 <span style=''>
+</span>7 <span style=''>import java.util.zip._
+</span>8 <span style=''>import java.io.InputStream
+</span>9 <span style=''>import java.nio.file.{Files, Path, Paths}
+</span>10 <span style=''>import java.nio.file.StandardCopyOption.REPLACE_EXISTING
+</span>11 <span style=''>
+</span>12 <span style=''>import com.fasterxml.jackson.dataformat.csv._
+</span>13 <span style=''>import com.fasterxml.jackson.databind.{MappingIterator, ObjectWriter}
+</span>14 <span style=''>
+</span>15 <span style=''>object ExtractLoad {
+</span>16 <span style=''>
+</span>17 <span style=''>  final case class Table(name: String, headers: Array[String], rows: Stream[Any, Array[String]])
+</span>18 <span style=''>
+</span>19 <span style=''>  final case class File(inputStream: InputStream, name: String, path: String)
+</span>20 <span style=''>
+</span>21 <span style=''>  // Service definition
+</span>22 <span style=''>  trait Service {
+</span>23 <span style=''>    def archiveFiles(path: Path): ZIO[Console, Throwable, ZStream[Console, Throwable, File]]
+</span>24 <span style=''>    def unzipFiles(path: Path, destination: Path): ZIO[Console, Throwable, Unit]
+</span>25 <span style=''>    def extractFiles(path: Path, destination: Path): ZIO[Console, Throwable, Unit]
+</span>26 <span style=''>    def tables(path: Path): ZIO[Console, Throwable, ZStream[Console, Throwable, Table]]
+</span>27 <span style=''>    def table(inputStream: InputStream): ZIO[Any, Throwable, Table]
+</span>28 <span style=''>    def fileAsTable(file: File): ZIO[Any, Throwable, Table]
+</span>29 <span style=''>    def writeTable(table: Table, path: Path): ZIO[Any, Throwable, Unit]
+</span>30 <span style=''>    def processFiles(
+</span>31 <span style=''>        path: Path,
+</span>32 <span style=''>        destination: Path,
+</span>33 <span style=''>        filter: (Table) =&gt; Boolean,
+</span>34 <span style=''>        transform: (Table) =&gt; ZIO[Any, Option[Nothing], Table]
+</span>35 <span style=''>    ): ZIO[Console, Throwable, Unit]
+</span>36 <span style=''>  }
+</span>37 <span style=''>
+</span>38 <span style=''>  // Module implementation
+</span>39 <span style=''>  val live: ZLayer[Any, Nothing, ExtractLoad] = </span><span style='background: #AEF1AE'>ZLayer.succeed {
+</span>40 <span style=''></span><span style='background: #AEF1AE'>    new Service {
+</span>41 <span style=''></span><span style='background: #AEF1AE'>
+</span>42 <span style=''></span><span style='background: #AEF1AE'>      def createStream[T](
+</span>43 <span style=''></span><span style='background: #AEF1AE'>          path: Path,
+</span>44 <span style=''></span><span style='background: #AEF1AE'>          processFile: File =&gt; ZIO[Console, Throwable, T]
+</span>45 <span style=''></span><span style='background: #AEF1AE'>      ): ZIO[Console, Throwable, ZStream[Console, Throwable, T]] = {
+</span>46 <span style=''></span><span style='background: #AEF1AE'>
+</span>47 <span style=''></span><span style='background: #AEF1AE'>        def zipInputStream = for {
+</span>48 <span style=''></span><span style='background: #AEF1AE'>          is  &lt;- IO(Files.newInputStream(path))
+</span>49 <span style=''></span><span style='background: #AEF1AE'>          zis &lt;- IO(new ZipInputStream(is))
+</span>50 <span style=''></span><span style='background: #AEF1AE'>        } yield zis
+</span>51 <span style=''></span><span style='background: #AEF1AE'>
+</span>52 <span style=''></span><span style='background: #AEF1AE'>        def nextFileInfo(zis: ZipInputStream): ZIO[Console, Option[Throwable], File] = for {
+</span>53 <span style=''></span><span style='background: #AEF1AE'>          fe &lt;- ZIO.fromOption(Option(zis.getNextEntry()))
+</span>54 <span style=''></span><span style='background: #AEF1AE'>        } yield File(zis, fe.getName, fe.getName)
+</span>55 <span style=''></span><span style='background: #AEF1AE'>
+</span>56 <span style=''></span><span style='background: #AEF1AE'>        for {
+</span>57 <span style=''></span><span style='background: #AEF1AE'>          zis &lt;- zipInputStream
+</span>58 <span style=''></span><span style='background: #AEF1AE'>          effect = for {
+</span>59 <span style=''></span><span style='background: #AEF1AE'>            file &lt;- nextFileInfo(zis)
+</span>60 <span style=''></span><span style='background: #AEF1AE'>            r    &lt;- processFile(file).mapError(f =&gt; </span><span style='background: #F0ADAD'>Some(f)</span><span style='background: #AEF1AE'>)
+</span>61 <span style=''></span><span style='background: #AEF1AE'>          } yield r
+</span>62 <span style=''></span><span style='background: #AEF1AE'>          stream = Stream.repeatEffectOption(effect)
+</span>63 <span style=''></span><span style='background: #AEF1AE'>        } yield stream
+</span>64 <span style=''></span><span style='background: #AEF1AE'>      }
+</span>65 <span style=''></span><span style='background: #AEF1AE'>
+</span>66 <span style=''></span><span style='background: #AEF1AE'>      def archiveFiles(path: Path): ZIO[Console, Throwable, ZStream[Console, Throwable, File]] =
+</span>67 <span style=''></span><span style='background: #AEF1AE'>        createStream(path, (file: File) =&gt; IO(file))
+</span>68 <span style=''></span><span style='background: #AEF1AE'>
+</span>69 <span style=''></span><span style='background: #AEF1AE'>      def unzipFiles(path: Path, destination: Path): ZIO[Console, Throwable, Unit] = {
+</span>70 <span style=''></span><span style='background: #AEF1AE'>
+</span>71 <span style=''></span><span style='background: #AEF1AE'>        def writeFile(file: File) = for {
+</span>72 <span style=''></span><span style='background: #AEF1AE'>          _      &lt;- IO(Files.createDirectories(destination))
+</span>73 <span style=''></span><span style='background: #AEF1AE'>          target &lt;- IO(destination.resolve(Paths.get(file.name)))
+</span>74 <span style=''></span><span style='background: #AEF1AE'>          _      &lt;- IO(Files.copy(file.inputStream, target, REPLACE_EXISTING))
+</span>75 <span style=''></span><span style='background: #AEF1AE'>          _      &lt;- zio.console.putStrLn(s&quot;written $target&quot;)
+</span>76 <span style=''></span><span style='background: #AEF1AE'>        } yield ()
+</span>77 <span style=''></span><span style='background: #AEF1AE'>
+</span>78 <span style=''></span><span style='background: #AEF1AE'>        for {
+</span>79 <span style=''></span><span style='background: #AEF1AE'>          stream &lt;- createStream(path, writeFile)
+</span>80 <span style=''></span><span style='background: #AEF1AE'>          _      &lt;- stream.run(Sink.drain)
+</span>81 <span style=''></span><span style='background: #AEF1AE'>        } yield ()
+</span>82 <span style=''></span><span style='background: #AEF1AE'>
+</span>83 <span style=''></span><span style='background: #AEF1AE'>      }
+</span>84 <span style=''></span><span style='background: #AEF1AE'>
+</span>85 <span style=''></span><span style='background: #AEF1AE'>      def extractFiles(path: Path, destination: Path): ZIO[Console, Throwable, Unit] = {
+</span>86 <span style=''></span><span style='background: #AEF1AE'>        def allTables(table: Table) = true
+</span>87 <span style=''></span><span style='background: #AEF1AE'>        def identity(table: Table)  = ZIO.succeed(table)
+</span>88 <span style=''></span><span style='background: #AEF1AE'>        processFiles(path, destination, allTables, identity)
+</span>89 <span style=''></span><span style='background: #AEF1AE'>      }
+</span>90 <span style=''></span><span style='background: #AEF1AE'>
+</span>91 <span style=''></span><span style='background: #AEF1AE'>      def processFiles(
+</span>92 <span style=''></span><span style='background: #AEF1AE'>          path: Path,
+</span>93 <span style=''></span><span style='background: #AEF1AE'>          destination: Path,
+</span>94 <span style=''></span><span style='background: #AEF1AE'>          filter: (Table) =&gt; Boolean,
+</span>95 <span style=''></span><span style='background: #AEF1AE'>          transform: (Table) =&gt; ZIO[Any, Option[Nothing], Table]
+</span>96 <span style=''></span><span style='background: #AEF1AE'>      ): ZIO[Console, Throwable, Unit] = {
+</span>97 <span style=''></span><span style='background: #AEF1AE'>        def saveTable(file: File): ZIO[Console, Throwable, Unit] = for {
+</span>98 <span style=''></span><span style='background: #AEF1AE'>          table &lt;- fileAsTable(file)
+</span>99 <span style=''></span><span style='background: #AEF1AE'>          _ &lt;-
+</span>100 <span style=''></span><span style='background: #AEF1AE'>            if (filter(table)) {
+</span>101 <span style=''></span><span style='background: #AEF1AE'>              for {
+</span>102 <span style=''></span><span style='background: #AEF1AE'>                _ &lt;- console.putStrLn(s&quot;process table ${table.name}&quot;)
+</span>103 <span style=''></span><span style='background: #AEF1AE'>                newTable &lt;- transform(table).mapError { case _ =&gt;
+</span>104 <span style=''></span><span style='background: #AEF1AE'>                  </span><span style='background: #F0ADAD'>new Exception(&quot;unable to create table&quot;)</span><span style='background: #AEF1AE'>
+</span>105 <span style=''></span><span style='background: #AEF1AE'>                }
+</span>106 <span style=''></span><span style='background: #AEF1AE'>                _ &lt;- writeTable(newTable, destination.resolve(file.path))
+</span>107 <span style=''></span><span style='background: #AEF1AE'>              } yield ()
+</span>108 <span style=''></span><span style='background: #AEF1AE'>            } else {
+</span>109 <span style=''></span><span style='background: #AEF1AE'>              console.putStrLn(s&quot;skipping table ${table.name}&quot;)
+</span>110 <span style=''></span><span style='background: #AEF1AE'>            }
+</span>111 <span style=''></span><span style='background: #AEF1AE'>        } yield ()
+</span>112 <span style=''></span><span style='background: #AEF1AE'>
+</span>113 <span style=''></span><span style='background: #AEF1AE'>        for {
+</span>114 <span style=''></span><span style='background: #AEF1AE'>          _      &lt;- IO(Files.createDirectories(destination))
+</span>115 <span style=''></span><span style='background: #AEF1AE'>          stream &lt;- createStream(path, saveTable)
+</span>116 <span style=''></span><span style='background: #AEF1AE'>          _      &lt;- stream.run(Sink.drain)
+</span>117 <span style=''></span><span style='background: #AEF1AE'>        } yield ()
+</span>118 <span style=''></span><span style='background: #AEF1AE'>      }
+</span>119 <span style=''></span><span style='background: #AEF1AE'>
+</span>120 <span style=''></span><span style='background: #AEF1AE'>      def tables(path: Path): ZIO[Console, Throwable, ZStream[Console, Throwable, Table]] = {
+</span>121 <span style=''></span><span style='background: #AEF1AE'>
+</span>122 <span style=''></span><span style='background: #AEF1AE'>        def asTable(file: File) = for {
+</span>123 <span style=''></span><span style='background: #AEF1AE'>          table &lt;- fileAsTable(file)
+</span>124 <span style=''></span><span style='background: #AEF1AE'>        } yield table
+</span>125 <span style=''></span><span style='background: #AEF1AE'>
+</span>126 <span style=''></span><span style='background: #AEF1AE'>        for {
+</span>127 <span style=''></span><span style='background: #AEF1AE'>          stream &lt;- createStream(path, asTable)
+</span>128 <span style=''></span><span style='background: #AEF1AE'>        } yield stream
+</span>129 <span style=''></span><span style='background: #AEF1AE'>      }
+</span>130 <span style=''></span><span style='background: #AEF1AE'>
+</span>131 <span style=''></span><span style='background: #AEF1AE'>      def table(inputStream: InputStream): ZIO[Any, Throwable, Table] =
+</span>132 <span style=''></span><span style='background: #AEF1AE'>        fileAsTable(File(inputStream, &quot;name&quot;, &quot;path&quot;))
+</span>133 <span style=''></span><span style='background: #AEF1AE'>
+</span>134 <span style=''></span><span style='background: #AEF1AE'>      def writeTable(table: Table, path: Path): ZIO[Any, Throwable, Unit] = {
+</span>135 <span style=''></span><span style='background: #AEF1AE'>        //  final case class Table(headers: Array[String], rows: Stream[Any, Array[String]]) {
+</span>136 <span style=''></span><span style='background: #AEF1AE'>        def writer: ObjectWriter = {
+</span>137 <span style=''></span><span style='background: #AEF1AE'>          val mapper = new CsvMapper();
+</span>138 <span style=''></span><span style='background: #AEF1AE'>          val builder =
+</span>139 <span style=''></span><span style='background: #AEF1AE'>            table.headers.foldLeft(CsvSchema.builder())((builder, name) =&gt; builder.addColumn(name))
+</span>140 <span style=''></span><span style='background: #AEF1AE'>          val schema = builder.setUseHeader(true).build
+</span>141 <span style=''></span><span style='background: #AEF1AE'>
+</span>142 <span style=''></span><span style='background: #AEF1AE'>          mapper.writer(
+</span>143 <span style=''></span><span style='background: #AEF1AE'>            schema
+</span>144 <span style=''></span><span style='background: #AEF1AE'>          ) // when no header, could use mapper.writerFor(classOf[Array[String]])
+</span>145 <span style=''></span><span style='background: #AEF1AE'>        }
+</span>146 <span style=''></span><span style='background: #AEF1AE'>
+</span>147 <span style=''></span><span style='background: #AEF1AE'>        import collection.JavaConverters._
+</span>148 <span style=''></span><span style='background: #AEF1AE'>        def asJavaIterator(it: Iterator[Either[Any, Array[String]]]) = it
+</span>149 <span style=''></span><span style='background: #AEF1AE'>          .collect { case Right(value: Array[String]) =&gt;
+</span>150 <span style=''></span><span style='background: #AEF1AE'>            value
+</span>151 <span style=''></span><span style='background: #AEF1AE'>          }
+</span>152 <span style=''></span><span style='background: #AEF1AE'>          .toIterable
+</span>153 <span style=''></span><span style='background: #AEF1AE'>          .asJava
+</span>154 <span style=''></span><span style='background: #AEF1AE'>
+</span>155 <span style=''></span><span style='background: #AEF1AE'>        for {
+</span>156 <span style=''></span><span style='background: #AEF1AE'>          _ &lt;- IO(Files.createDirectories(path.getParent()))
+</span>157 <span style=''></span><span style='background: #AEF1AE'>          _ &lt;- table.rows.toIterator.use((iter: Iterator[Either[Any, Array[String]]]) =&gt; {
+</span>158 <span style=''></span><span style='background: #AEF1AE'>            ZIO.effect(writer.writeValues(path.toFile()).writeAll(asJavaIterator(iter)))
+</span>159 <span style=''></span><span style='background: #AEF1AE'>          })
+</span>160 <span style=''></span><span style='background: #AEF1AE'>        } yield ()
+</span>161 <span style=''></span><span style='background: #AEF1AE'>
+</span>162 <span style=''></span><span style='background: #AEF1AE'>      }
+</span>163 <span style=''></span><span style='background: #AEF1AE'>
+</span>164 <span style=''></span><span style='background: #AEF1AE'>      def fileAsTable(file: File): ZIO[Any, Throwable, Table] = {
+</span>165 <span style=''></span><span style='background: #AEF1AE'>
+</span>166 <span style=''></span><span style='background: #AEF1AE'>        def it: MappingIterator[Array[String]] = {
+</span>167 <span style=''></span><span style='background: #AEF1AE'>          val mapper = new CsvMapper();
+</span>168 <span style=''></span><span style='background: #AEF1AE'>          mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
+</span>169 <span style=''></span><span style='background: #AEF1AE'>          mapper.readerFor(classOf[Array[String]]).readValues(file.inputStream)
+</span>170 <span style=''></span><span style='background: #AEF1AE'>        }
+</span>171 <span style=''></span><span style='background: #AEF1AE'>
+</span>172 <span style=''></span><span style='background: #AEF1AE'>        def headers(it: MappingIterator[Array[String]]): Array[String] =
+</span>173 <span style=''></span><span style='background: #AEF1AE'>          if (it.hasNext) {
+</span>174 <span style=''></span><span style='background: #AEF1AE'>            it.next
+</span>175 <span style=''></span><span style='background: #AEF1AE'>          } else {
+</span>176 <span style=''></span><span style='background: #AEF1AE'>            </span><span style='background: #F0ADAD'>throw new Exception(&quot;no header in CSV file&quot;)</span><span style='background: #AEF1AE'>
+</span>177 <span style=''></span><span style='background: #AEF1AE'>          }
+</span>178 <span style=''></span><span style='background: #AEF1AE'>
+</span>179 <span style=''></span><span style='background: #AEF1AE'>        def effect(it: MappingIterator[Array[String]]): ZIO[Any, Option[Nothing], Array[String]] =
+</span>180 <span style=''></span><span style='background: #AEF1AE'>          ZIO.fromOption(if (it.hasNext) {
+</span>181 <span style=''></span><span style='background: #AEF1AE'>            Some(it.next)
+</span>182 <span style=''></span><span style='background: #AEF1AE'>          } else {
+</span>183 <span style=''></span><span style='background: #AEF1AE'>            None
+</span>184 <span style=''></span><span style='background: #AEF1AE'>          })
+</span>185 <span style=''></span><span style='background: #AEF1AE'>
+</span>186 <span style=''></span><span style='background: #AEF1AE'>        for {
+</span>187 <span style=''></span><span style='background: #AEF1AE'>          it               &lt;- ZIO.succeed(it)
+</span>188 <span style=''></span><span style='background: #AEF1AE'>          h: Array[String] &lt;- ZIO.effect(headers(it))
+</span>189 <span style=''></span><span style='background: #AEF1AE'>          stream = Stream.repeatEffectOption(effect(it))
+</span>190 <span style=''></span><span style='background: #AEF1AE'>        } yield Table(file.name, h, stream)
+</span>191 <span style=''></span><span style='background: #AEF1AE'>      }
+</span>192 <span style=''></span><span style='background: #AEF1AE'>    }
+</span>193 <span style=''></span><span style='background: #AEF1AE'>  }</span><span style=''>
+</span>194 <span style=''>
+</span>195 <span style=''>  def archiveFiles(
+</span>196 <span style=''>      path: Path
+</span>197 <span style=''>  ): ZIO[ExtractLoad with Console, Throwable, ZStream[Console, Throwable, File]] =
+</span>198 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.archiveFiles(path))</span><span style=''>
+</span>199 <span style=''>
+</span>200 <span style=''>  def tables(
+</span>201 <span style=''>      path: Path
+</span>202 <span style=''>  ): ZIO[ExtractLoad with Console, Throwable, ZStream[Console, Throwable, Table]] =
+</span>203 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.tables(path))</span><span style=''>
+</span>204 <span style=''>
+</span>205 <span style=''>  def table(inputStream: InputStream): ZIO[ExtractLoad, Throwable, Table] =
+</span>206 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.table(inputStream))</span><span style=''>
+</span>207 <span style=''>
+</span>208 <span style=''>  def unzipFiles(path: Path, destination: Path): ZIO[ExtractLoad with Console, Throwable, Unit] =
+</span>209 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.unzipFiles(path, destination))</span><span style=''>
+</span>210 <span style=''>
+</span>211 <span style=''>  def extractFiles(path: Path, destination: Path): ZIO[ExtractLoad with Console, Throwable, Unit] =
+</span>212 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.extractFiles(path, destination))</span><span style=''>
+</span>213 <span style=''>
+</span>214 <span style=''>  def writeTable(table: Table, path: Path): ZIO[ExtractLoad with Console, Throwable, Unit] =
+</span>215 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.writeTable(table, path))</span><span style=''>
+</span>216 <span style=''>
+</span>217 <span style=''>  def fileAsTable(file: File): ZIO[ExtractLoad with Console, Throwable, Table] =
+</span>218 <span style=''>    </span><span style='background: #F0ADAD'>ZIO.accessM(_.get.fileAsTable(file))</span><span style=''>
+</span>219 <span style=''>
+</span>220 <span style=''>  def processFiles(
+</span>221 <span style=''>      path: Path,
+</span>222 <span style=''>      destination: Path,
+</span>223 <span style=''>      filter: (Table) =&gt; Boolean,
+</span>224 <span style=''>      transform: (Table) =&gt; ZIO[Any, Option[Nothing], Table]
+</span>225 <span style=''>  ): ZIO[ExtractLoad with Console, Throwable, Unit] =
+</span>226 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.processFiles(path, destination, filter, transform))</span><span style=''>
+</span>227 <span style=''>
+</span>228 <span style=''>}
+</span></pre>
+          </div>
+          <div class="tab-pane" id="statementlist">
+            <table cellspacing="0" cellpadding="0" class="table statementlist">
+      <tr>
+        <th>Line</th>
+        <th>Stmt Id</th>
+        <th>Pos</th>
+        <th>Tree</th>
+        <th>Symbol</th>
+        <th>Code</th>
+      </tr><tr>
+        <td>
+          39
+        </td>
+        <td>
+          202
+        </td>
+        <td>
+          1430
+          -
+          6751
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          zio.ZLayer.succeed
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZLayer.succeed[datavault.extractload.ExtractLoad.Service]({
+  final class $anon extends AnyRef with datavault.extractload.ExtractLoad.Service {
+    def &lt;init&gt;(): &lt;$anon: datavault.extractload.ExtractLoad.Service&gt; = {
+      $anon.super.&lt;init&gt;();
+      ()
+    };
+    private def createStream[T](path: java.nio.file.Path, processFile: datavault.extractload.ExtractLoad.File =&gt; zio.ZIO[zio.console.Console,Throwable,T]): zio.ZIO[zio.console.Console,Throwable,zio.stream.ZStream[zio.console.Console,Throwable,T]] = {
+      def zipInputStream: zio.ZIO[Any,Throwable,java.util.zip.ZipInputStream] = zio.IO.apply[java.io.InputStream](java.nio.file.Files.newInputStream(path)).flatMap[Any, Throwable, java.util.zip.ZipInputStream](((is: java.io.InputStream) =&gt; zio.IO.apply[java.util.zip.ZipInputStream](new java.util.zip.ZipInputStream(is)).map[java.util.zip.ZipInputStream](((zis: java.util.zip.ZipInputStream) =&gt; zis))));
+      def nextFileInfo(zis: java.util.zip.ZipInputStream): zio.ZIO[zio.console.Console,Option[Throwable],datavault.extractload.ExtractLoad.File] = zio.ZIO.fromOption[java.util.zip.ZipEntry](scala.Option.apply[java.util.zip.ZipEntry](zis.getNextEntry())).map[datavault.extractload.ExtractLoad.File](((fe: java.util.zip.ZipEntry) =&gt; ExtractLoad.this.File.apply(zis, fe.getName(), fe.getName())));
+      zipInputStream.map[(java.util.zip.ZipInputStream, zio.ZIO[zio.console.Console,Option[Throwable],T], zio.stream.ZStream[zio.console.Console,Throwable,T])](((zis: java.util.zip.ZipInputStream) =&gt; {
+  val effect: zio.ZIO[zio.console.Console,Option[Throwable],T] = nextFileInfo(zis).flatMap[zio.console.Console, Option[Throwable], T](((file: datavault.extractload.ExtractLoad.File) =&gt; processFile.apply(file).mapError[Some[Throwable]](((f: Throwable) =&gt; scala.Some.apply[Throwable](f)))(zio.this.CanFail.canFail[Any]).map[T](((r: T) =&gt; r))));
+  val stream: zio.stream.ZStream[zio.console.Console,Throwable,T] = zio.stream.`package`.Stream.repeatEffectOption[zio.console.Console, Throwable, T](effect);
+  scala.Tuple3.apply[java.util.zip.ZipInputStream, zio.ZIO[zio.console.Console,Option[Throwable],T], zio.stream.ZStream[zio.console.Console,Throwable,T]](zis, effect, stream)
+})).map[zio.stream.ZStream[zio.console.Console,Throwable,T]](((x$1: (java.util.zip.ZipInputStream, zio.ZIO[zio.console.Console,Option[Throwable],T], zio.stream.ZStream[zio.console.Console,Throwable,T])) =&gt; (x$1: (java.util.zip.ZipInputStream, zio.ZIO[zio.console.Console,Option[Throwable],T], zio.stream.ZStream[zio.console.Console,Throwable,T]) @unchecked) match {
+        case (_1: java.util.zip.ZipInputStream, _2: zio.ZIO[zio.console.Console,Option[Throwable],T], _3: zio.stream.ZStream[zio.console.Console,Throwable,T])(java.util.zip.ZipInputStream, zio.ZIO[zio.console.Console,Option[Throwable],T], zio.stream.ZStream[zio.console.Console,Throwable,T])((zis @ _), (effect @ _), (stream @ _)) =&gt; stream
+      }))
+    };
+    def archiveFiles(path: java.nio.file.Path): zio.ZIO[zio.console.Console,Throwable,zio.stream.ZStream[zio.console.Console,Throwable,datavault.extractload.ExtractLoad.File]] = $anon.this.createStream[datavault.extractload.ExtractLoad.File](path, ((file: datavault.extractload.ExtractLoad.File) =&gt; zio.IO.apply[datavault.extractload.ExtractLoad.File](file)));
+    def unzipFiles(path: java.nio.file.Path, destination: java.nio.file.Path): zio.ZIO[zio.console.Console,Throwable,Unit] = {
+      def writeFile(file: datavault.extractload.ExtractLoad.File): zio.ZIO[zio.console.Console,Throwable,Unit] = zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(destination)).flatMap[zio.console.Console, Throwable, Unit](((_: java.nio.file.Path) =&gt; zio.IO.apply[java.nio.file.Path](destination.resolve(java.nio.file.Paths.get(file.name))).flatMap[zio.console.Console, Throwable, Unit](((target: java.nio.file.Path) =&gt; zio.IO.apply[Long](java.nio.file.Files.copy(file.inputStream, target, REPLACE_EXISTING)).flatMap[zio.console.Console, Throwable, Unit](((_: Long) =&gt; zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;written &quot;, &quot;&quot;).s(target)).map[Unit](((_: Unit) =&gt; ()))))))));
+      $anon.this.createStream[Unit](path, {
+  ((file: datavault.extractload.ExtractLoad.File) =&gt; writeFile(file))
+}).flatMap[zio.console.Console, Throwable, Unit](((stream: zio.stream.ZStream[zio.console.Console,Throwable,Unit]) =&gt; stream.run[zio.console.Console, Throwable, Unit](zio.stream.`package`.Sink.drain).map[Unit](((_: Unit) =&gt; ()))))
+    };
+    def extractFiles(path: java.nio.file.Path, destination: java.nio.file.Path): zio.ZIO[zio.console.Console,Throwable,Unit] = {
+      def allTables(table: datavault.extractload.ExtractLoad.Table): Boolean = true;
+      def identity(table: datavault.extractload.ExtractLoad.Table): zio.UIO[datavault.extractload.ExtractLoad.Table] = zio.ZIO.succeed[datavault.extractload.ExtractLoad.Table](table);
+      $anon.this.processFiles(path, destination, {
+        ((table: datavault.extractload.ExtractLoad.Table) =&gt; allTables(table))
+      }, {
+        ((table: datavault.extractload.ExtractLoad.Table) =&gt; identity(table))
+      })
+    };
+    def processFiles(path: java.nio.file.Path, destination: java.nio.file.Path, filter: datavault.extractload.ExtractLoad.Table =&gt; Boolean, transform: datavault.extractload.ExtractLoad.Table =&gt; zio.ZIO[Any,Option[Nothing],datavault.extractload.ExtractLoad.Table]): zio.ZIO[zio.console.Console,Throwable,Unit] = {
+      def saveTable(file: datavault.extractload.ExtractLoad.File): zio.ZIO[zio.console.Console,Throwable,Unit] = $anon.this.fileAsTable(file).flatMap[zio.console.Console, Throwable, Unit](((table: datavault.extractload.ExtractLoad.Table) =&gt; if (filter.apply(table))
+  zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;process table &quot;, &quot;&quot;).s(table.name)).flatMap[zio.console.Console, Throwable, Unit](((_: Unit) =&gt; transform.apply(table).mapError[Exception](((x0$1: Option[Nothing]) =&gt; x0$1 match {
+  case _ =&gt; new scala.`package`.Exception(&quot;unable to create table&quot;)
+}))(zio.this.CanFail.canFail[Any]).flatMap[Any, Throwable, Unit](((newTable: datavault.extractload.ExtractLoad.Table) =&gt; $anon.this.writeTable(newTable, destination.resolve(file.path)).map[Unit](((_: Unit) =&gt; ()))))))
+else
+  zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;skipping table &quot;, &quot;&quot;).s(table.name)).map[Unit](((_: Unit) =&gt; ()))));
+      zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(destination)).flatMap[zio.console.Console, Throwable, Unit](((_: java.nio.file.Path) =&gt; $anon.this.createStream[Unit](path, {
+  ((file: datavault.extractload.ExtractLoad.File) =&gt; saveTable(file))
+}).flatMap[zio.console.Console, Throwable, Unit](((stream: zio.stream.ZStream[zio.console.Console,Throwable,Unit]) =&gt; stream.run[zio.console.Console, Throwable, Unit](zio.stream.`package`.Sink.drain).map[Unit](((_: Unit) =&gt; ()))))))
+    };
+    def tables(path: java.nio.file.Path): zio.ZIO[zio.console.Console,Throwable,zio.stream.ZStream[zio.console.Console,Throwable,datavault.extractload.ExtractLoad.Table]] = {
+      def asTable(file: datavault.extractload.ExtractLoad.File): zio.ZIO[Any,Throwable,datavault.extractload.ExtractLoad.Table] = $anon.this.fileAsTable(file).map[datavault.extractload.ExtractLoad.Table](((table: datavault.extractload.ExtractLoad.Table) =&gt; table));
+      $anon.this.createStream[datavault.extractload.ExtractLoad.Table](path, {
+  ((file: datavault.extractload.ExtractLoad.File) =&gt; asTable(file))
+}).map[zio.stream.ZStream[zio.console.Console,Throwable,datavault.extractload.ExtractLoad.Table]](((stream: zio.stream.ZStream[zio.console.Console,Throwable,datavault.extractload.ExtractLoad.Table]) =&gt; stream))
+    };
+    def table(inputStream: java.io.InputStream): zio.ZIO[Any,Throwable,datavault.extractload.ExtractLoad.Table] = $anon.this.fileAsTable(ExtractLoad.this.File.apply(inputStream, &quot;name&quot;, &quot;path&quot;));
+    def writeTable(table: datavault.extractload.ExtractLoad.Table, path: java.nio.file.Path): zio.ZIO[Any,Throwable,Unit] = {
+      def writer: com.fasterxml.jackson.databind.ObjectWriter = {
+        val mapper: com.fasterxml.jackson.dataformat.csv.CsvMapper = new com.fasterxml.jackson.dataformat.csv.CsvMapper();
+        val builder: com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder = scala.Predef.refArrayOps[String](table.headers).foldLeft[com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder](com.fasterxml.jackson.dataformat.csv.CsvSchema.builder())(((builder: com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder, name: String) =&gt; builder.addColumn(name)));
+        val schema: com.fasterxml.jackson.dataformat.csv.CsvSchema = builder.setUseHeader(true).build();
+        mapper.writer(schema)
+      };
+      import scala.collection.JavaConverters._;
+      def asJavaIterator(it: Iterator[Either[Any,Array[String]]]): Iterable[Array[String]] = scala.collection.JavaConverters.asJavaIterableConverter[Array[String]](it.collect[Array[String]](({
+  @SerialVersionUID(value = 0) final &lt;synthetic&gt; class $anonfun extends scala.runtime.AbstractPartialFunction[Either[Any,Array[String]],Array[String]] with Serializable {
+    def &lt;init&gt;(): &lt;$anon: Either[Any,Array[String]] =&gt; Array[String]&gt; = {
+      $anonfun.super.&lt;init&gt;();
+      ()
+    };
+    final override def applyOrElse[A1 &lt;: Either[Any,Array[String]], B1 &gt;: Array[String]](x1: A1, default: A1 =&gt; B1): B1 = ((x1.asInstanceOf[scala.util.Either[Any,Array[String]]]: Either[Any,Array[String]]): Either[Any,Array[String]] @unchecked) match {
+      case (value: Array[String])scala.util.Right[Any,Array[String]]((value @ (_: Array[String]))) =&gt; value
+      case (defaultCase$ @ _) =&gt; default.apply(x1)
+    };
+    final def isDefinedAt(x1: Either[Any,Array[String]]): Boolean = ((x1.asInstanceOf[scala.util.Either[Any,Array[String]]]: Either[Any,Array[String]]): Either[Any,Array[String]] @unchecked) match {
+      case (value: Array[String])scala.util.Right[Any,Array[String]]((value @ (_: Array[String]))) =&gt; true
+      case (defaultCase$ @ _) =&gt; false
+    }
+  };
+  new $anonfun()
+}: PartialFunction[Either[Any,Array[String]],Array[String]])).toIterable).asJava;
+      zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(path.getParent())).flatMap[Any, Throwable, Unit](((_: java.nio.file.Path) =&gt; table.rows.toIterator.use[Any, Throwable, com.fasterxml.jackson.databind.SequenceWriter](((iter: Iterator[Either[Any,Array[String]]]) =&gt; zio.ZIO.effect[com.fasterxml.jackson.databind.SequenceWriter](writer.writeValues(path.toFile()).writeAll(asJavaIterator(iter))))).map[Unit](((_: com.fasterxml.jackson.databind.SequenceWriter) =&gt; ()))))
+    };
+    def fileAsTable(file: datavault.extractload.ExtractLoad.File): zio.ZIO[Any,Throwable,datavault.extractload.ExtractLoad.Table] = {
+      def it: com.fasterxml.jackson.databind.MappingIterator[Array[String]] = {
+        val mapper: com.fasterxml.jackson.dataformat.csv.CsvMapper = new com.fasterxml.jackson.dataformat.csv.CsvMapper();
+        mapper.enable(WRAP_AS_ARRAY);
+        mapper.readerFor(classOf[[Ljava.lang.String;]).readValues[Array[String]](file.inputStream)
+      };
+      def headers(it: com.fasterxml.jackson.databind.MappingIterator[Array[String]]): Array[String] = if (it.hasNext())
+        it.next()
+      else
+        throw new scala.`package`.Exception(&quot;no header in CSV file&quot;);
+      def effect(it: com.fasterxml.jackson.databind.MappingIterator[Array[String]]): zio.ZIO[Any,Option[Nothing],Array[String]] = zio.ZIO.fromOption[Array[String]](if (it.hasNext())
+        scala.Some.apply[Array[String]](it.next())
+      else
+        scala.None);
+      zio.ZIO.succeed[com.fasterxml.jackson.databind.MappingIterator[Array[String]]](it).flatMap[Any, Throwable, datavault.extractload.ExtractLoad.Table](((it: com.fasterxml.jackson.databind.MappingIterator[Array[String]]) =&gt; zio.this.ZIO.ZIOWithFilterOps[Any, Throwable, Array[String]](zio.ZIO.effect[Array[String]](headers(it))).withFilter(((check$ifrefutable$1: Array[String]) =&gt; (check$ifrefutable$1: Array[String] @unchecked) match {
+  case (h @ (_: Array[String])) =&gt; true
+  case _ =&gt; false
+}))(ZIO.this.CanFilter.canFilter[NoSuchElementException]).map[(Array[String], zio.stream.ZStream[Any,Nothing,Array[String]])](((h: Array[String]) =&gt; {
+  val stream: zio.stream.ZStream[Any,Nothing,Array[String]] = zio.stream.`package`.Stream.repeatEffectOption[Any, Nothing, Array[String]](effect(it));
+  scala.Tuple2.apply[Array[String], zio.stream.ZStream[Any,Nothing,Array[String]]](h, stream)
+})).map[datavault.extractload.ExtractLoad.Table](((x$2: (Array[String], zio.stream.ZStream[Any,Nothing,Array[String]])) =&gt; (x$2: (Array[String], zio.stream.ZStream[Any,Nothing,Array[String]]) @unchecked) match {
+        case (_1: Array[String], _2: zio.stream.ZStream[Any,Nothing,Array[String]])(Array[String], zio.stream.ZStream[Any,Nothing,Array[String]])((h @ (_: Array[String])), (stream @ _)) =&gt; ExtractLoad.this.Table.apply(file.name, h, stream)
+      }))))
+    }
+  };
+  new $anon()
+})((izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[java.lang.Object], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0001\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001\u0001\u0004\u0000\u0001\u0090\u0002\u0001\u0002\u0003\u0090\u0002\u0001\u0000\u0001.datavault.extractload.ExtractLoad.&lt;refinement&gt;\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0002\u0003\u0090\u0002&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service]))
+        </td>
+      </tr><tr>
+        <td>
+          40
+        </td>
+        <td>
+          201
+        </td>
+        <td>
+          1451
+          -
+          1454
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.$anon.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new $anon()
+        </td>
+      </tr><tr>
+        <td>
+          48
+        </td>
+        <td>
+          83
+        </td>
+        <td>
+          1672
+          -
+          1789
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.IO.apply[java.io.InputStream](java.nio.file.Files.newInputStream(path)).flatMap[Any, Throwable, java.util.zip.ZipInputStream](((is: java.io.InputStream) =&gt; zio.IO.apply[java.util.zip.ZipInputStream](new java.util.zip.ZipInputStream(is)).map[java.util.zip.ZipInputStream](((zis: java.util.zip.ZipInputStream) =&gt; zis))))
+        </td>
+      </tr><tr>
+        <td>
+          48
+        </td>
+        <td>
+          80
+        </td>
+        <td>
+          1698
+          -
+          1724
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Files.newInputStream
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Files.newInputStream(path)
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          82
+        </td>
+        <td>
+          1736
+          -
+          1789
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          zio.IO.apply[java.util.zip.ZipInputStream](new java.util.zip.ZipInputStream(is)).map[java.util.zip.ZipInputStream](((zis: java.util.zip.ZipInputStream) =&gt; zis))
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          81
+        </td>
+        <td>
+          1746
+          -
+          1768
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.util.zip.ZipInputStream.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new java.util.zip.ZipInputStream(is)
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          89
+        </td>
+        <td>
+          1878
+          -
+          1992
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.fromOption[java.util.zip.ZipEntry](scala.Option.apply[java.util.zip.ZipEntry](zis.getNextEntry())).map[datavault.extractload.ExtractLoad.File](((fe: java.util.zip.ZipEntry) =&gt; ExtractLoad.this.File.apply(zis, fe.getName(), fe.getName())))
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          85
+        </td>
+        <td>
+          1915
+          -
+          1941
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Option.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Option.apply[java.util.zip.ZipEntry](zis.getNextEntry())
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          84
+        </td>
+        <td>
+          1922
+          -
+          1940
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.util.zip.ZipInputStream.getNextEntry
+        </td>
+        <td style="background: #AEF1AE">
+          zis.getNextEntry()
+        </td>
+      </tr><tr>
+        <td>
+          54
+        </td>
+        <td>
+          86
+        </td>
+        <td>
+          1969
+          -
+          1979
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.util.zip.ZipEntry.getName
+        </td>
+        <td style="background: #AEF1AE">
+          fe.getName()
+        </td>
+      </tr><tr>
+        <td>
+          54
+        </td>
+        <td>
+          88
+        </td>
+        <td>
+          1959
+          -
+          1992
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.File.apply
+        </td>
+        <td style="background: #AEF1AE">
+          ExtractLoad.this.File.apply(zis, fe.getName(), fe.getName())
+        </td>
+      </tr><tr>
+        <td>
+          54
+        </td>
+        <td>
+          87
+        </td>
+        <td>
+          1981
+          -
+          1991
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.util.zip.ZipEntry.getName
+        </td>
+        <td style="background: #AEF1AE">
+          fe.getName()
+        </td>
+      </tr><tr>
+        <td>
+          57
+        </td>
+        <td>
+          95
+        </td>
+        <td>
+          2018
+          -
+          2018
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Tuple3.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Tuple3.apply[java.util.zip.ZipInputStream, zio.ZIO[zio.console.Console,Option[Throwable],T], zio.stream.ZStream[zio.console.Console,Throwable,T]](zis, effect, stream)
+        </td>
+      </tr><tr>
+        <td>
+          57
+        </td>
+        <td>
+          96
+        </td>
+        <td>
+          2002
+          -
+          2259
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          zipInputStream.map[(java.util.zip.ZipInputStream, zio.ZIO[zio.console.Console,Option[Throwable],T], zio.stream.ZStream[zio.console.Console,Throwable,T])](((zis: java.util.zip.ZipInputStream) =&gt; {
+  val effect: zio.ZIO[zio.console.Console,Option[Throwable],T] = nextFileInfo(zis).flatMap[zio.console.Console, Option[Throwable], T](((file: datavault.extractload.ExtractLoad.File) =&gt; processFile.apply(file).mapError[Some[Throwable]](((f: Throwable) =&gt; scala.Some.apply[Throwable](f)))(zio.this.CanFail.canFail[Any]).map[T](((r: T) =&gt; r))));
+  val stream: zio.stream.ZStream[zio.console.Console,Throwable,T] = zio.stream.`package`.Stream.repeatEffectOption[zio.console.Console, Throwable, T](effect);
+  scala.Tuple3.apply[java.util.zip.ZipInputStream, zio.ZIO[zio.console.Console,Option[Throwable],T], zio.stream.ZStream[zio.console.Console,Throwable,T]](zis, effect, stream)
+})).map[zio.stream.ZStream[zio.console.Console,Throwable,T]](((x$1: (java.util.zip.ZipInputStream, zio.ZIO[zio.console.Console,Option[Throwable],T], zio.stream.ZStream[zio.console.Console,Throwable,T])) =&gt; (x$1: (java.util.zip.ZipInputStream, zio.ZIO[zio.console.Console,Option[Throwable],T], zio.stream.ZStream[zio.console.Console,Throwable,T]) @unchecked) match {
+  case (_1: java.util.zip.ZipInputStream, _2: zio.ZIO[zio.console.Console,Option[Throwable],T], _3: zio.stream.ZStream[zio.console.Console,Throwable,T])(java.util.zip.ZipInputStream, zio.ZIO[zio.console.Console,Option[Throwable],T], zio.stream.ZStream[zio.console.Console,Throwable,T])((zis @ _), (effect @ _), (stream @ _)) =&gt; stream
+}))
+        </td>
+      </tr><tr>
+        <td>
+          59
+        </td>
+        <td>
+          93
+        </td>
+        <td>
+          2059
+          -
+          2183
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          nextFileInfo(zis).flatMap[zio.console.Console, Option[Throwable], T](((file: datavault.extractload.ExtractLoad.File) =&gt; processFile.apply(file).mapError[Some[Throwable]](((f: Throwable) =&gt; scala.Some.apply[Throwable](f)))(zio.this.CanFail.canFail[Any]).map[T](((r: T) =&gt; r))))
+        </td>
+      </tr><tr>
+        <td>
+          60
+        </td>
+        <td>
+          92
+        </td>
+        <td>
+          2115
+          -
+          2183
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          processFile.apply(file).mapError[Some[Throwable]](((f: Throwable) =&gt; scala.Some.apply[Throwable](f)))(zio.this.CanFail.canFail[Any]).map[T](((r: T) =&gt; r))
+        </td>
+      </tr><tr>
+        <td>
+          60
+        </td>
+        <td>
+          91
+        </td>
+        <td>
+          2149
+          -
+          2149
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          zio.CanFail.canFail
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.CanFail.canFail[Any]
+        </td>
+      </tr><tr>
+        <td>
+          60
+        </td>
+        <td>
+          90
+        </td>
+        <td>
+          2155
+          -
+          2162
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Some.apply
+        </td>
+        <td style="background: #F0ADAD">
+          scala.Some.apply[Throwable](f)
+        </td>
+      </tr><tr>
+        <td>
+          62
+        </td>
+        <td>
+          94
+        </td>
+        <td>
+          2203
+          -
+          2236
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.stream.ZStream.repeatEffectOption
+        </td>
+        <td style="background: #AEF1AE">
+          zio.stream.`package`.Stream.repeatEffectOption[zio.console.Console, Throwable, T](effect)
+        </td>
+      </tr><tr>
+        <td>
+          67
+        </td>
+        <td>
+          98
+        </td>
+        <td>
+          2374
+          -
+          2418
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.$anon.createStream
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.createStream[datavault.extractload.ExtractLoad.File](path, ((file: datavault.extractload.ExtractLoad.File) =&gt; zio.IO.apply[datavault.extractload.ExtractLoad.File](file)))
+        </td>
+      </tr><tr>
+        <td>
+          67
+        </td>
+        <td>
+          97
+        </td>
+        <td>
+          2409
+          -
+          2417
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.IO.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.IO.apply[datavault.extractload.ExtractLoad.File](file)
+        </td>
+      </tr><tr>
+        <td>
+          72
+        </td>
+        <td>
+          99
+        </td>
+        <td>
+          2573
+          -
+          2609
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Files.createDirectories
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Files.createDirectories(destination)
+        </td>
+      </tr><tr>
+        <td>
+          72
+        </td>
+        <td>
+          111
+        </td>
+        <td>
+          2544
+          -
+          2835
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(destination)).flatMap[zio.console.Console, Throwable, Unit](((_: java.nio.file.Path) =&gt; zio.IO.apply[java.nio.file.Path](destination.resolve(java.nio.file.Paths.get(file.name))).flatMap[zio.console.Console, Throwable, Unit](((target: java.nio.file.Path) =&gt; zio.IO.apply[Long](java.nio.file.Files.copy(file.inputStream, target, REPLACE_EXISTING)).flatMap[zio.console.Console, Throwable, Unit](((_: Long) =&gt; zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;written &quot;, &quot;&quot;).s(target)).map[Unit](((_: Unit) =&gt; ()))))))))
+        </td>
+      </tr><tr>
+        <td>
+          73
+        </td>
+        <td>
+          101
+        </td>
+        <td>
+          2654
+          -
+          2674
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Paths.get
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Paths.get(file.name)
+        </td>
+      </tr><tr>
+        <td>
+          73
+        </td>
+        <td>
+          110
+        </td>
+        <td>
+          2621
+          -
+          2835
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.IO.apply[java.nio.file.Path](destination.resolve(java.nio.file.Paths.get(file.name))).flatMap[zio.console.Console, Throwable, Unit](((target: java.nio.file.Path) =&gt; zio.IO.apply[Long](java.nio.file.Files.copy(file.inputStream, target, REPLACE_EXISTING)).flatMap[zio.console.Console, Throwable, Unit](((_: Long) =&gt; zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;written &quot;, &quot;&quot;).s(target)).map[Unit](((_: Unit) =&gt; ()))))))
+        </td>
+      </tr><tr>
+        <td>
+          73
+        </td>
+        <td>
+          100
+        </td>
+        <td>
+          2664
+          -
+          2673
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.File.name
+        </td>
+        <td style="background: #AEF1AE">
+          file.name
+        </td>
+      </tr><tr>
+        <td>
+          73
+        </td>
+        <td>
+          102
+        </td>
+        <td>
+          2634
+          -
+          2675
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Path.resolve
+        </td>
+        <td style="background: #AEF1AE">
+          destination.resolve(java.nio.file.Paths.get(file.name))
+        </td>
+      </tr><tr>
+        <td>
+          74
+        </td>
+        <td>
+          104
+        </td>
+        <td>
+          2737
+          -
+          2753
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          REPLACE_EXISTING
+        </td>
+      </tr><tr>
+        <td>
+          74
+        </td>
+        <td>
+          109
+        </td>
+        <td>
+          2687
+          -
+          2835
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.IO.apply[Long](java.nio.file.Files.copy(file.inputStream, target, REPLACE_EXISTING)).flatMap[zio.console.Console, Throwable, Unit](((_: Long) =&gt; zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;written &quot;, &quot;&quot;).s(target)).map[Unit](((_: Unit) =&gt; ()))))
+        </td>
+      </tr><tr>
+        <td>
+          74
+        </td>
+        <td>
+          103
+        </td>
+        <td>
+          2711
+          -
+          2727
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.File.inputStream
+        </td>
+        <td style="background: #AEF1AE">
+          file.inputStream
+        </td>
+      </tr><tr>
+        <td>
+          74
+        </td>
+        <td>
+          105
+        </td>
+        <td>
+          2700
+          -
+          2754
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Files.copy
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Files.copy(file.inputStream, target, REPLACE_EXISTING)
+        </td>
+      </tr><tr>
+        <td>
+          75
+        </td>
+        <td>
+          106
+        </td>
+        <td>
+          2797
+          -
+          2815
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.StringContext.s
+        </td>
+        <td style="background: #AEF1AE">
+          scala.StringContext.apply(&quot;written &quot;, &quot;&quot;).s(target)
+        </td>
+      </tr><tr>
+        <td>
+          75
+        </td>
+        <td>
+          108
+        </td>
+        <td>
+          2766
+          -
+          2835
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;written &quot;, &quot;&quot;).s(target)).map[Unit](((_: Unit) =&gt; ()))
+        </td>
+      </tr><tr>
+        <td>
+          76
+        </td>
+        <td>
+          107
+        </td>
+        <td>
+          2833
+          -
+          2835
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          ()
+        </td>
+      </tr><tr>
+        <td>
+          79
+        </td>
+        <td>
+          116
+        </td>
+        <td>
+          2845
+          -
+          2962
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.createStream[Unit](path, {
+  ((file: datavault.extractload.ExtractLoad.File) =&gt; writeFile(file))
+}).flatMap[zio.console.Console, Throwable, Unit](((stream: zio.stream.ZStream[zio.console.Console,Throwable,Unit]) =&gt; stream.run[zio.console.Console, Throwable, Unit](zio.stream.`package`.Sink.drain).map[Unit](((_: Unit) =&gt; ()))))
+        </td>
+      </tr><tr>
+        <td>
+          79
+        </td>
+        <td>
+          112
+        </td>
+        <td>
+          2890
+          -
+          2899
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.$anon.writeFile
+        </td>
+        <td style="background: #AEF1AE">
+          writeFile(file)
+        </td>
+      </tr><tr>
+        <td>
+          80
+        </td>
+        <td>
+          113
+        </td>
+        <td>
+          2932
+          -
+          2942
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          zio.stream.ZSink.drain
+        </td>
+        <td style="background: #AEF1AE">
+          zio.stream.`package`.Sink.drain
+        </td>
+      </tr><tr>
+        <td>
+          80
+        </td>
+        <td>
+          115
+        </td>
+        <td>
+          2911
+          -
+          2962
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          stream.run[zio.console.Console, Throwable, Unit](zio.stream.`package`.Sink.drain).map[Unit](((_: Unit) =&gt; ()))
+        </td>
+      </tr><tr>
+        <td>
+          81
+        </td>
+        <td>
+          114
+        </td>
+        <td>
+          2960
+          -
+          2962
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          ()
+        </td>
+      </tr><tr>
+        <td>
+          86
+        </td>
+        <td>
+          117
+        </td>
+        <td>
+          3100
+          -
+          3104
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          true
+        </td>
+      </tr><tr>
+        <td>
+          87
+        </td>
+        <td>
+          118
+        </td>
+        <td>
+          3143
+          -
+          3161
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.succeed
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.succeed[datavault.extractload.ExtractLoad.Table](table)
+        </td>
+      </tr><tr>
+        <td>
+          88
+        </td>
+        <td>
+          119
+        </td>
+        <td>
+          3202
+          -
+          3211
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.$anon.allTables
+        </td>
+        <td style="background: #AEF1AE">
+          allTables(table)
+        </td>
+      </tr><tr>
+        <td>
+          88
+        </td>
+        <td>
+          121
+        </td>
+        <td>
+          3170
+          -
+          3222
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.$anon.processFiles
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.processFiles(path, destination, {
+  ((table: datavault.extractload.ExtractLoad.Table) =&gt; allTables(table))
+}, {
+  ((table: datavault.extractload.ExtractLoad.Table) =&gt; identity(table))
+})
+        </td>
+      </tr><tr>
+        <td>
+          88
+        </td>
+        <td>
+          120
+        </td>
+        <td>
+          3213
+          -
+          3221
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.$anon.identity
+        </td>
+        <td style="background: #AEF1AE">
+          identity(table)
+        </td>
+      </tr><tr>
+        <td>
+          98
+        </td>
+        <td>
+          144
+        </td>
+        <td>
+          3520
+          -
+          4059
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.fileAsTable(file).flatMap[zio.console.Console, Throwable, Unit](((table: datavault.extractload.ExtractLoad.Table) =&gt; if (filter.apply(table))
+  zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;process table &quot;, &quot;&quot;).s(table.name)).flatMap[zio.console.Console, Throwable, Unit](((_: Unit) =&gt; transform.apply(table).mapError[Exception](((x0$1: Option[Nothing]) =&gt; x0$1 match {
+  case _ =&gt; new scala.`package`.Exception(&quot;unable to create table&quot;)
+}))(zio.this.CanFail.canFail[Any]).flatMap[Any, Throwable, Unit](((newTable: datavault.extractload.ExtractLoad.Table) =&gt; $anon.this.writeTable(newTable, destination.resolve(file.path)).map[Unit](((_: Unit) =&gt; ()))))))
+else
+  zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;skipping table &quot;, &quot;&quot;).s(table.name)).map[Unit](((_: Unit) =&gt; ()))))
+        </td>
+      </tr><tr>
+        <td>
+          99
+        </td>
+        <td>
+          143
+        </td>
+        <td>
+          3573
+          -
+          4059
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          if (filter.apply(table))
+  zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;process table &quot;, &quot;&quot;).s(table.name)).flatMap[zio.console.Console, Throwable, Unit](((_: Unit) =&gt; transform.apply(table).mapError[Exception](((x0$1: Option[Nothing]) =&gt; x0$1 match {
+  case _ =&gt; new scala.`package`.Exception(&quot;unable to create table&quot;)
+}))(zio.this.CanFail.canFail[Any]).flatMap[Any, Throwable, Unit](((newTable: datavault.extractload.ExtractLoad.Table) =&gt; $anon.this.writeTable(newTable, destination.resolve(file.path)).map[Unit](((_: Unit) =&gt; ()))))))
+else
+  zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;skipping table &quot;, &quot;&quot;).s(table.name)).map[Unit](((_: Unit) =&gt; ()))
+        </td>
+      </tr><tr>
+        <td>
+          100
+        </td>
+        <td>
+          122
+        </td>
+        <td>
+          3594
+          -
+          3607
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Function1.apply
+        </td>
+        <td style="background: #AEF1AE">
+          filter.apply(table)
+        </td>
+      </tr><tr>
+        <td>
+          102
+        </td>
+        <td>
+          134
+        </td>
+        <td>
+          3625
+          -
+          3941
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;process table &quot;, &quot;&quot;).s(table.name)).flatMap[zio.console.Console, Throwable, Unit](((_: Unit) =&gt; transform.apply(table).mapError[Exception](((x0$1: Option[Nothing]) =&gt; x0$1 match {
+  case _ =&gt; new scala.`package`.Exception(&quot;unable to create table&quot;)
+}))(zio.this.CanFail.canFail[Any]).flatMap[Any, Throwable, Unit](((newTable: datavault.extractload.ExtractLoad.Table) =&gt; $anon.this.writeTable(newTable, destination.resolve(file.path)).map[Unit](((_: Unit) =&gt; ()))))))
+        </td>
+      </tr><tr>
+        <td>
+          102
+        </td>
+        <td>
+          125
+        </td>
+        <td>
+          3687
+          -
+          3697
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.Table.name
+        </td>
+        <td style="background: #AEF1AE">
+          table.name
+        </td>
+      </tr><tr>
+        <td>
+          102
+        </td>
+        <td>
+          124
+        </td>
+        <td>
+          3698
+          -
+          3699
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;&quot;
+        </td>
+      </tr><tr>
+        <td>
+          102
+        </td>
+        <td>
+          123
+        </td>
+        <td>
+          3671
+          -
+          3686
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;process table &quot;
+        </td>
+      </tr><tr>
+        <td>
+          102
+        </td>
+        <td>
+          126
+        </td>
+        <td>
+          3669
+          -
+          3699
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.StringContext.s
+        </td>
+        <td style="background: #AEF1AE">
+          scala.StringContext.apply(&quot;process table &quot;, &quot;&quot;).s(table.name)
+        </td>
+      </tr><tr>
+        <td>
+          102
+        </td>
+        <td>
+          135
+        </td>
+        <td>
+          3625
+          -
+          3941
+        </td>
+        <td>
+          Block
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;process table &quot;, &quot;&quot;).s(table.name)).flatMap[zio.console.Console, Throwable, Unit](((_: Unit) =&gt; transform.apply(table).mapError[Exception](((x0$1: Option[Nothing]) =&gt; x0$1 match {
+  case _ =&gt; new scala.`package`.Exception(&quot;unable to create table&quot;)
+}))(zio.this.CanFail.canFail[Any]).flatMap[Any, Throwable, Unit](((newTable: datavault.extractload.ExtractLoad.Table) =&gt; $anon.this.writeTable(newTable, destination.resolve(file.path)).map[Unit](((_: Unit) =&gt; ()))))))
+        </td>
+      </tr><tr>
+        <td>
+          103
+        </td>
+        <td>
+          128
+        </td>
+        <td>
+          3755
+          -
+          3755
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          zio.CanFail.canFail
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.CanFail.canFail[Any]
+        </td>
+      </tr><tr>
+        <td>
+          103
+        </td>
+        <td>
+          133
+        </td>
+        <td>
+          3717
+          -
+          3941
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          transform.apply(table).mapError[Exception](((x0$1: Option[Nothing]) =&gt; x0$1 match {
+  case _ =&gt; new scala.`package`.Exception(&quot;unable to create table&quot;)
+}))(zio.this.CanFail.canFail[Any]).flatMap[Any, Throwable, Unit](((newTable: datavault.extractload.ExtractLoad.Table) =&gt; $anon.this.writeTable(newTable, destination.resolve(file.path)).map[Unit](((_: Unit) =&gt; ()))))
+        </td>
+      </tr><tr>
+        <td>
+          104
+        </td>
+        <td>
+          127
+        </td>
+        <td>
+          3785
+          -
+          3824
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.lang.Exception.&lt;init&gt;
+        </td>
+        <td style="background: #F0ADAD">
+          new scala.`package`.Exception(&quot;unable to create table&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          106
+        </td>
+        <td>
+          130
+        </td>
+        <td>
+          3885
+          -
+          3915
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Path.resolve
+        </td>
+        <td style="background: #AEF1AE">
+          destination.resolve(file.path)
+        </td>
+      </tr><tr>
+        <td>
+          106
+        </td>
+        <td>
+          129
+        </td>
+        <td>
+          3905
+          -
+          3914
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.File.path
+        </td>
+        <td style="background: #AEF1AE">
+          file.path
+        </td>
+      </tr><tr>
+        <td>
+          106
+        </td>
+        <td>
+          132
+        </td>
+        <td>
+          3859
+          -
+          3941
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.writeTable(newTable, destination.resolve(file.path)).map[Unit](((_: Unit) =&gt; ()))
+        </td>
+      </tr><tr>
+        <td>
+          107
+        </td>
+        <td>
+          131
+        </td>
+        <td>
+          3939
+          -
+          3941
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          ()
+        </td>
+      </tr><tr>
+        <td>
+          109
+        </td>
+        <td>
+          137
+        </td>
+        <td>
+          4024
+          -
+          4025
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;&quot;
+        </td>
+      </tr><tr>
+        <td>
+          109
+        </td>
+        <td>
+          140
+        </td>
+        <td>
+          3977
+          -
+          4026
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.console.putStrLn
+        </td>
+        <td style="background: #AEF1AE">
+          zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;skipping table &quot;, &quot;&quot;).s(table.name))
+        </td>
+      </tr><tr>
+        <td>
+          109
+        </td>
+        <td>
+          136
+        </td>
+        <td>
+          3996
+          -
+          4012
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;skipping table &quot;
+        </td>
+      </tr><tr>
+        <td>
+          109
+        </td>
+        <td>
+          139
+        </td>
+        <td>
+          3994
+          -
+          4025
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.StringContext.s
+        </td>
+        <td style="background: #AEF1AE">
+          scala.StringContext.apply(&quot;skipping table &quot;, &quot;&quot;).s(table.name)
+        </td>
+      </tr><tr>
+        <td>
+          109
+        </td>
+        <td>
+          138
+        </td>
+        <td>
+          4013
+          -
+          4023
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.Table.name
+        </td>
+        <td style="background: #AEF1AE">
+          table.name
+        </td>
+      </tr><tr>
+        <td>
+          109
+        </td>
+        <td>
+          141
+        </td>
+        <td>
+          3977
+          -
+          4026
+        </td>
+        <td>
+          Block
+        </td>
+        <td>
+          zio.console.putStrLn
+        </td>
+        <td style="background: #AEF1AE">
+          zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;skipping table &quot;, &quot;&quot;).s(table.name))
+        </td>
+      </tr><tr>
+        <td>
+          111
+        </td>
+        <td>
+          142
+        </td>
+        <td>
+          4057
+          -
+          4059
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          ()
+        </td>
+      </tr><tr>
+        <td>
+          114
+        </td>
+        <td>
+          151
+        </td>
+        <td>
+          4069
+          -
+          4247
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(destination)).flatMap[zio.console.Console, Throwable, Unit](((_: java.nio.file.Path) =&gt; $anon.this.createStream[Unit](path, {
+  ((file: datavault.extractload.ExtractLoad.File) =&gt; saveTable(file))
+}).flatMap[zio.console.Console, Throwable, Unit](((stream: zio.stream.ZStream[zio.console.Console,Throwable,Unit]) =&gt; stream.run[zio.console.Console, Throwable, Unit](zio.stream.`package`.Sink.drain).map[Unit](((_: Unit) =&gt; ()))))))
+        </td>
+      </tr><tr>
+        <td>
+          114
+        </td>
+        <td>
+          145
+        </td>
+        <td>
+          4098
+          -
+          4134
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Files.createDirectories
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Files.createDirectories(destination)
+        </td>
+      </tr><tr>
+        <td>
+          115
+        </td>
+        <td>
+          146
+        </td>
+        <td>
+          4175
+          -
+          4184
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.$anon.saveTable
+        </td>
+        <td style="background: #AEF1AE">
+          saveTable(file)
+        </td>
+      </tr><tr>
+        <td>
+          115
+        </td>
+        <td>
+          150
+        </td>
+        <td>
+          4146
+          -
+          4247
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.createStream[Unit](path, {
+  ((file: datavault.extractload.ExtractLoad.File) =&gt; saveTable(file))
+}).flatMap[zio.console.Console, Throwable, Unit](((stream: zio.stream.ZStream[zio.console.Console,Throwable,Unit]) =&gt; stream.run[zio.console.Console, Throwable, Unit](zio.stream.`package`.Sink.drain).map[Unit](((_: Unit) =&gt; ()))))
+        </td>
+      </tr><tr>
+        <td>
+          116
+        </td>
+        <td>
+          149
+        </td>
+        <td>
+          4196
+          -
+          4247
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          stream.run[zio.console.Console, Throwable, Unit](zio.stream.`package`.Sink.drain).map[Unit](((_: Unit) =&gt; ()))
+        </td>
+      </tr><tr>
+        <td>
+          116
+        </td>
+        <td>
+          147
+        </td>
+        <td>
+          4217
+          -
+          4227
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          zio.stream.ZSink.drain
+        </td>
+        <td style="background: #AEF1AE">
+          zio.stream.`package`.Sink.drain
+        </td>
+      </tr><tr>
+        <td>
+          117
+        </td>
+        <td>
+          148
+        </td>
+        <td>
+          4245
+          -
+          4247
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          ()
+        </td>
+      </tr><tr>
+        <td>
+          123
+        </td>
+        <td>
+          152
+        </td>
+        <td>
+          4386
+          -
+          4450
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.fileAsTable(file).map[datavault.extractload.ExtractLoad.Table](((table: datavault.extractload.ExtractLoad.Table) =&gt; table))
+        </td>
+      </tr><tr>
+        <td>
+          127
+        </td>
+        <td>
+          154
+        </td>
+        <td>
+          4460
+          -
+          4536
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.createStream[datavault.extractload.ExtractLoad.Table](path, {
+  ((file: datavault.extractload.ExtractLoad.File) =&gt; asTable(file))
+}).map[zio.stream.ZStream[zio.console.Console,Throwable,datavault.extractload.ExtractLoad.Table]](((stream: zio.stream.ZStream[zio.console.Console,Throwable,datavault.extractload.ExtractLoad.Table]) =&gt; stream))
+        </td>
+      </tr><tr>
+        <td>
+          127
+        </td>
+        <td>
+          153
+        </td>
+        <td>
+          4505
+          -
+          4512
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.$anon.asTable
+        </td>
+        <td style="background: #AEF1AE">
+          asTable(file)
+        </td>
+      </tr><tr>
+        <td>
+          132
+        </td>
+        <td>
+          155
+        </td>
+        <td>
+          4638
+          -
+          4671
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.File.apply
+        </td>
+        <td style="background: #AEF1AE">
+          ExtractLoad.this.File.apply(inputStream, &quot;name&quot;, &quot;path&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          132
+        </td>
+        <td>
+          156
+        </td>
+        <td>
+          4626
+          -
+          4672
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.$anon.fileAsTable
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.fileAsTable(ExtractLoad.this.File.apply(inputStream, &quot;name&quot;, &quot;path&quot;))
+        </td>
+      </tr><tr>
+        <td>
+          137
+        </td>
+        <td>
+          157
+        </td>
+        <td>
+          4907
+          -
+          4922
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          com.fasterxml.jackson.dataformat.csv.CsvMapper.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new com.fasterxml.jackson.dataformat.csv.CsvMapper()
+        </td>
+      </tr><tr>
+        <td>
+          139
+        </td>
+        <td>
+          158
+        </td>
+        <td>
+          4960
+          -
+          4973
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.Table.headers
+        </td>
+        <td style="background: #AEF1AE">
+          table.headers
+        </td>
+      </tr><tr>
+        <td>
+          139
+        </td>
+        <td>
+          160
+        </td>
+        <td>
+          5023
+          -
+          5046
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder.addColumn
+        </td>
+        <td style="background: #AEF1AE">
+          builder.addColumn(name)
+        </td>
+      </tr><tr>
+        <td>
+          139
+        </td>
+        <td>
+          159
+        </td>
+        <td>
+          4983
+          -
+          5002
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          com.fasterxml.jackson.dataformat.csv.CsvSchema.builder
+        </td>
+        <td style="background: #AEF1AE">
+          com.fasterxml.jackson.dataformat.csv.CsvSchema.builder()
+        </td>
+      </tr><tr>
+        <td>
+          139
+        </td>
+        <td>
+          161
+        </td>
+        <td>
+          4960
+          -
+          5047
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.collection.IndexedSeqOptimized.foldLeft
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.refArrayOps[String](table.headers).foldLeft[com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder](com.fasterxml.jackson.dataformat.csv.CsvSchema.builder())(((builder: com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder, name: String) =&gt; builder.addColumn(name)))
+        </td>
+      </tr><tr>
+        <td>
+          140
+        </td>
+        <td>
+          162
+        </td>
+        <td>
+          5071
+          -
+          5103
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder.build
+        </td>
+        <td style="background: #AEF1AE">
+          builder.setUseHeader(true).build()
+        </td>
+      </tr><tr>
+        <td>
+          142
+        </td>
+        <td>
+          163
+        </td>
+        <td>
+          5115
+          -
+          5160
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          com.fasterxml.jackson.databind.ObjectMapper.writer
+        </td>
+        <td style="background: #AEF1AE">
+          mapper.writer(schema)
+        </td>
+      </tr><tr>
+        <td>
+          149
+        </td>
+        <td>
+          164
+        </td>
+        <td>
+          5378
+          -
+          5378
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.$anon.$anonfun.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new $anonfun()
+        </td>
+      </tr><tr>
+        <td>
+          152
+        </td>
+        <td>
+          165
+        </td>
+        <td>
+          5356
+          -
+          5467
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.collection.TraversableOnce.toIterable
+        </td>
+        <td style="background: #AEF1AE">
+          it.collect[Array[String]](({
+  @SerialVersionUID(value = 0) final &lt;synthetic&gt; class $anonfun extends scala.runtime.AbstractPartialFunction[Either[Any,Array[String]],Array[String]] with Serializable {
+    def &lt;init&gt;(): &lt;$anon: Either[Any,Array[String]] =&gt; Array[String]&gt; = {
+      $anonfun.super.&lt;init&gt;();
+      ()
+    };
+    final override def applyOrElse[A1 &lt;: Either[Any,Array[String]], B1 &gt;: Array[String]](x1: A1, default: A1 =&gt; B1): B1 = ((x1.asInstanceOf[scala.util.Either[Any,Array[String]]]: Either[Any,Array[String]]): Either[Any,Array[String]] @unchecked) match {
+      case (value: Array[String])scala.util.Right[Any,Array[String]]((value @ (_: Array[String]))) =&gt; value
+      case (defaultCase$ @ _) =&gt; default.apply(x1)
+    };
+    final def isDefinedAt(x1: Either[Any,Array[String]]): Boolean = ((x1.asInstanceOf[scala.util.Either[Any,Array[String]]]: Either[Any,Array[String]]): Either[Any,Array[String]] @unchecked) match {
+      case (value: Array[String])scala.util.Right[Any,Array[String]]((value @ (_: Array[String]))) =&gt; true
+      case (defaultCase$ @ _) =&gt; false
+    }
+  };
+  new $anonfun()
+}: PartialFunction[Either[Any,Array[String]],Array[String]])).toIterable
+        </td>
+      </tr><tr>
+        <td>
+          153
+        </td>
+        <td>
+          166
+        </td>
+        <td>
+          5356
+          -
+          5485
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.collection.convert.Decorators.AsJava.asJava
+        </td>
+        <td style="background: #AEF1AE">
+          scala.collection.JavaConverters.asJavaIterableConverter[Array[String]](it.collect[Array[String]](({
+  @SerialVersionUID(value = 0) final &lt;synthetic&gt; class $anonfun extends scala.runtime.AbstractPartialFunction[Either[Any,Array[String]],Array[String]] with Serializable {
+    def &lt;init&gt;(): &lt;$anon: Either[Any,Array[String]] =&gt; Array[String]&gt; = {
+      $anonfun.super.&lt;init&gt;();
+      ()
+    };
+    final override def applyOrElse[A1 &lt;: Either[Any,Array[String]], B1 &gt;: Array[String]](x1: A1, default: A1 =&gt; B1): B1 = ((x1.asInstanceOf[scala.util.Either[Any,Array[String]]]: Either[Any,Array[String]]): Either[Any,Array[String]] @unchecked) match {
+      case (value: Array[String])scala.util.Right[Any,Array[String]]((value @ (_: Array[String]))) =&gt; value
+      case (defaultCase$ @ _) =&gt; default.apply(x1)
+    };
+    final def isDefinedAt(x1: Either[Any,Array[String]]): Boolean = ((x1.asInstanceOf[scala.util.Either[Any,Array[String]]]: Either[Any,Array[String]]): Either[Any,Array[String]] @unchecked) match {
+      case (value: Array[String])scala.util.Right[Any,Array[String]]((value @ (_: Array[String]))) =&gt; true
+      case (defaultCase$ @ _) =&gt; false
+    }
+  };
+  new $anonfun()
+}: PartialFunction[Either[Any,Array[String]],Array[String]])).toIterable).asJava
+        </td>
+      </tr><tr>
+        <td>
+          156
+        </td>
+        <td>
+          167
+        </td>
+        <td>
+          5543
+          -
+          5559
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Path.getParent
+        </td>
+        <td style="background: #AEF1AE">
+          path.getParent()
+        </td>
+      </tr><tr>
+        <td>
+          156
+        </td>
+        <td>
+          175
+        </td>
+        <td>
+          5495
+          -
+          5773
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.IO.apply[java.nio.file.Path](java.nio.file.Files.createDirectories(path.getParent())).flatMap[Any, Throwable, Unit](((_: java.nio.file.Path) =&gt; table.rows.toIterator.use[Any, Throwable, com.fasterxml.jackson.databind.SequenceWriter](((iter: Iterator[Either[Any,Array[String]]]) =&gt; zio.ZIO.effect[com.fasterxml.jackson.databind.SequenceWriter](writer.writeValues(path.toFile()).writeAll(asJavaIterator(iter))))).map[Unit](((_: com.fasterxml.jackson.databind.SequenceWriter) =&gt; ()))))
+        </td>
+      </tr><tr>
+        <td>
+          156
+        </td>
+        <td>
+          168
+        </td>
+        <td>
+          5519
+          -
+          5560
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Files.createDirectories
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Files.createDirectories(path.getParent())
+        </td>
+      </tr><tr>
+        <td>
+          157
+        </td>
+        <td>
+          174
+        </td>
+        <td>
+          5572
+          -
+          5773
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          table.rows.toIterator.use[Any, Throwable, com.fasterxml.jackson.databind.SequenceWriter](((iter: Iterator[Either[Any,Array[String]]]) =&gt; zio.ZIO.effect[com.fasterxml.jackson.databind.SequenceWriter](writer.writeValues(path.toFile()).writeAll(asJavaIterator(iter))))).map[Unit](((_: com.fasterxml.jackson.databind.SequenceWriter) =&gt; ()))
+        </td>
+      </tr><tr>
+        <td>
+          158
+        </td>
+        <td>
+          169
+        </td>
+        <td>
+          5695
+          -
+          5708
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Path.toFile
+        </td>
+        <td style="background: #AEF1AE">
+          path.toFile()
+        </td>
+      </tr><tr>
+        <td>
+          158
+        </td>
+        <td>
+          172
+        </td>
+        <td>
+          5665
+          -
+          5741
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.effect
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.effect[com.fasterxml.jackson.databind.SequenceWriter](writer.writeValues(path.toFile()).writeAll(asJavaIterator(iter)))
+        </td>
+      </tr><tr>
+        <td>
+          158
+        </td>
+        <td>
+          171
+        </td>
+        <td>
+          5676
+          -
+          5740
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          com.fasterxml.jackson.databind.SequenceWriter.writeAll
+        </td>
+        <td style="background: #AEF1AE">
+          writer.writeValues(path.toFile()).writeAll(asJavaIterator(iter))
+        </td>
+      </tr><tr>
+        <td>
+          158
+        </td>
+        <td>
+          170
+        </td>
+        <td>
+          5719
+          -
+          5739
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.$anon.asJavaIterator
+        </td>
+        <td style="background: #AEF1AE">
+          asJavaIterator(iter)
+        </td>
+      </tr><tr>
+        <td>
+          160
+        </td>
+        <td>
+          173
+        </td>
+        <td>
+          5771
+          -
+          5773
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          ()
+        </td>
+      </tr><tr>
+        <td>
+          167
+        </td>
+        <td>
+          176
+        </td>
+        <td>
+          5925
+          -
+          5940
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          com.fasterxml.jackson.dataformat.csv.CsvMapper.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new com.fasterxml.jackson.dataformat.csv.CsvMapper()
+        </td>
+      </tr><tr>
+        <td>
+          168
+        </td>
+        <td>
+          177
+        </td>
+        <td>
+          5952
+          -
+          5998
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          com.fasterxml.jackson.dataformat.csv.CsvMapper.enable
+        </td>
+        <td style="background: #AEF1AE">
+          mapper.enable(WRAP_AS_ARRAY)
+        </td>
+      </tr><tr>
+        <td>
+          169
+        </td>
+        <td>
+          178
+        </td>
+        <td>
+          6027
+          -
+          6049
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          classOf[[Ljava.lang.String;]
+        </td>
+      </tr><tr>
+        <td>
+          169
+        </td>
+        <td>
+          180
+        </td>
+        <td>
+          6010
+          -
+          6079
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          com.fasterxml.jackson.databind.ObjectReader.readValues
+        </td>
+        <td style="background: #AEF1AE">
+          mapper.readerFor(classOf[[Ljava.lang.String;]).readValues[Array[String]](file.inputStream)
+        </td>
+      </tr><tr>
+        <td>
+          169
+        </td>
+        <td>
+          179
+        </td>
+        <td>
+          6062
+          -
+          6078
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.File.inputStream
+        </td>
+        <td style="background: #AEF1AE">
+          file.inputStream
+        </td>
+      </tr><tr>
+        <td>
+          173
+        </td>
+        <td>
+          181
+        </td>
+        <td>
+          6178
+          -
+          6188
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          com.fasterxml.jackson.databind.MappingIterator.hasNext
+        </td>
+        <td style="background: #AEF1AE">
+          it.hasNext()
+        </td>
+      </tr><tr>
+        <td>
+          174
+        </td>
+        <td>
+          182
+        </td>
+        <td>
+          6204
+          -
+          6211
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          com.fasterxml.jackson.databind.MappingIterator.next
+        </td>
+        <td style="background: #AEF1AE">
+          it.next()
+        </td>
+      </tr><tr>
+        <td>
+          174
+        </td>
+        <td>
+          183
+        </td>
+        <td>
+          6204
+          -
+          6211
+        </td>
+        <td>
+          Block
+        </td>
+        <td>
+          com.fasterxml.jackson.databind.MappingIterator.next
+        </td>
+        <td style="background: #AEF1AE">
+          it.next()
+        </td>
+      </tr><tr>
+        <td>
+          176
+        </td>
+        <td>
+          185
+        </td>
+        <td>
+          6243
+          -
+          6287
+        </td>
+        <td>
+          Block
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #F0ADAD">
+          throw new scala.`package`.Exception(&quot;no header in CSV file&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          176
+        </td>
+        <td>
+          184
+        </td>
+        <td>
+          6243
+          -
+          6287
+        </td>
+        <td>
+          Throw
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #F0ADAD">
+          throw new scala.`package`.Exception(&quot;no header in CSV file&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          180
+        </td>
+        <td>
+          192
+        </td>
+        <td>
+          6410
+          -
+          6517
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.fromOption
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.fromOption[Array[String]](if (it.hasNext())
+  scala.Some.apply[Array[String]](it.next())
+else
+  scala.None)
+        </td>
+      </tr><tr>
+        <td>
+          180
+        </td>
+        <td>
+          186
+        </td>
+        <td>
+          6429
+          -
+          6439
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          com.fasterxml.jackson.databind.MappingIterator.hasNext
+        </td>
+        <td style="background: #AEF1AE">
+          it.hasNext()
+        </td>
+      </tr><tr>
+        <td>
+          181
+        </td>
+        <td>
+          187
+        </td>
+        <td>
+          6460
+          -
+          6467
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          com.fasterxml.jackson.databind.MappingIterator.next
+        </td>
+        <td style="background: #AEF1AE">
+          it.next()
+        </td>
+      </tr><tr>
+        <td>
+          181
+        </td>
+        <td>
+          189
+        </td>
+        <td>
+          6455
+          -
+          6468
+        </td>
+        <td>
+          Block
+        </td>
+        <td>
+          scala.Some.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Some.apply[Array[String]](it.next())
+        </td>
+      </tr><tr>
+        <td>
+          181
+        </td>
+        <td>
+          188
+        </td>
+        <td>
+          6455
+          -
+          6468
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Some.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Some.apply[Array[String]](it.next())
+        </td>
+      </tr><tr>
+        <td>
+          183
+        </td>
+        <td>
+          191
+        </td>
+        <td>
+          6500
+          -
+          6504
+        </td>
+        <td>
+          Block
+        </td>
+        <td>
+          scala.None
+        </td>
+        <td style="background: #AEF1AE">
+          scala.None
+        </td>
+      </tr><tr>
+        <td>
+          183
+        </td>
+        <td>
+          190
+        </td>
+        <td>
+          6500
+          -
+          6504
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.None
+        </td>
+        <td style="background: #AEF1AE">
+          scala.None
+        </td>
+      </tr><tr>
+        <td>
+          187
+        </td>
+        <td>
+          200
+        </td>
+        <td>
+          6527
+          -
+          6733
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.succeed[com.fasterxml.jackson.databind.MappingIterator[Array[String]]](it).flatMap[Any, Throwable, datavault.extractload.ExtractLoad.Table](((it: com.fasterxml.jackson.databind.MappingIterator[Array[String]]) =&gt; zio.this.ZIO.ZIOWithFilterOps[Any, Throwable, Array[String]](zio.ZIO.effect[Array[String]](headers(it))).withFilter(((check$ifrefutable$1: Array[String]) =&gt; (check$ifrefutable$1: Array[String] @unchecked) match {
+  case (h @ (_: Array[String])) =&gt; true
+  case _ =&gt; false
+}))(ZIO.this.CanFilter.canFilter[NoSuchElementException]).map[(Array[String], zio.stream.ZStream[Any,Nothing,Array[String]])](((h: Array[String]) =&gt; {
+  val stream: zio.stream.ZStream[Any,Nothing,Array[String]] = zio.stream.`package`.Stream.repeatEffectOption[Any, Nothing, Array[String]](effect(it));
+  scala.Tuple2.apply[Array[String], zio.stream.ZStream[Any,Nothing,Array[String]]](h, stream)
+})).map[datavault.extractload.ExtractLoad.Table](((x$2: (Array[String], zio.stream.ZStream[Any,Nothing,Array[String]])) =&gt; (x$2: (Array[String], zio.stream.ZStream[Any,Nothing,Array[String]]) @unchecked) match {
+  case (_1: Array[String], _2: zio.stream.ZStream[Any,Nothing,Array[String]])(Array[String], zio.stream.ZStream[Any,Nothing,Array[String]])((h @ (_: Array[String])), (stream @ _)) =&gt; ExtractLoad.this.Table.apply(file.name, h, stream)
+}))))
+        </td>
+      </tr><tr>
+        <td>
+          188
+        </td>
+        <td>
+          193
+        </td>
+        <td>
+          6619
+          -
+          6619
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          zio.ZIO.CanFilter.canFilter
+        </td>
+        <td style="background: #AEF1AE">
+          ZIO.this.CanFilter.canFilter[NoSuchElementException]
+        </td>
+      </tr><tr>
+        <td>
+          188
+        </td>
+        <td>
+          196
+        </td>
+        <td>
+          6589
+          -
+          6589
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Tuple2.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Tuple2.apply[Array[String], zio.stream.ZStream[Any,Nothing,Array[String]]](h, stream)
+        </td>
+      </tr><tr>
+        <td>
+          188
+        </td>
+        <td>
+          199
+        </td>
+        <td>
+          6589
+          -
+          6733
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.ZIO.ZIOWithFilterOps[Any, Throwable, Array[String]](zio.ZIO.effect[Array[String]](headers(it))).withFilter(((check$ifrefutable$1: Array[String]) =&gt; (check$ifrefutable$1: Array[String] @unchecked) match {
+  case (h @ (_: Array[String])) =&gt; true
+  case _ =&gt; false
+}))(ZIO.this.CanFilter.canFilter[NoSuchElementException]).map[(Array[String], zio.stream.ZStream[Any,Nothing,Array[String]])](((h: Array[String]) =&gt; {
+  val stream: zio.stream.ZStream[Any,Nothing,Array[String]] = zio.stream.`package`.Stream.repeatEffectOption[Any, Nothing, Array[String]](effect(it));
+  scala.Tuple2.apply[Array[String], zio.stream.ZStream[Any,Nothing,Array[String]]](h, stream)
+})).map[datavault.extractload.ExtractLoad.Table](((x$2: (Array[String], zio.stream.ZStream[Any,Nothing,Array[String]])) =&gt; (x$2: (Array[String], zio.stream.ZStream[Any,Nothing,Array[String]]) @unchecked) match {
+  case (_1: Array[String], _2: zio.stream.ZStream[Any,Nothing,Array[String]])(Array[String], zio.stream.ZStream[Any,Nothing,Array[String]])((h @ (_: Array[String])), (stream @ _)) =&gt; ExtractLoad.this.Table.apply(file.name, h, stream)
+}))
+        </td>
+      </tr><tr>
+        <td>
+          189
+        </td>
+        <td>
+          194
+        </td>
+        <td>
+          6678
+          -
+          6688
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.$anon.effect
+        </td>
+        <td style="background: #AEF1AE">
+          effect(it)
+        </td>
+      </tr><tr>
+        <td>
+          189
+        </td>
+        <td>
+          195
+        </td>
+        <td>
+          6652
+          -
+          6689
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.stream.ZStream.repeatEffectOption
+        </td>
+        <td style="background: #AEF1AE">
+          zio.stream.`package`.Stream.repeatEffectOption[Any, Nothing, Array[String]](effect(it))
+        </td>
+      </tr><tr>
+        <td>
+          190
+        </td>
+        <td>
+          198
+        </td>
+        <td>
+          6706
+          -
+          6733
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.Table.apply
+        </td>
+        <td style="background: #AEF1AE">
+          ExtractLoad.this.Table.apply(file.name, h, stream)
+        </td>
+      </tr><tr>
+        <td>
+          190
+        </td>
+        <td>
+          197
+        </td>
+        <td>
+          6712
+          -
+          6721
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.File.name
+        </td>
+        <td style="background: #AEF1AE">
+          file.name
+        </td>
+      </tr><tr>
+        <td>
+          198
+        </td>
+        <td>
+          204
+        </td>
+        <td>
+          6877
+          -
+          6914
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.accessM[datavault.extractload.ExtractLoad with zio.console.Console].apply[Throwable, zio.stream.ZStream[zio.console.Console,Throwable,datavault.extractload.ExtractLoad.File]](((x$3: datavault.extractload.ExtractLoad with zio.console.Console) =&gt; zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad with zio.console.Console](x$3).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad with zio.console.Console], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).archiveFiles(path)))
+        </td>
+      </tr><tr>
+        <td>
+          198
+        </td>
+        <td>
+          203
+        </td>
+        <td>
+          6889
+          -
+          6913
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.Service.archiveFiles
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad with zio.console.Console](x$3).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad with zio.console.Console], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).archiveFiles(path)
+        </td>
+      </tr><tr>
+        <td>
+          203
+        </td>
+        <td>
+          205
+        </td>
+        <td>
+          7047
+          -
+          7065
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.Service.tables
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad with zio.console.Console](x$4).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad with zio.console.Console], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).tables(path)
+        </td>
+      </tr><tr>
+        <td>
+          203
+        </td>
+        <td>
+          206
+        </td>
+        <td>
+          7035
+          -
+          7066
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.accessM[datavault.extractload.ExtractLoad with zio.console.Console].apply[Throwable, zio.stream.ZStream[zio.console.Console,Throwable,datavault.extractload.ExtractLoad.Table]](((x$4: datavault.extractload.ExtractLoad with zio.console.Console) =&gt; zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad with zio.console.Console](x$4).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad with zio.console.Console], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).tables(path)))
+        </td>
+      </tr><tr>
+        <td>
+          206
+        </td>
+        <td>
+          208
+        </td>
+        <td>
+          7148
+          -
+          7185
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.accessM[datavault.extractload.ExtractLoad].apply[Throwable, datavault.extractload.ExtractLoad.Table](((x$5: datavault.extractload.ExtractLoad) =&gt; zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad](x$5).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).table(inputStream)))
+        </td>
+      </tr><tr>
+        <td>
+          206
+        </td>
+        <td>
+          207
+        </td>
+        <td>
+          7160
+          -
+          7184
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.Service.table
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad](x$5).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).table(inputStream)
+        </td>
+      </tr><tr>
+        <td>
+          209
+        </td>
+        <td>
+          209
+        </td>
+        <td>
+          7301
+          -
+          7336
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.Service.unzipFiles
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad with zio.console.Console](x$6).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad with zio.console.Console], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).unzipFiles(path, destination)
+        </td>
+      </tr><tr>
+        <td>
+          209
+        </td>
+        <td>
+          210
+        </td>
+        <td>
+          7289
+          -
+          7337
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.accessM[datavault.extractload.ExtractLoad with zio.console.Console].apply[Throwable, Unit](((x$6: datavault.extractload.ExtractLoad with zio.console.Console) =&gt; zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad with zio.console.Console](x$6).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad with zio.console.Console], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).unzipFiles(path, destination)))
+        </td>
+      </tr><tr>
+        <td>
+          212
+        </td>
+        <td>
+          211
+        </td>
+        <td>
+          7455
+          -
+          7492
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.Service.extractFiles
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad with zio.console.Console](x$7).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad with zio.console.Console], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).extractFiles(path, destination)
+        </td>
+      </tr><tr>
+        <td>
+          212
+        </td>
+        <td>
+          212
+        </td>
+        <td>
+          7443
+          -
+          7493
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.accessM[datavault.extractload.ExtractLoad with zio.console.Console].apply[Throwable, Unit](((x$7: datavault.extractload.ExtractLoad with zio.console.Console) =&gt; zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad with zio.console.Console](x$7).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad with zio.console.Console], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).extractFiles(path, destination)))
+        </td>
+      </tr><tr>
+        <td>
+          215
+        </td>
+        <td>
+          214
+        </td>
+        <td>
+          7592
+          -
+          7634
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.accessM[datavault.extractload.ExtractLoad with zio.console.Console].apply[Throwable, Unit](((x$8: datavault.extractload.ExtractLoad with zio.console.Console) =&gt; zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad with zio.console.Console](x$8).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad with zio.console.Console], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).writeTable(table, path)))
+        </td>
+      </tr><tr>
+        <td>
+          215
+        </td>
+        <td>
+          213
+        </td>
+        <td>
+          7604
+          -
+          7633
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.Service.writeTable
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad with zio.console.Console](x$8).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad with zio.console.Console], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).writeTable(table, path)
+        </td>
+      </tr><tr>
+        <td>
+          218
+        </td>
+        <td>
+          216
+        </td>
+        <td>
+          7721
+          -
+          7757
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #F0ADAD">
+          zio.ZIO.accessM[datavault.extractload.ExtractLoad with zio.console.Console].apply[Throwable, datavault.extractload.ExtractLoad.Table](((x$9: datavault.extractload.ExtractLoad with zio.console.Console) =&gt; zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad with zio.console.Console](x$9).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad with zio.console.Console], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).fileAsTable(file)))
+        </td>
+      </tr><tr>
+        <td>
+          218
+        </td>
+        <td>
+          215
+        </td>
+        <td>
+          7733
+          -
+          7756
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.Service.fileAsTable
+        </td>
+        <td style="background: #F0ADAD">
+          zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad with zio.console.Console](x$9).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad with zio.console.Console], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).fileAsTable(file)
+        </td>
+      </tr><tr>
+        <td>
+          226
+        </td>
+        <td>
+          218
+        </td>
+        <td>
+          7975
+          -
+          8044
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.accessM[datavault.extractload.ExtractLoad with zio.console.Console].apply[Throwable, Unit](((x$10: datavault.extractload.ExtractLoad with zio.console.Console) =&gt; zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad with zio.console.Console](x$10).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad with zio.console.Console], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).processFiles(path, destination, filter, transform)))
+        </td>
+      </tr><tr>
+        <td>
+          226
+        </td>
+        <td>
+          217
+        </td>
+        <td>
+          7987
+          -
+          8043
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.Service.processFiles
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad with zio.console.Console](x$10).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad with zio.console.Console], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).processFiles(path, destination, filter, transform)
+        </td>
+      </tr>
+    </table>
+          </div>
+        </div>
+      </body>
+    </html>
