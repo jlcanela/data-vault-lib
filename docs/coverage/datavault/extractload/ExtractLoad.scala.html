@@ -1,0 +1,320 @@
+<html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title id="title">
+          datavault/extractload/ExtractLoad.scala.html
+        </title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/css/theme.default.min.css" type="text/css"/><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/js/jquery.tablesorter.min.js"></script><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" type="text/css"/><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script><script type="text/javascript">
+        $(document).ready(function() {$(".tablesorter").tablesorter();});
+      </script>
+        <style>
+          table.codegrid { font-family: monospace; font-size: 12px; width: auto!important; }table.statementlist { width: auto!important; font-size: 13px; } table.codegrid td { padding: 0!important; border: 0!important } table td.linenumber { width: 40px!important; } 
+        </style>
+      </head>
+      <body style="font-family: monospace;">
+        <ul class="nav nav-tabs">
+          <li>
+            <a href="#codegrid" data-toggle="tab">Codegrid</a>
+          </li>
+          <li>
+            <a href="#statementlist" data-toggle="tab">Statement List</a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active" id="codegrid">
+            <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault.extractload
+</span>2 <span style=''>
+</span>3 <span style=''>import zio._
+</span>4 <span style=''>import zio.stream._
+</span>5 <span style=''>
+</span>6 <span style=''>import java.io.InputStream
+</span>7 <span style=''>import java.nio.file.Path
+</span>8 <span style=''>
+</span>9 <span style=''>object ExtractLoad {
+</span>10 <span style=''>
+</span>11 <span style=''>    case class Table(headers: Array[String], rows: Stream[Any, Array[String]]) 
+</span>12 <span style=''>
+</span>13 <span style=''>    case class File(inputStream: InputStream, name: String, path: String) {
+</span>14 <span style=''>        def asTable: ZIO[Any, Throwable, Table] = </span><span style='background: #F0ADAD'>???</span><span style=''>
+</span>15 <span style=''>    }
+</span>16 <span style=''>
+</span>17 <span style=''>  // Service definition
+</span>18 <span style=''>  trait Service {
+</span>19 <span style=''>      def archiveFiles(path: Path): ZIO[Any, Throwable, ZStream[Any, Throwable, Unit]] 
+</span>20 <span style=''>      def tables(inputStream: InputStream): ZIO[Any, Throwable, Stream[Throwable, Table]] 
+</span>21 <span style=''>  }
+</span>22 <span style=''>
+</span>23 <span style=''>  // Module implementation
+</span>24 <span style=''>  val live: ZLayer[Any, Nothing, ExtractLoad] = </span><span style='background: #AEF1AE'>ZLayer.succeed {
+</span>25 <span style=''></span><span style='background: #AEF1AE'>    new Service {
+</span>26 <span style=''></span><span style='background: #AEF1AE'>      def archiveFiles(path: Path): ZIO[Any, Throwable, ZStream[Any, Throwable, Unit]] = 
+</span>27 <span style=''></span><span style='background: #AEF1AE'>      ZIO.succeed(Stream(()))
+</span>28 <span style=''></span><span style='background: #AEF1AE'>
+</span>29 <span style=''></span><span style='background: #AEF1AE'>     def tables(inputStream: InputStream): ZIO[Any, Throwable, Stream[Throwable, Table]] = 
+</span>30 <span style=''></span><span style='background: #AEF1AE'>        </span><span style='background: #F0ADAD'>ZIO.succeed(Stream())</span><span style='background: #AEF1AE'>
+</span>31 <span style=''></span><span style='background: #AEF1AE'>    }
+</span>32 <span style=''></span><span style='background: #AEF1AE'>  }</span><span style=''>
+</span>33 <span style=''>  def archiveFiles(path: Path): ZIO[ExtractLoad, Throwable, ZStream[Any, Throwable, Unit]] =
+</span>34 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.archiveFiles(path))</span><span style=''>
+</span>35 <span style=''>
+</span>36 <span style=''>  def tables(inputStream: InputStream): ZIO[ExtractLoad, Throwable, Stream[Throwable, Table]] =
+</span>37 <span style=''>    </span><span style='background: #F0ADAD'>ZIO.accessM(_.get.tables(inputStream))</span><span style=''>
+</span>38 <span style=''>}
+</span></pre>
+          </div>
+          <div class="tab-pane" id="statementlist">
+            <table cellspacing="0" cellpadding="0" class="table statementlist">
+      <tr>
+        <th>Line</th>
+        <th>Stmt Id</th>
+        <th>Pos</th>
+        <th>Tree</th>
+        <th>Symbol</th>
+        <th>Code</th>
+      </tr><tr>
+        <td>
+          14
+        </td>
+        <td>
+          41
+        </td>
+        <td>
+          348
+          -
+          351
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.Predef.???
+        </td>
+        <td style="background: #F0ADAD">
+          scala.Predef.???
+        </td>
+      </tr><tr>
+        <td>
+          24
+        </td>
+        <td>
+          47
+        </td>
+        <td>
+          660
+          -
+          947
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          zio.ZLayer.succeed
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZLayer.succeed[datavault.extractload.ExtractLoad.Service]({
+  final class $anon extends AnyRef with datavault.extractload.ExtractLoad.Service {
+    def &lt;init&gt;(): &lt;$anon: datavault.extractload.ExtractLoad.Service&gt; = {
+      $anon.super.&lt;init&gt;();
+      ()
+    };
+    def archiveFiles(path: java.nio.file.Path): zio.ZIO[Any,Throwable,zio.stream.ZStream[Any,Throwable,Unit]] = zio.ZIO.succeed[zio.stream.ZStream[Any,Nothing,Unit]](zio.stream.`package`.Stream.apply[Unit](()));
+    def tables(inputStream: java.io.InputStream): zio.ZIO[Any,Throwable,zio.stream.Stream[Throwable,datavault.extractload.ExtractLoad.Table]] = zio.ZIO.succeed[zio.stream.ZStream[Any,Nothing,Nothing]](zio.stream.`package`.Stream.apply[Nothing]())
+  };
+  new $anon()
+})((izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[java.lang.Object], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0001\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001\u0001\u0004\u0000\u0001\u0090\u0002\u0001\u0002\u0003\u0090\u0002\u0001\u0000\u0001.datavault.extractload.ExtractLoad.&lt;refinement&gt;\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0002\u0003\u0090\u0002&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service]))
+        </td>
+      </tr><tr>
+        <td>
+          25
+        </td>
+        <td>
+          46
+        </td>
+        <td>
+          681
+          -
+          684
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.$anon.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new $anon()
+        </td>
+      </tr><tr>
+        <td>
+          27
+        </td>
+        <td>
+          43
+        </td>
+        <td>
+          791
+          -
+          814
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.succeed
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.succeed[zio.stream.ZStream[Any,Nothing,Unit]](zio.stream.`package`.Stream.apply[Unit](()))
+        </td>
+      </tr><tr>
+        <td>
+          27
+        </td>
+        <td>
+          42
+        </td>
+        <td>
+          803
+          -
+          813
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.stream.ZStream.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.stream.`package`.Stream.apply[Unit](())
+        </td>
+      </tr><tr>
+        <td>
+          30
+        </td>
+        <td>
+          44
+        </td>
+        <td>
+          928
+          -
+          936
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.stream.ZStream.apply
+        </td>
+        <td style="background: #F0ADAD">
+          zio.stream.`package`.Stream.apply[Nothing]()
+        </td>
+      </tr><tr>
+        <td>
+          30
+        </td>
+        <td>
+          45
+        </td>
+        <td>
+          916
+          -
+          937
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.succeed
+        </td>
+        <td style="background: #F0ADAD">
+          zio.ZIO.succeed[zio.stream.ZStream[Any,Nothing,Nothing]](zio.stream.`package`.Stream.apply[Nothing]())
+        </td>
+      </tr><tr>
+        <td>
+          34
+        </td>
+        <td>
+          49
+        </td>
+        <td>
+          1045
+          -
+          1082
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.accessM[datavault.extractload.ExtractLoad].apply[Throwable, zio.stream.ZStream[Any,Throwable,Unit]](((x$1: datavault.extractload.ExtractLoad) =&gt; zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad](x$1).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).archiveFiles(path)))
+        </td>
+      </tr><tr>
+        <td>
+          34
+        </td>
+        <td>
+          48
+        </td>
+        <td>
+          1057
+          -
+          1081
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.Service.archiveFiles
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad](x$1).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).archiveFiles(path)
+        </td>
+      </tr><tr>
+        <td>
+          37
+        </td>
+        <td>
+          50
+        </td>
+        <td>
+          1196
+          -
+          1221
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.Service.tables
+        </td>
+        <td style="background: #F0ADAD">
+          zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad](x$2).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).tables(inputStream)
+        </td>
+      </tr><tr>
+        <td>
+          37
+        </td>
+        <td>
+          51
+        </td>
+        <td>
+          1184
+          -
+          1222
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #F0ADAD">
+          zio.ZIO.accessM[datavault.extractload.ExtractLoad].apply[Throwable, zio.stream.Stream[Throwable,datavault.extractload.ExtractLoad.Table]](((x$2: datavault.extractload.ExtractLoad) =&gt; zio.this.Has.HasSyntax[datavault.extractload.ExtractLoad](x$2).get[datavault.extractload.ExtractLoad.Service](scala.Predef.$conforms[datavault.extractload.ExtractLoad], (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad.Service](classOf[datavault.extractload.ExtractLoad$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1509367356: Int), (&quot;\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad.Service])).tables(inputStream)))
+        </td>
+      </tr>
+    </table>
+          </div>
+        </div>
+      </body>
+    </html>

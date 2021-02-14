@@ -1,9 +1,7 @@
 package datavault.service
 
 import zio._
-import zio.macros.accessible
 
-@accessible
 object Repository {
 
   // Service definition

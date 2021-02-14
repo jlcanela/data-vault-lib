@@ -1,0 +1,384 @@
+<html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title id="title">
+          datavault/command/Command.scala.html
+        </title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/css/theme.default.min.css" type="text/css"/><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/js/jquery.tablesorter.min.js"></script><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" type="text/css"/><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script><script type="text/javascript">
+        $(document).ready(function() {$(".tablesorter").tablesorter();});
+      </script>
+        <style>
+          table.codegrid { font-family: monospace; font-size: 12px; width: auto!important; }table.statementlist { width: auto!important; font-size: 13px; } table.codegrid td { padding: 0!important; border: 0!important } table td.linenumber { width: 40px!important; } 
+        </style>
+      </head>
+      <body style="font-family: monospace;">
+        <ul class="nav nav-tabs">
+          <li>
+            <a href="#codegrid" data-toggle="tab">Codegrid</a>
+          </li>
+          <li>
+            <a href="#statementlist" data-toggle="tab">Statement List</a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active" id="codegrid">
+            <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault.command
+</span>2 <span style=''>
+</span>3 <span style=''>import zio._
+</span>4 <span style=''>import zio.console._
+</span>5 <span style=''>
+</span>6 <span style=''>import datavault.cli.ExtractCommandParam
+</span>7 <span style=''>import datavault.extractload.ExtractLoad
+</span>8 <span style=''>
+</span>9 <span style=''>object Command {
+</span>10 <span style=''>
+</span>11 <span style=''>  // Service definition
+</span>12 <span style=''>  trait Service {
+</span>13 <span style=''>      def showMessage(message: String): ZIO[Console, Nothing, Int]
+</span>14 <span style=''>      def extractFiles(ecp: ExtractCommandParam): ZIO[ExtractLoad with Console, Throwable, Int]
+</span>15 <span style=''>  }
+</span>16 <span style=''>
+</span>17 <span style=''>  // Module implementation
+</span>18 <span style=''>  val live: ZLayer[Any, Nothing, Command] = </span><span style='background: #AEF1AE'>ZLayer.succeed {
+</span>19 <span style=''></span><span style='background: #AEF1AE'>    new Service {
+</span>20 <span style=''></span><span style='background: #AEF1AE'>      def showMessage(message: String): ZIO[Console, Nothing, Int] = </span><span style='background: #F0ADAD'>for {
+</span>21 <span style=''></span><span style='background: #F0ADAD'>        _ &lt;- putStrLn(message)
+</span>22 <span style=''></span><span style='background: #F0ADAD'>      } yield 1</span><span style='background: #AEF1AE'>
+</span>23 <span style=''></span><span style='background: #AEF1AE'>
+</span>24 <span style=''></span><span style='background: #AEF1AE'>      def extractFiles(ecp: ExtractCommandParam): ZIO[ExtractLoad with Console, Throwable, Int] = for {
+</span>25 <span style=''></span><span style='background: #AEF1AE'>        input &lt;- ecp.inputPath
+</span>26 <span style=''></span><span style='background: #AEF1AE'>        output &lt;- ecp.outputPath
+</span>27 <span style=''></span><span style='background: #AEF1AE'>        _ &lt;- putStrLn(s&quot;extract $input to $output&quot;)
+</span>28 <span style=''></span><span style='background: #AEF1AE'>        _ &lt;- ExtractLoad.archiveFiles(input)
+</span>29 <span style=''></span><span style='background: #AEF1AE'>      } yield 0
+</span>30 <span style=''></span><span style='background: #AEF1AE'>      
+</span>31 <span style=''></span><span style='background: #AEF1AE'>    }
+</span>32 <span style=''></span><span style='background: #AEF1AE'>  }</span><span style=''>
+</span>33 <span style=''>
+</span>34 <span style=''>  def showMessage(message: String): ZIO[Command with Console, Nothing, Int] =
+</span>35 <span style=''>    </span><span style='background: #F0ADAD'>ZIO.accessM(_.get.showMessage(message))</span><span style=''>
+</span>36 <span style=''>
+</span>37 <span style=''>  def extractFiles(ecp: ExtractCommandParam): ZIO[Command with ExtractLoad with Console, Throwable, Int] = 
+</span>38 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.extractFiles(ecp))</span><span style=''>
+</span>39 <span style=''>}
+</span></pre>
+          </div>
+          <div class="tab-pane" id="statementlist">
+            <table cellspacing="0" cellpadding="0" class="table statementlist">
+      <tr>
+        <th>Line</th>
+        <th>Stmt Id</th>
+        <th>Pos</th>
+        <th>Tree</th>
+        <th>Symbol</th>
+        <th>Code</th>
+      </tr><tr>
+        <td>
+          18
+        </td>
+        <td>
+          36
+        </td>
+        <td>
+          444
+          -
+          899
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          zio.ZLayer.succeed
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZLayer.succeed[datavault.command.Command.Service]({
+  final class $anon extends AnyRef with datavault.command.Command.Service {
+    def &lt;init&gt;(): &lt;$anon: datavault.command.Command.Service&gt; = {
+      $anon.super.&lt;init&gt;();
+      ()
+    };
+    def showMessage(message: String): zio.ZIO[zio.console.Console,Nothing,Int] = zio.console.`package`.putStrLn(message).map[Int](((_: Unit) =&gt; 1));
+    def extractFiles(ecp: datavault.cli.ExtractCommandParam): zio.ZIO[datavault.extractload.ExtractLoad with zio.console.Console,Throwable,Int] = ecp.inputPath.flatMap[zio.console.Console with datavault.extractload.ExtractLoad, Throwable, Int](((input: java.nio.file.Path) =&gt; ecp.outputPath.flatMap[zio.console.Console with datavault.extractload.ExtractLoad, Throwable, Int](((output: java.nio.file.Path) =&gt; zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;extract &quot;, &quot; to &quot;, &quot;&quot;).s(input, output)).flatMap[zio.console.Console with datavault.extractload.ExtractLoad, Throwable, Int](((_: Unit) =&gt; datavault.extractload.ExtractLoad.archiveFiles(input).map[Int](((_: zio.stream.ZStream[Any,Throwable,Unit]) =&gt; 0))))))))
+  };
+  new $anon()
+})((izumi.reflect.Tag.apply[datavault.command.Command.Service](classOf[java.lang.Object], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1206591399: Int), (&quot;\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001&quot;: String), (&quot;\u0000\u0001\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001\u0001\u0004\u0000\u0001\u0090\u0002\u0001\u0002\u0003\u0090\u0002\u0001\u0000\u0001&amp;datavault.command.Command.&lt;refinement&gt;\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0002\u0003\u0090\u0002&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.command.Command.Service]))
+        </td>
+      </tr><tr>
+        <td>
+          19
+        </td>
+        <td>
+          35
+        </td>
+        <td>
+          465
+          -
+          468
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.command.Command.$anon.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new $anon()
+        </td>
+      </tr><tr>
+        <td>
+          21
+        </td>
+        <td>
+          28
+        </td>
+        <td>
+          548
+          -
+          600
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #F0ADAD">
+          zio.console.`package`.putStrLn(message).map[Int](((_: Unit) =&gt; 1))
+        </td>
+      </tr><tr>
+        <td>
+          22
+        </td>
+        <td>
+          27
+        </td>
+        <td>
+          599
+          -
+          600
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #F0ADAD">
+          1
+        </td>
+      </tr><tr>
+        <td>
+          25
+        </td>
+        <td>
+          34
+        </td>
+        <td>
+          700
+          -
+          882
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          ecp.inputPath.flatMap[zio.console.Console with datavault.extractload.ExtractLoad, Throwable, Int](((input: java.nio.file.Path) =&gt; ecp.outputPath.flatMap[zio.console.Console with datavault.extractload.ExtractLoad, Throwable, Int](((output: java.nio.file.Path) =&gt; zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;extract &quot;, &quot; to &quot;, &quot;&quot;).s(input, output)).flatMap[zio.console.Console with datavault.extractload.ExtractLoad, Throwable, Int](((_: Unit) =&gt; datavault.extractload.ExtractLoad.archiveFiles(input).map[Int](((_: zio.stream.ZStream[Any,Throwable,Unit]) =&gt; 0))))))))
+        </td>
+      </tr><tr>
+        <td>
+          26
+        </td>
+        <td>
+          33
+        </td>
+        <td>
+          745
+          -
+          882
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          ecp.outputPath.flatMap[zio.console.Console with datavault.extractload.ExtractLoad, Throwable, Int](((output: java.nio.file.Path) =&gt; zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;extract &quot;, &quot; to &quot;, &quot;&quot;).s(input, output)).flatMap[zio.console.Console with datavault.extractload.ExtractLoad, Throwable, Int](((_: Unit) =&gt; datavault.extractload.ExtractLoad.archiveFiles(input).map[Int](((_: zio.stream.ZStream[Any,Throwable,Unit]) =&gt; 0))))))
+        </td>
+      </tr><tr>
+        <td>
+          27
+        </td>
+        <td>
+          32
+        </td>
+        <td>
+          778
+          -
+          882
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.flatMap
+        </td>
+        <td style="background: #AEF1AE">
+          zio.console.`package`.putStrLn(scala.StringContext.apply(&quot;extract &quot;, &quot; to &quot;, &quot;&quot;).s(input, output)).flatMap[zio.console.Console with datavault.extractload.ExtractLoad, Throwable, Int](((_: Unit) =&gt; datavault.extractload.ExtractLoad.archiveFiles(input).map[Int](((_: zio.stream.ZStream[Any,Throwable,Unit]) =&gt; 0))))
+        </td>
+      </tr><tr>
+        <td>
+          27
+        </td>
+        <td>
+          29
+        </td>
+        <td>
+          792
+          -
+          820
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.StringContext.s
+        </td>
+        <td style="background: #AEF1AE">
+          scala.StringContext.apply(&quot;extract &quot;, &quot; to &quot;, &quot;&quot;).s(input, output)
+        </td>
+      </tr><tr>
+        <td>
+          28
+        </td>
+        <td>
+          31
+        </td>
+        <td>
+          830
+          -
+          882
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          datavault.extractload.ExtractLoad.archiveFiles(input).map[Int](((_: zio.stream.ZStream[Any,Throwable,Unit]) =&gt; 0))
+        </td>
+      </tr><tr>
+        <td>
+          29
+        </td>
+        <td>
+          30
+        </td>
+        <td>
+          881
+          -
+          882
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          0
+        </td>
+      </tr><tr>
+        <td>
+          35
+        </td>
+        <td>
+          38
+        </td>
+        <td>
+          983
+          -
+          1022
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #F0ADAD">
+          zio.ZIO.accessM[datavault.command.Command with zio.console.Console].apply[Nothing, Int](((x$1: datavault.command.Command with zio.console.Console) =&gt; zio.this.Has.HasSyntax[datavault.command.Command with zio.console.Console](x$1).get[datavault.command.Command.Service](scala.Predef.$conforms[datavault.command.Command with zio.console.Console], (izumi.reflect.Tag.apply[datavault.command.Command.Service](classOf[datavault.command.Command$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1206591399: Int), (&quot;\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.command.Command.Service])).showMessage(message)))
+        </td>
+      </tr><tr>
+        <td>
+          35
+        </td>
+        <td>
+          37
+        </td>
+        <td>
+          995
+          -
+          1021
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.command.Command.Service.showMessage
+        </td>
+        <td style="background: #F0ADAD">
+          zio.this.Has.HasSyntax[datavault.command.Command with zio.console.Console](x$1).get[datavault.command.Command.Service](scala.Predef.$conforms[datavault.command.Command with zio.console.Console], (izumi.reflect.Tag.apply[datavault.command.Command.Service](classOf[datavault.command.Command$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1206591399: Int), (&quot;\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.command.Command.Service])).showMessage(message)
+        </td>
+      </tr><tr>
+        <td>
+          38
+        </td>
+        <td>
+          40
+        </td>
+        <td>
+          1136
+          -
+          1172
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.accessM[datavault.command.Command with datavault.extractload.ExtractLoad with zio.console.Console].apply[Throwable, Int](((x$2: datavault.command.Command with datavault.extractload.ExtractLoad with zio.console.Console) =&gt; zio.this.Has.HasSyntax[datavault.command.Command with datavault.extractload.ExtractLoad with zio.console.Console](x$2).get[datavault.command.Command.Service](scala.Predef.$conforms[datavault.command.Command with datavault.extractload.ExtractLoad with zio.console.Console], (izumi.reflect.Tag.apply[datavault.command.Command.Service](classOf[datavault.command.Command$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1206591399: Int), (&quot;\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.command.Command.Service])).extractFiles(ecp)))
+        </td>
+      </tr><tr>
+        <td>
+          38
+        </td>
+        <td>
+          39
+        </td>
+        <td>
+          1148
+          -
+          1171
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.command.Command.Service.extractFiles
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.Has.HasSyntax[datavault.command.Command with datavault.extractload.ExtractLoad with zio.console.Console](x$2).get[datavault.command.Command.Service](scala.Predef.$conforms[datavault.command.Command with datavault.extractload.ExtractLoad with zio.console.Console], (izumi.reflect.Tag.apply[datavault.command.Command.Service](classOf[datavault.command.Command$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1206591399: Int), (&quot;\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.command.Command.Service])).extractFiles(ecp)
+        </td>
+      </tr>
+    </table>
+          </div>
+        </div>
+      </body>
+    </html>
