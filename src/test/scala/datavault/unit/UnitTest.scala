@@ -129,7 +129,11 @@ object UnitTest extends DefaultRunnableSpec {
     },
     testM("table write to disk") {
       val table =
-        Table(Array("col1", "col2"), Stream(Array("r1col1", "r1col2"), Array("r2col1", "r2col2")))
+        Table(
+          "dummy_table",
+          Array("col1", "col2"),
+          Stream(Array("r1col1", "r1col2"), Array("r2col1", "r2col2"))
+        )
       assertM(ExtractLoad.writeTable(table, Paths.get("out/export/table.csv")).provideLayer(deps))(
         equalTo(())
       )

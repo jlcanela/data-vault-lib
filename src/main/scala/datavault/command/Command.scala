@@ -2,9 +2,11 @@ package datavault.command
 
 import zio._
 import zio.console._
+import zio.clock.Clock
 
-import datavault.cli.{ExtractCommandParam, UnzipCommandParam}
+import datavault.cli.{ExtractCommandParam, LoadHubCommandParam, UnzipCommandParam}
 import datavault.extractload.ExtractLoad
+import datavault.transform.Datavault
 
 object Command {
 
@@ -16,6 +18,9 @@ object Command {
     def showMessage(message: String): ZIO[Console, Nothing, Int]
     def unzipFiles(ucp: UnzipCommandParam): ZIO[ExtractLoad with Console, Throwable, Int]
     def extractFiles(ucp: ExtractCommandParam): ZIO[ExtractLoad with Console, Throwable, Int]
+    def loadHubs(
+        hcp: LoadHubCommandParam
+    ): ZIO[Datavault with ExtractLoad with Console with Clock, Throwable, Int]
   }
 
   // Module implementation
@@ -40,6 +45,17 @@ object Command {
           _      <- ExtractLoad.extractFiles(input, output)
         } yield SUCCESS
 
+      def loadHubs(
+          hcp: LoadHubCommandParam
+      ): ZIO[Datavault with ExtractLoad with Console with Clock, Throwable, Int] = for {
+        input     <- hcp.inputPath
+        output    <- hcp.outputPath
+        filter    <- Datavault.filterHub
+        transform <- Datavault.transformHub
+        _         <- putStrLn(s"load hubs from $input to $output")
+        _         <- ExtractLoad.processFiles(input, output, filter, transform)
+      } yield SUCCESS
+
     }
   }
 
@@ -55,4 +71,9 @@ object Command {
       ecp: ExtractCommandParam
   ): ZIO[Command with ExtractLoad with Console, Throwable, Int] =
     ZIO.accessM(_.get.extractFiles(ecp))
+
+  def loadHubs(
+      hcp: LoadHubCommandParam
+  ): ZIO[Command with Datavault with ExtractLoad with Console with Clock, Throwable, Int] =
+    ZIO.accessM(_.get.loadHubs(hcp))
 }

@@ -27,16 +27,40 @@
 </span>3 <span style=''>import zio._
 </span>4 <span style=''>import java.nio.file.Paths
 </span>5 <span style=''>
-</span>6 <span style=''>sealed trait CommandParam
-</span>7 <span style=''>case class ErrorCommandParam(message: String) extends CommandParam
-</span>8 <span style=''>case class ExtractCommandParam(input: String, output: String) extends CommandParam {
-</span>9 <span style=''>    def inputPath = </span><span style='background: #AEF1AE'>ZIO.succeed(Paths.get(input))</span><span style=''>
-</span>10 <span style=''>    def outputPath = </span><span style='background: #AEF1AE'>ZIO.succeed(Paths.get(output))</span><span style=''>
-</span>11 <span style=''>}
-</span>12 <span style=''>
-</span>13 <span style=''>object Cli {
-</span>14 <span style=''>    def parse(args: Array[String]): CommandParam = </span><span style='background: #AEF1AE'>ExtractCommandParam(&quot;data/archive.zip&quot;, &quot;out/extract&quot;)</span><span style=''>
-</span>15 <span style=''>}
+</span>6 <span style=''>trait CreatePath {
+</span>7 <span style=''>
+</span>8 <span style=''>  def input: String
+</span>9 <span style=''>  def output: String
+</span>10 <span style=''>
+</span>11 <span style=''>  def inputPath = </span><span style='background: #AEF1AE'>ZIO
+</span>12 <span style=''></span><span style='background: #AEF1AE'>    .fromOption(Option(Paths.get(input)))
+</span>13 <span style=''></span><span style='background: #AEF1AE'>    .mapError(_ =&gt; </span><span style='background: #F0ADAD'>new IllegalArgumentException(&quot;invalid input&quot;)</span><span style='background: #AEF1AE'>)</span><span style=''>
+</span>14 <span style=''>  def outputPath = </span><span style='background: #AEF1AE'>ZIO
+</span>15 <span style=''></span><span style='background: #AEF1AE'>    .fromOption(Option(Paths.get(output)))
+</span>16 <span style=''></span><span style='background: #AEF1AE'>    .mapError(_ =&gt; </span><span style='background: #F0ADAD'>new IllegalArgumentException(&quot;invalid output&quot;)</span><span style='background: #AEF1AE'>)</span><span style=''>
+</span>17 <span style=''>}
+</span>18 <span style=''>
+</span>19 <span style=''>sealed trait CommandParam
+</span>20 <span style=''>final case class ErrorCommandParam(message: String) extends CommandParam
+</span>21 <span style=''>final case class ExtractCommandParam(input: String, output: String)
+</span>22 <span style=''>    extends CommandParam
+</span>23 <span style=''>    with CreatePath
+</span>24 <span style=''>final case class UnzipCommandParam(input: String, output: String)
+</span>25 <span style=''>    extends CommandParam
+</span>26 <span style=''>    with CreatePath
+</span>27 <span style=''>final case class LoadHubCommandParam(input: String, output: String)
+</span>28 <span style=''>    extends CommandParam
+</span>29 <span style=''>    with CreatePath
+</span>30 <span style=''>
+</span>31 <span style=''>object Cli {
+</span>32 <span style=''>  def parse(args: Array[String]): CommandParam = </span><span style='background: #AEF1AE'>args.toList</span><span style=''> match {
+</span>33 <span style=''>    case &quot;extract-files&quot; :: _ =&gt; </span><span style='background: #AEF1AE'>ExtractCommandParam(&quot;data/archive.zip&quot;, &quot;out/extract&quot;)</span><span style=''>
+</span>34 <span style=''>    case &quot;unzip-files&quot; :: _   =&gt; </span><span style='background: #AEF1AE'>UnzipCommandParam(&quot;data/archive.zip&quot;, &quot;out/unzip&quot;)</span><span style=''>
+</span>35 <span style=''>    case &quot;load-hubs&quot; :: _     =&gt; </span><span style='background: #AEF1AE'>LoadHubCommandParam(&quot;data/archive.zip&quot;, &quot;out/hubs&quot;)</span><span style=''>
+</span>36 <span style=''>    case List()               =&gt; </span><span style='background: #AEF1AE'>ErrorCommandParam(&quot;no parameter&quot;)</span><span style=''>
+</span>37 <span style=''>    case _                    =&gt; </span><span style='background: #F0ADAD'>ErrorCommandParam(&quot;unknown parameter&quot;)</span><span style=''>
+</span>38 <span style=''>  }
+</span>39 <span style=''>}
 </span></pre>
           </div>
           <div class="tab-pane" id="statementlist">
@@ -50,57 +74,15 @@
         <th>Code</th>
       </tr><tr>
         <td>
-          9
+          12
         </td>
         <td>
-          20
+          29
         </td>
         <td>
-          284
+          171
           -
-          289
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          datavault.cli.ExtractCommandParam.input
-        </td>
-        <td style="background: #AEF1AE">
-          ExtractCommandParam.this.input
-        </td>
-      </tr><tr>
-        <td>
-          9
-        </td>
-        <td>
-          22
-        </td>
-        <td>
-          262
-          -
-          291
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          zio.ZIO.succeed
-        </td>
-        <td style="background: #AEF1AE">
-          zio.ZIO.succeed[java.nio.file.Path](java.nio.file.Paths.get(ExtractCommandParam.this.input))
-        </td>
-      </tr><tr>
-        <td>
-          9
-        </td>
-        <td>
-          21
-        </td>
-        <td>
-          274
-          -
-          290
+          187
         </td>
         <td>
           Apply
@@ -109,82 +91,271 @@
           java.nio.file.Paths.get
         </td>
         <td style="background: #AEF1AE">
-          java.nio.file.Paths.get(ExtractCommandParam.this.input)
+          java.nio.file.Paths.get(CreatePath.this.input)
         </td>
       </tr><tr>
         <td>
-          10
+          12
         </td>
         <td>
-          23
+          28
+        </td>
+        <td>
+          181
+          -
+          186
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.cli.CreatePath.input
+        </td>
+        <td style="background: #AEF1AE">
+          CreatePath.this.input
+        </td>
+      </tr><tr>
+        <td>
+          12
+        </td>
+        <td>
+          30
+        </td>
+        <td>
+          164
+          -
+          188
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Option.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Option.apply[java.nio.file.Path](java.nio.file.Paths.get(CreatePath.this.input))
+        </td>
+      </tr><tr>
+        <td>
+          13
+        </td>
+        <td>
+          32
+        </td>
+        <td>
+          203
+          -
+          203
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          zio.CanFail.canFail
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.CanFail.canFail[Any]
+        </td>
+      </tr><tr>
+        <td>
+          13
+        </td>
+        <td>
+          31
+        </td>
+        <td>
+          209
+          -
+          254
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.lang.IllegalArgumentException.&lt;init&gt;
+        </td>
+        <td style="background: #F0ADAD">
+          new scala.`package`.IllegalArgumentException(&quot;invalid input&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          13
+        </td>
+        <td>
+          33
+        </td>
+        <td>
+          144
+          -
+          255
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          zio.ZIO.mapError
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.fromOption[java.nio.file.Path](scala.Option.apply[java.nio.file.Path](java.nio.file.Paths.get(CreatePath.this.input))).mapError[IllegalArgumentException](((x$1: Option[Nothing]) =&gt; new scala.`package`.IllegalArgumentException(&quot;invalid input&quot;)))(zio.this.CanFail.canFail[Any])
+        </td>
+      </tr><tr>
+        <td>
+          15
+        </td>
+        <td>
+          35
+        </td>
+        <td>
+          302
+          -
+          319
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.nio.file.Paths.get
+        </td>
+        <td style="background: #AEF1AE">
+          java.nio.file.Paths.get(CreatePath.this.output)
+        </td>
+      </tr><tr>
+        <td>
+          15
+        </td>
+        <td>
+          34
+        </td>
+        <td>
+          312
+          -
+          318
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.cli.CreatePath.output
+        </td>
+        <td style="background: #AEF1AE">
+          CreatePath.this.output
+        </td>
+      </tr><tr>
+        <td>
+          15
+        </td>
+        <td>
+          36
+        </td>
+        <td>
+          295
+          -
+          320
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Option.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Option.apply[java.nio.file.Path](java.nio.file.Paths.get(CreatePath.this.output))
+        </td>
+      </tr><tr>
+        <td>
+          16
+        </td>
+        <td>
+          38
         </td>
         <td>
           335
           -
+          335
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          zio.CanFail.canFail
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.CanFail.canFail[Any]
+        </td>
+      </tr><tr>
+        <td>
+          16
+        </td>
+        <td>
+          37
+        </td>
+        <td>
           341
+          -
+          387
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.lang.IllegalArgumentException.&lt;init&gt;
+        </td>
+        <td style="background: #F0ADAD">
+          new scala.`package`.IllegalArgumentException(&quot;invalid output&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          16
+        </td>
+        <td>
+          39
+        </td>
+        <td>
+          275
+          -
+          388
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          zio.ZIO.mapError
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.fromOption[java.nio.file.Path](scala.Option.apply[java.nio.file.Path](java.nio.file.Paths.get(CreatePath.this.output))).mapError[IllegalArgumentException](((x$2: Option[Nothing]) =&gt; new scala.`package`.IllegalArgumentException(&quot;invalid output&quot;)))(zio.this.CanFail.canFail[Any])
+        </td>
+      </tr><tr>
+        <td>
+          32
+        </td>
+        <td>
+          40
+        </td>
+        <td>
+          891
+          -
+          902
         </td>
         <td>
           Select
         </td>
         <td>
-          datavault.cli.ExtractCommandParam.output
+          scala.collection.IndexedSeqOptimized.toList
         </td>
         <td style="background: #AEF1AE">
-          ExtractCommandParam.this.output
+          scala.Predef.refArrayOps[String](args).toList
         </td>
       </tr><tr>
         <td>
-          10
+          33
         </td>
         <td>
-          25
+          41
         </td>
         <td>
-          313
+          944
           -
-          343
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          zio.ZIO.succeed
-        </td>
-        <td style="background: #AEF1AE">
-          zio.ZIO.succeed[java.nio.file.Path](java.nio.file.Paths.get(ExtractCommandParam.this.output))
-        </td>
-      </tr><tr>
-        <td>
-          10
-        </td>
-        <td>
-          24
-        </td>
-        <td>
-          325
-          -
-          342
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          java.nio.file.Paths.get
-        </td>
-        <td style="background: #AEF1AE">
-          java.nio.file.Paths.get(ExtractCommandParam.this.output)
-        </td>
-      </tr><tr>
-        <td>
-          14
-        </td>
-        <td>
-          26
-        </td>
-        <td>
-          411
-          -
-          465
+          998
         </td>
         <td>
           Apply
@@ -194,6 +365,90 @@
         </td>
         <td style="background: #AEF1AE">
           ExtractCommandParam.apply(&quot;data/archive.zip&quot;, &quot;out/extract&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          34
+        </td>
+        <td>
+          42
+        </td>
+        <td>
+          1032
+          -
+          1082
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.cli.UnzipCommandParam.apply
+        </td>
+        <td style="background: #AEF1AE">
+          UnzipCommandParam.apply(&quot;data/archive.zip&quot;, &quot;out/unzip&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          35
+        </td>
+        <td>
+          43
+        </td>
+        <td>
+          1116
+          -
+          1167
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.cli.LoadHubCommandParam.apply
+        </td>
+        <td style="background: #AEF1AE">
+          LoadHubCommandParam.apply(&quot;data/archive.zip&quot;, &quot;out/hubs&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          36
+        </td>
+        <td>
+          44
+        </td>
+        <td>
+          1201
+          -
+          1234
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.cli.ErrorCommandParam.apply
+        </td>
+        <td style="background: #AEF1AE">
+          ErrorCommandParam.apply(&quot;no parameter&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          37
+        </td>
+        <td>
+          45
+        </td>
+        <td>
+          1268
+          -
+          1306
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.cli.ErrorCommandParam.apply
+        </td>
+        <td style="background: #F0ADAD">
+          ErrorCommandParam.apply(&quot;unknown parameter&quot;)
         </td>
       </tr>
     </table>

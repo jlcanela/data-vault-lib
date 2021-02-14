@@ -25,29 +25,34 @@
             <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault
 </span>2 <span style=''>
 </span>3 <span style=''>import zio.console.Console
-</span>4 <span style=''>
-</span>5 <span style=''>import cli.{Cli, ErrorCommandParam, ExtractCommandParam}
+</span>4 <span style=''>import zio.clock.Clock
+</span>5 <span style=''>import cli.{Cli, ErrorCommandParam, ExtractCommandParam, UnzipCommandParam}
 </span>6 <span style=''>import command.Command
 </span>7 <span style=''>import extractload.ExtractLoad
-</span>8 <span style=''>
-</span>9 <span style=''>object Datavault {
-</span>10 <span style=''>    
-</span>11 <span style=''>    def deps = </span><span style='background: #AEF1AE'>Console.live &gt;+&gt; ExtractLoad.live &gt;+&gt; Command.live</span><span style=''>
+</span>8 <span style=''>import datavault.cli.LoadHubCommandParam
+</span>9 <span style=''>import datavault.transform.{Datavault =&gt; DV}
+</span>10 <span style=''>
+</span>11 <span style=''>object Datavault {
 </span>12 <span style=''>
-</span>13 <span style=''>    def cmd(args: Array[String]) = </span><span style='background: #AEF1AE'>Cli.parse(args)</span><span style=''> match {
-</span>14 <span style=''>        case ErrorCommandParam(message) =&gt; </span><span style='background: #F0ADAD'>Command.showMessage(message)</span><span style=''>
-</span>15 <span style=''>        case ecp: ExtractCommandParam =&gt; </span><span style='background: #AEF1AE'>Command.extractFiles(ecp)</span><span style=''>
-</span>16 <span style=''>    }
-</span>17 <span style=''>
-</span>18 <span style=''>    def run(args: Array[String]) = {
-</span>19 <span style=''>        val runtime = zio.Runtime.default
-</span>20 <span style=''>        val result = </span><span style='background: #F0ADAD'>runtime.unsafeRun(cmd(args).provideLayer(deps))</span><span style=''>
-</span>21 <span style=''>        if (</span><span style='background: #F0ADAD'>result != 0</span><span style=''>) </span><span style='background: #F0ADAD'>System.exit(result)</span><span style=''>
-</span>22 <span style=''>    }
-</span>23 <span style=''>
-</span>24 <span style=''>    def main(args: Array[String]) = </span><span style='background: #F0ADAD'>run(args)</span><span style=''>
-</span>25 <span style=''>
-</span>26 <span style=''>}
+</span>13 <span style=''>  def deps = </span><span style='background: #AEF1AE'>Clock.live &gt;+&gt; Console.live &gt;+&gt; ExtractLoad.live &gt;+&gt; DV.live &gt;+&gt; Command.live</span><span style=''>
+</span>14 <span style=''>
+</span>15 <span style=''>  def cmd(args: Array[String]) = </span><span style='background: #AEF1AE'>Cli.parse(args)</span><span style=''> match {
+</span>16 <span style=''>    case ErrorCommandParam(message) =&gt; </span><span style='background: #AEF1AE'>Command.showMessage(message)</span><span style=''>
+</span>17 <span style=''>    case ucp: UnzipCommandParam     =&gt; </span><span style='background: #AEF1AE'>Command.unzipFiles(ucp)</span><span style=''>
+</span>18 <span style=''>    case ecp: ExtractCommandParam   =&gt; </span><span style='background: #AEF1AE'>Command.extractFiles(ecp)</span><span style=''>
+</span>19 <span style=''>    case hcp: LoadHubCommandParam   =&gt; </span><span style='background: #AEF1AE'>Command.loadHubs(hcp)</span><span style=''>
+</span>20 <span style=''>    case _                          =&gt; </span><span style='background: #F0ADAD'>Command.showMessage(&quot;unknown command&quot;)</span><span style=''>
+</span>21 <span style=''>  }
+</span>22 <span style=''>
+</span>23 <span style=''>  def run(args: Array[String]) = {
+</span>24 <span style=''>    val runtime = zio.Runtime.default
+</span>25 <span style=''>    val result  = </span><span style='background: #AEF1AE'>runtime.unsafeRun(cmd(args).provideLayer(deps))</span><span style=''>
+</span>26 <span style=''>    if (</span><span style='background: #AEF1AE'>result &gt; Command.NO_COMMAND</span><span style=''>) </span><span style='background: #F0ADAD'>System.exit(result)</span><span style=''>
+</span>27 <span style=''>  }
+</span>28 <span style=''>
+</span>29 <span style=''>  def main(args: Array[String]) = </span><span style='background: #AEF1AE'>run(args)</span><span style=''>
+</span>30 <span style=''>
+</span>31 <span style=''>}
 </span></pre>
           </div>
           <div class="tab-pane" id="statementlist">
@@ -61,15 +66,36 @@
         <th>Code</th>
       </tr><tr>
         <td>
-          11
+          13
+        </td>
+        <td>
+          8
+        </td>
+        <td>
+          380
+          -
+          380
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          zio.Has.Union.HasHasUnion
+        </td>
+        <td style="background: #AEF1AE">
+          Has.this.Union.HasHasUnion[zio.clock.Clock with zio.console.Console with datavault.extractload.ExtractLoad with datavault.transform.Datavault, datavault.command.Command]((izumi.reflect.Tag.apply[datavault.command.Command](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((185724861: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.command.Command]))
+        </td>
+      </tr><tr>
+        <td>
+          13
         </td>
         <td>
           2
         </td>
         <td>
-          211
+          330
           -
-          211
+          330
         </td>
         <td>
           ApplyToImplicitArgs
@@ -78,40 +104,40 @@
           zio.Has.Union.HasHasUnion
         </td>
         <td style="background: #AEF1AE">
-          Has.this.Union.HasHasUnion[zio.console.Console, datavault.extractload.ExtractLoad]((izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((539511303: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad]))
+          Has.this.Union.HasHasUnion[zio.clock.Clock, zio.console.Console]((izumi.reflect.Tag.apply[zio.console.Console](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((145612161: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001\u001Bzio.console.Console.Service\u0001\u0002\u0003\u0000\u0000\u0013zio.console.Console\u0001\u0002\u0003\u0000\u0000\u0013zio.console.package\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0002\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001\u001Bzio.console.Console.Service\u0001\u0002\u0003\u0000\u0000\u0013zio.console.Console\u0001\u0002\u0003\u0000\u0000\u0013zio.console.package\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0004\u0000\u0001\u0090\u0003\u0001\u0002\u0003\u0000\u0000\u0090\u0004\u0001\u0002\u0003\u0090\u0002\u0002\u0004\u0000\u0001\u0090\u0006\u0001\u0001\u0004\u0000\u0001\u0090\u0007\u0001\u0001\u0002\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0006\u0001\u0001\u0000\u0001\u0090\u0007\u0001\u0001\u0000\u0001\u0090\u0003\u0001\u0002\u0003\u0000\u0000\u0090\u0004\u0001\u0002\u0003\u0090\u0002\u0002\u0090\u000E\u0090\u000F&quot;: String), (1: Int))): izumi.reflect.Tag[zio.console.Console]))
         </td>
       </tr><tr>
         <td>
-          11
+          13
         </td>
         <td>
           5
         </td>
         <td>
-          198
+          372
           -
-          248
+          379
         </td>
         <td>
-          ApplyToImplicitArgs
+          Select
         </td>
         <td>
-          zio.ZLayer.&gt;+&gt;
+          datavault.transform.Datavault.live
         </td>
         <td style="background: #AEF1AE">
-          zio.console.`package`.Console.live.&gt;+&gt;[Nothing, Any, zio.console.Console, datavault.extractload.ExtractLoad](extractload.ExtractLoad.live)(Has.this.Union.HasHasUnion[zio.console.Console, datavault.extractload.ExtractLoad]((izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((539511303: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad])), (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((539511303: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad])).&gt;+&gt;[Nothing, Any, zio.console.Console with datavault.extractload.ExtractLoad, datavault.command.Command](command.Command.live)(Has.this.Union.HasHasUnion[zio.console.Console with datavault.extractload.ExtractLoad, datavault.command.Command]((izumi.reflect.Tag.apply[datavault.command.Command](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((185724861: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.command.Command])), (izumi.reflect.Tag.apply[datavault.command.Command](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((185724861: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.command.Command]))
+          datavault.transform.Datavault.live
         </td>
       </tr><tr>
         <td>
-          11
+          13
         </td>
         <td>
           4
         </td>
         <td>
-          232
+          347
           -
-          232
+          347
         </td>
         <td>
           ApplyToImplicitArgs
@@ -120,40 +146,19 @@
           zio.Has.Union.HasHasUnion
         </td>
         <td style="background: #AEF1AE">
-          Has.this.Union.HasHasUnion[zio.console.Console with datavault.extractload.ExtractLoad, datavault.command.Command]((izumi.reflect.Tag.apply[datavault.command.Command](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((185724861: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.command.Command]))
+          Has.this.Union.HasHasUnion[zio.clock.Clock with zio.console.Console, datavault.extractload.ExtractLoad]((izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((539511303: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad]))
         </td>
       </tr><tr>
         <td>
-          11
+          13
         </td>
         <td>
-          1
+          7
         </td>
         <td>
-          215
+          384
           -
-          231
-        </td>
-        <td>
-          Select
-        </td>
-        <td>
-          datavault.extractload.ExtractLoad.live
-        </td>
-        <td style="background: #AEF1AE">
-          extractload.ExtractLoad.live
-        </td>
-      </tr><tr>
-        <td>
-          11
-        </td>
-        <td>
-          3
-        </td>
-        <td>
-          236
-          -
-          248
+          396
         </td>
         <td>
           Select
@@ -169,12 +174,96 @@
           13
         </td>
         <td>
+          1
+        </td>
+        <td>
+          334
+          -
+          346
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          zio.console.Console.live
+        </td>
+        <td style="background: #AEF1AE">
+          zio.console.`package`.Console.live
+        </td>
+      </tr><tr>
+        <td>
+          13
+        </td>
+        <td>
+          9
+        </td>
+        <td>
+          319
+          -
+          396
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          zio.ZLayer.&gt;+&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          zio.clock.`package`.Clock.live.&gt;+&gt;[Nothing, Any, zio.clock.Clock, zio.console.Console](zio.console.`package`.Console.live)(Has.this.Union.HasHasUnion[zio.clock.Clock, zio.console.Console]((izumi.reflect.Tag.apply[zio.console.Console](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((145612161: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001\u001Bzio.console.Console.Service\u0001\u0002\u0003\u0000\u0000\u0013zio.console.Console\u0001\u0002\u0003\u0000\u0000\u0013zio.console.package\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0002\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001\u001Bzio.console.Console.Service\u0001\u0002\u0003\u0000\u0000\u0013zio.console.Console\u0001\u0002\u0003\u0000\u0000\u0013zio.console.package\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0004\u0000\u0001\u0090\u0003\u0001\u0002\u0003\u0000\u0000\u0090\u0004\u0001\u0002\u0003\u0090\u0002\u0002\u0004\u0000\u0001\u0090\u0006\u0001\u0001\u0004\u0000\u0001\u0090\u0007\u0001\u0001\u0002\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0006\u0001\u0001\u0000\u0001\u0090\u0007\u0001\u0001\u0000\u0001\u0090\u0003\u0001\u0002\u0003\u0000\u0000\u0090\u0004\u0001\u0002\u0003\u0090\u0002\u0002\u0090\u000E\u0090\u000F&quot;: String), (1: Int))): izumi.reflect.Tag[zio.console.Console])), (izumi.reflect.Tag.apply[zio.console.Console](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((145612161: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001\u001Bzio.console.Console.Service\u0001\u0002\u0003\u0000\u0000\u0013zio.console.Console\u0001\u0002\u0003\u0000\u0000\u0013zio.console.package\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0002\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001\u001Bzio.console.Console.Service\u0001\u0002\u0003\u0000\u0000\u0013zio.console.Console\u0001\u0002\u0003\u0000\u0000\u0013zio.console.package\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0004\u0000\u0001\u0090\u0003\u0001\u0002\u0003\u0000\u0000\u0090\u0004\u0001\u0002\u0003\u0090\u0002\u0002\u0004\u0000\u0001\u0090\u0006\u0001\u0001\u0004\u0000\u0001\u0090\u0007\u0001\u0001\u0002\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0006\u0001\u0001\u0000\u0001\u0090\u0007\u0001\u0001\u0000\u0001\u0090\u0003\u0001\u0002\u0003\u0000\u0000\u0090\u0004\u0001\u0002\u0003\u0090\u0002\u0002\u0090\u000E\u0090\u000F&quot;: String), (1: Int))): izumi.reflect.Tag[zio.console.Console])).&gt;+&gt;[Nothing, Any, zio.clock.Clock with zio.console.Console, datavault.extractload.ExtractLoad](extractload.ExtractLoad.live)(Has.this.Union.HasHasUnion[zio.clock.Clock with zio.console.Console, datavault.extractload.ExtractLoad]((izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((539511303: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad])), (izumi.reflect.Tag.apply[datavault.extractload.ExtractLoad](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((539511303: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001)datavault.extractload.ExtractLoad.Service\u0001\u0002\u0003\u0000\u0000!datavault.extractload.ExtractLoad\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.extractload.ExtractLoad])).&gt;+&gt;[Nothing, zio.clock.Clock, zio.clock.Clock with zio.console.Console with datavault.extractload.ExtractLoad, datavault.transform.Datavault](datavault.transform.Datavault.live)(Has.this.Union.HasHasUnion[zio.clock.Clock with zio.console.Console with datavault.extractload.ExtractLoad, datavault.transform.Datavault]((izumi.reflect.Tag.apply[datavault.transform.Datavault](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1313745911: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001%datavault.transform.Datavault.Service\u0001\u0002\u0003\u0000\u0000\u001Ddatavault.transform.Datavault\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001%datavault.transform.Datavault.Service\u0001\u0002\u0003\u0000\u0000\u001Ddatavault.transform.Datavault\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.transform.Datavault])), (izumi.reflect.Tag.apply[datavault.transform.Datavault](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1313745911: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001%datavault.transform.Datavault.Service\u0001\u0002\u0003\u0000\u0000\u001Ddatavault.transform.Datavault\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001%datavault.transform.Datavault.Service\u0001\u0002\u0003\u0000\u0000\u001Ddatavault.transform.Datavault\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.transform.Datavault])).&gt;+&gt;[Nothing, Any, zio.clock.Clock with zio.console.Console with datavault.extractload.ExtractLoad with datavault.transform.Datavault, datavault.command.Command](command.Command.live)(Has.this.Union.HasHasUnion[zio.clock.Clock with zio.console.Console with datavault.extractload.ExtractLoad with datavault.transform.Datavault, datavault.command.Command]((izumi.reflect.Tag.apply[datavault.command.Command](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((185724861: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.command.Command])), (izumi.reflect.Tag.apply[datavault.command.Command](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((185724861: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001!datavault.command.Command.Service\u0001\u0002\u0003\u0000\u0000\u0019datavault.command.Command\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.command.Command]))
+        </td>
+      </tr><tr>
+        <td>
+          13
+        </td>
+        <td>
+          3
+        </td>
+        <td>
+          351
+          -
+          367
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.live
+        </td>
+        <td style="background: #AEF1AE">
+          extractload.ExtractLoad.live
+        </td>
+      </tr><tr>
+        <td>
+          13
+        </td>
+        <td>
           6
         </td>
         <td>
-          285
+          368
           -
-          300
+          368
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          zio.Has.Union.HasHasUnion
+        </td>
+        <td style="background: #AEF1AE">
+          Has.this.Union.HasHasUnion[zio.clock.Clock with zio.console.Console with datavault.extractload.ExtractLoad, datavault.transform.Datavault]((izumi.reflect.Tag.apply[datavault.transform.Datavault](classOf[zio.Has], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((1313745911: Int), (&quot;\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001%datavault.transform.Datavault.Service\u0001\u0002\u0003\u0000\u0000\u001Ddatavault.transform.Datavault\u0001\u0001\u0000\u0001&quot;: String), (&quot;\u0000\u0001\u0001\u0000\u0007zio.Has\u0001\u0000\u0004\u0000\u0001%datavault.transform.Datavault.Service\u0001\u0002\u0003\u0000\u0000\u001Ddatavault.transform.Datavault\u0001\u0001\u0000\u0001\u0002\u0004\u0000\u0001\u0014java.io.Serializable\u0001\u0001\u0004\u0000\u0001\u0012scala.Serializable\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0001\u0002\u0000\u0001\u0090\u0005\u0001\u0001\u0000\u0001\u0090\u0006\u0001\u0001&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.transform.Datavault]))
+        </td>
+      </tr><tr>
+        <td>
+          15
+        </td>
+        <td>
+          10
+        </td>
+        <td>
+          431
+          -
+          446
         </td>
         <td>
           Apply
@@ -187,15 +276,15 @@
         </td>
       </tr><tr>
         <td>
-          14
+          16
         </td>
         <td>
-          7
+          11
         </td>
         <td>
-          352
+          494
           -
-          380
+          522
         </td>
         <td>
           Apply
@@ -203,20 +292,41 @@
         <td>
           datavault.command.Command.showMessage
         </td>
-        <td style="background: #F0ADAD">
+        <td style="background: #AEF1AE">
           command.Command.showMessage(message)
         </td>
       </tr><tr>
         <td>
-          15
+          17
         </td>
         <td>
-          8
+          12
         </td>
         <td>
-          422
+          562
           -
-          447
+          585
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.command.Command.unzipFiles
+        </td>
+        <td style="background: #AEF1AE">
+          command.Command.unzipFiles(ucp)
+        </td>
+      </tr><tr>
+        <td>
+          18
+        </td>
+        <td>
+          13
+        </td>
+        <td>
+          625
+          -
+          650
         </td>
         <td>
           Apply
@@ -229,57 +339,57 @@
         </td>
       </tr><tr>
         <td>
-          20
+          19
         </td>
         <td>
-          11
+          14
         </td>
         <td>
-          595
+          690
           -
-          595
-        </td>
-        <td>
-          TypeApply
-        </td>
-        <td>
-          zio.NeedsEnv.needsEnv
-        </td>
-        <td style="background: #F0ADAD">
-          zio.this.NeedsEnv.needsEnv[Nothing]
-        </td>
-      </tr><tr>
-        <td>
-          20
-        </td>
-        <td>
-          13
-        </td>
-        <td>
-          555
-          -
-          602
+          711
         </td>
         <td>
           Apply
         </td>
         <td>
-          zio.Runtime.unsafeRun
+          datavault.command.Command.loadHubs
         </td>
-        <td style="background: #F0ADAD">
-          runtime.unsafeRun[Throwable, Int](Datavault.this.cmd(args).provideLayer[Throwable, Any, zio.console.Console with datavault.extractload.ExtractLoad with datavault.command.Command](Datavault.this.deps)(scala.Predef.$conforms[zio.console.Console with datavault.extractload.ExtractLoad with datavault.command.Command], zio.this.NeedsEnv.needsEnv[Nothing]))
+        <td style="background: #AEF1AE">
+          command.Command.loadHubs(hcp)
         </td>
       </tr><tr>
         <td>
           20
         </td>
         <td>
-          10
+          15
         </td>
         <td>
-          595
+          751
           -
-          595
+          789
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.command.Command.showMessage
+        </td>
+        <td style="background: #F0ADAD">
+          command.Command.showMessage(&quot;unknown command&quot;)
+        </td>
+      </tr><tr>
+        <td>
+          25
+        </td>
+        <td>
+          17
+        </td>
+        <td>
+          926
+          -
+          926
         </td>
         <td>
           TypeApply
@@ -287,20 +397,41 @@
         <td>
           scala.Predef.$conforms
         </td>
-        <td style="background: #F0ADAD">
-          scala.Predef.$conforms[zio.console.Console with datavault.extractload.ExtractLoad with datavault.command.Command]
+        <td style="background: #AEF1AE">
+          scala.Predef.$conforms[zio.clock.Clock with zio.console.Console with datavault.extractload.ExtractLoad with datavault.transform.Datavault with datavault.command.Command]
         </td>
       </tr><tr>
+        <td>
+          25
+        </td>
         <td>
           20
         </td>
         <td>
-          9
+          886
+          -
+          933
         </td>
         <td>
-          596
+          Apply
+        </td>
+        <td>
+          zio.Runtime.unsafeRun
+        </td>
+        <td style="background: #AEF1AE">
+          runtime.unsafeRun[Throwable, Int](Datavault.this.cmd(args).provideLayer[Throwable, Any, zio.clock.Clock with zio.console.Console with datavault.extractload.ExtractLoad with datavault.transform.Datavault with datavault.command.Command](Datavault.this.deps)(scala.Predef.$conforms[zio.clock.Clock with zio.console.Console with datavault.extractload.ExtractLoad with datavault.transform.Datavault with datavault.command.Command], zio.this.NeedsEnv.needsEnv[Nothing]))
+        </td>
+      </tr><tr>
+        <td>
+          25
+        </td>
+        <td>
+          16
+        </td>
+        <td>
+          927
           -
-          600
+          931
         </td>
         <td>
           Select
@@ -308,20 +439,20 @@
         <td>
           datavault.Datavault.deps
         </td>
-        <td style="background: #F0ADAD">
+        <td style="background: #AEF1AE">
           Datavault.this.deps
         </td>
       </tr><tr>
         <td>
-          20
+          25
         </td>
         <td>
-          12
+          19
         </td>
         <td>
-          573
+          904
           -
-          601
+          932
         </td>
         <td>
           ApplyToImplicitArgs
@@ -329,20 +460,104 @@
         <td>
           zio.ZIO.provideLayer
         </td>
-        <td style="background: #F0ADAD">
-          Datavault.this.cmd(args).provideLayer[Throwable, Any, zio.console.Console with datavault.extractload.ExtractLoad with datavault.command.Command](Datavault.this.deps)(scala.Predef.$conforms[zio.console.Console with datavault.extractload.ExtractLoad with datavault.command.Command], zio.this.NeedsEnv.needsEnv[Nothing])
+        <td style="background: #AEF1AE">
+          Datavault.this.cmd(args).provideLayer[Throwable, Any, zio.clock.Clock with zio.console.Console with datavault.extractload.ExtractLoad with datavault.transform.Datavault with datavault.command.Command](Datavault.this.deps)(scala.Predef.$conforms[zio.clock.Clock with zio.console.Console with datavault.extractload.ExtractLoad with datavault.transform.Datavault with datavault.command.Command], zio.this.NeedsEnv.needsEnv[Nothing])
         </td>
       </tr><tr>
         <td>
-          21
+          25
         </td>
         <td>
-          17
+          18
         </td>
         <td>
-          611
+          926
           -
-          611
+          926
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          zio.NeedsEnv.needsEnv
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.NeedsEnv.needsEnv[Nothing]
+        </td>
+      </tr><tr>
+        <td>
+          26
+        </td>
+        <td>
+          23
+        </td>
+        <td>
+          971
+          -
+          990
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.lang.System.exit
+        </td>
+        <td style="background: #F0ADAD">
+          java.lang.System.exit(result)
+        </td>
+      </tr><tr>
+        <td>
+          26
+        </td>
+        <td>
+          26
+        </td>
+        <td>
+          938
+          -
+          938
+        </td>
+        <td>
+          Block
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          ()
+        </td>
+      </tr><tr>
+        <td>
+          26
+        </td>
+        <td>
+          22
+        </td>
+        <td>
+          942
+          -
+          969
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Int.&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          result.&gt;(command.Command.NO_COMMAND)
+        </td>
+      </tr><tr>
+        <td>
+          26
+        </td>
+        <td>
+          25
+        </td>
+        <td>
+          938
+          -
+          938
         </td>
         <td>
           Literal
@@ -350,104 +565,62 @@
         <td>
           &lt;nosymbol&gt;
         </td>
-        <td style="background: #F0ADAD">
+        <td style="background: #AEF1AE">
           ()
         </td>
       </tr><tr>
         <td>
-          21
+          26
         </td>
-        <td>
-          14
-        </td>
-        <td>
-          615
-          -
-          626
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          scala.Int.!=
-        </td>
-        <td style="background: #F0ADAD">
-          result.!=(0)
-        </td>
-      </tr><tr>
         <td>
           21
         </td>
         <td>
-          16
-        </td>
-        <td>
-          628
+          951
           -
-          647
+          969
         </td>
         <td>
-          Block
+          Select
         </td>
         <td>
-          java.lang.System.exit
+          datavault.command.Command.NO_COMMAND
         </td>
-        <td style="background: #F0ADAD">
-          java.lang.System.exit(result)
+        <td style="background: #AEF1AE">
+          command.Command.NO_COMMAND
         </td>
       </tr><tr>
         <td>
-          21
+          26
         </td>
-        <td>
-          18
-        </td>
-        <td>
-          611
-          -
-          611
-        </td>
-        <td>
-          Block
-        </td>
-        <td>
-          &lt;nosymbol&gt;
-        </td>
-        <td style="background: #F0ADAD">
-          ()
-        </td>
-      </tr><tr>
-        <td>
-          21
-        </td>
-        <td>
-          15
-        </td>
-        <td>
-          628
-          -
-          647
-        </td>
-        <td>
-          Apply
-        </td>
-        <td>
-          java.lang.System.exit
-        </td>
-        <td style="background: #F0ADAD">
-          java.lang.System.exit(result)
-        </td>
-      </tr><tr>
         <td>
           24
         </td>
         <td>
-          19
+          971
+          -
+          990
         </td>
         <td>
-          691
+          Block
+        </td>
+        <td>
+          java.lang.System.exit
+        </td>
+        <td style="background: #F0ADAD">
+          java.lang.System.exit(result)
+        </td>
+      </tr><tr>
+        <td>
+          29
+        </td>
+        <td>
+          27
+        </td>
+        <td>
+          1030
           -
-          700
+          1039
         </td>
         <td>
           Apply
@@ -455,7 +628,7 @@
         <td>
           datavault.Datavault.run
         </td>
-        <td style="background: #F0ADAD">
+        <td style="background: #AEF1AE">
           Datavault.this.run(args)
         </td>
       </tr>

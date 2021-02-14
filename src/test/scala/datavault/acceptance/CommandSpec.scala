@@ -19,6 +19,9 @@ object CommandSpec extends DefaultRunnableSpec {
     },
     testM("extract files must succeed") {
       assertM(run(Array("extract-files", "data/archive.zip", "out/extract")))(equalTo(SUCCESS))
+    },
+    testM("load hubs must succeed") {
+      assertM(run(Array("load-hubs", "data/archive.zip", "out/hubs")))(equalTo(SUCCESS))
     }
   )
 }

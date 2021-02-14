@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.{MappingIterator, ObjectWriter}
 
 object ExtractLoad {
 
-  final case class Table(headers: Array[String], rows: Stream[Any, Array[String]])
+  final case class Table(name: String, headers: Array[String], rows: Stream[Any, Array[String]])
 
   final case class File(inputStream: InputStream, name: String, path: String)
 
@@ -27,6 +27,12 @@ object ExtractLoad {
     def table(inputStream: InputStream): ZIO[Any, Throwable, Table]
     def fileAsTable(file: File): ZIO[Any, Throwable, Table]
     def writeTable(table: Table, path: Path): ZIO[Any, Throwable, Unit]
+    def processFiles(
+        path: Path,
+        destination: Path,
+        filter: (Table) => Boolean,
+        transform: (Table) => ZIO[Any, Option[Nothing], Table]
+    ): ZIO[Console, Throwable, Unit]
   }
 
   // Module implementation
@@ -77,10 +83,31 @@ object ExtractLoad {
       }
 
       def extractFiles(path: Path, destination: Path): ZIO[Console, Throwable, Unit] = {
+        def allTables(table: Table) = true
+        def identity(table: Table)  = ZIO.succeed(table)
+        processFiles(path, destination, allTables, identity)
+      }
 
-        def saveTable(file: File) = for {
+      def processFiles(
+          path: Path,
+          destination: Path,
+          filter: (Table) => Boolean,
+          transform: (Table) => ZIO[Any, Option[Nothing], Table]
+      ): ZIO[Console, Throwable, Unit] = {
+        def saveTable(file: File): ZIO[Console, Throwable, Unit] = for {
           table <- fileAsTable(file)
-          _     <- writeTable(table, destination.resolve(file.path))
+          _ <-
+            if (filter(table)) {
+              for {
+                _ <- console.putStrLn(s"process table ${table.name}")
+                newTable <- transform(table).mapError { case _ =>
+                  new Exception("unable to create table")
+                }
+                _ <- writeTable(newTable, destination.resolve(file.path))
+              } yield ()
+            } else {
+              console.putStrLn(s"skipping table ${table.name}")
+            }
         } yield ()
 
         for {
@@ -160,7 +187,7 @@ object ExtractLoad {
           it               <- ZIO.succeed(it)
           h: Array[String] <- ZIO.effect(headers(it))
           stream = Stream.repeatEffectOption(effect(it))
-        } yield Table(h, stream)
+        } yield Table(file.name, h, stream)
       }
     }
   }
@@ -189,5 +216,13 @@ object ExtractLoad {
 
   def fileAsTable(file: File): ZIO[ExtractLoad with Console, Throwable, Table] =
     ZIO.accessM(_.get.fileAsTable(file))
+
+  def processFiles(
+      path: Path,
+      destination: Path,
+      filter: (Table) => Boolean,
+      transform: (Table) => ZIO[Any, Option[Nothing], Table]
+  ): ZIO[ExtractLoad with Console, Throwable, Unit] =
+    ZIO.accessM(_.get.processFiles(path, destination, filter, transform))
 
 }

@@ -1,0 +1,1041 @@
+<html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title id="title">
+          datavault/transform/Datavault.scala.html
+        </title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/css/theme.default.min.css" type="text/css"/><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.20.1/js/jquery.tablesorter.min.js"></script><link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" type="text/css"/><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script><script type="text/javascript">
+        $(document).ready(function() {$(".tablesorter").tablesorter();});
+      </script>
+        <style>
+          table.codegrid { font-family: monospace; font-size: 12px; width: auto!important; }table.statementlist { width: auto!important; font-size: 13px; } table.codegrid td { padding: 0!important; border: 0!important } table td.linenumber { width: 40px!important; } 
+        </style>
+      </head>
+      <body style="font-family: monospace;">
+        <ul class="nav nav-tabs">
+          <li>
+            <a href="#codegrid" data-toggle="tab">Codegrid</a>
+          </li>
+          <li>
+            <a href="#statementlist" data-toggle="tab">Statement List</a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active" id="codegrid">
+            <pre style='font-size: 12pt; font-family: courier, monospace;'>1 <span style=''>package datavault.transform
+</span>2 <span style=''>
+</span>3 <span style=''>import zio._
+</span>4 <span style=''>import zio.clock.Clock
+</span>5 <span style=''>
+</span>6 <span style=''>import datavault.extractload.ExtractLoad.Table
+</span>7 <span style=''>
+</span>8 <span style=''>object Datavault {
+</span>9 <span style=''>
+</span>10 <span style=''>  // Service definition
+</span>11 <span style=''>  trait Service {
+</span>12 <span style=''>    def transformHub: ZIO[Clock, Throwable, (Table) =&gt; ZIO[Any, Option[Nothing], Table]]
+</span>13 <span style=''>    def filterHub: ZIO[Any, Nothing, (Table) =&gt; Boolean]
+</span>14 <span style=''>  }
+</span>15 <span style=''>
+</span>16 <span style=''>  // Module implementation
+</span>17 <span style=''>  val live: ZLayer[Clock, Nothing, Datavault] = </span><span style='background: #AEF1AE'>ZLayer.succeed {
+</span>18 <span style=''></span><span style='background: #AEF1AE'>    new Service {
+</span>19 <span style=''></span><span style='background: #AEF1AE'>      val R = &quot;olist_([a-z]*)?s_dataset(\\.csv)?&quot;.r
+</span>20 <span style=''></span><span style='background: #AEF1AE'>
+</span>21 <span style=''></span><span style='background: #AEF1AE'>      def entity(tableName: String) = tableName match {
+</span>22 <span style=''></span><span style='background: #AEF1AE'>        case R(name, _) =&gt; Some(name)
+</span>23 <span style=''></span><span style='background: #AEF1AE'>        case _          =&gt; </span><span style='background: #F0ADAD'>None</span><span style='background: #AEF1AE'>
+</span>24 <span style=''></span><span style='background: #AEF1AE'>      }
+</span>25 <span style=''></span><span style='background: #AEF1AE'>
+</span>26 <span style=''></span><span style='background: #AEF1AE'>      def mapHubTable(clock: String, table: Table): Option[Table] = {
+</span>27 <span style=''></span><span style='background: #AEF1AE'>        val Table(name, headers, rows) = table
+</span>28 <span style=''></span><span style='background: #AEF1AE'>
+</span>29 <span style=''></span><span style='background: #AEF1AE'>        def generateHubHeader(tableName: String, key: String) =
+</span>30 <span style=''></span><span style='background: #AEF1AE'>          Array(s&quot;HUB_${tableName.toUpperCase}_KEY&quot;, key.toUpperCase, &quot;HUB_Load_DTS&quot;, &quot;HUB_Rec_SRC&quot;)
+</span>31 <span style=''></span><span style='background: #AEF1AE'>
+</span>32 <span style=''></span><span style='background: #AEF1AE'>        def generateHubRow(index: Int)(arr: Array[String]) =
+</span>33 <span style=''></span><span style='background: #AEF1AE'>          Array(arr(index), arr(index), clock, name)
+</span>34 <span style=''></span><span style='background: #AEF1AE'>
+</span>35 <span style=''></span><span style='background: #AEF1AE'>        for {
+</span>36 <span style=''></span><span style='background: #AEF1AE'>          entName &lt;- entity(name)
+</span>37 <span style=''></span><span style='background: #AEF1AE'>          index = 0
+</span>38 <span style=''></span><span style='background: #AEF1AE'>        } yield Table(
+</span>39 <span style=''></span><span style='background: #AEF1AE'>          name,
+</span>40 <span style=''></span><span style='background: #AEF1AE'>          generateHubHeader(entName, s&quot;${entName}_id&quot;),
+</span>41 <span style=''></span><span style='background: #AEF1AE'>          rows.map(generateHubRow(index))
+</span>42 <span style=''></span><span style='background: #AEF1AE'>        )
+</span>43 <span style=''></span><span style='background: #AEF1AE'>
+</span>44 <span style=''></span><span style='background: #AEF1AE'>      }
+</span>45 <span style=''></span><span style='background: #AEF1AE'>
+</span>46 <span style=''></span><span style='background: #AEF1AE'>      def transformHub: ZIO[Clock, Throwable, (Table) =&gt; ZIO[Any, Option[Nothing], Table]] =
+</span>47 <span style=''></span><span style='background: #AEF1AE'>        for {
+</span>48 <span style=''></span><span style='background: #AEF1AE'>          clock &lt;- zio.clock.currentDateTime
+</span>49 <span style=''></span><span style='background: #AEF1AE'>        } yield (table: Table) =&gt; ZIO.fromOption(mapHubTable(clock.toEpochSecond.toString, table))
+</span>50 <span style=''></span><span style='background: #AEF1AE'>
+</span>51 <span style=''></span><span style='background: #AEF1AE'>      def filterHub: ZIO[Any, Nothing, (Table) =&gt; Boolean] = ZIO.succeed((table: Table) =&gt;
+</span>52 <span style=''></span><span style='background: #AEF1AE'>        table.name match {
+</span>53 <span style=''></span><span style='background: #AEF1AE'>          case R(name, _) =&gt; true
+</span>54 <span style=''></span><span style='background: #AEF1AE'>          case _          =&gt; false
+</span>55 <span style=''></span><span style='background: #AEF1AE'>        }
+</span>56 <span style=''></span><span style='background: #AEF1AE'>      )
+</span>57 <span style=''></span><span style='background: #AEF1AE'>    }
+</span>58 <span style=''></span><span style='background: #AEF1AE'>  }</span><span style=''>
+</span>59 <span style=''>
+</span>60 <span style=''>  def transformHub
+</span>61 <span style=''>      : ZIO[Datavault with Clock, Throwable, (Table) =&gt; ZIO[Any, Option[Nothing], Table]] =
+</span>62 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM(_.get.transformHub)</span><span style=''>
+</span>63 <span style=''>
+</span>64 <span style=''>  def filterHub: ZIO[Datavault, Nothing, (Table) =&gt; Boolean] =
+</span>65 <span style=''>    </span><span style='background: #AEF1AE'>ZIO.accessM[Datavault](_.get.filterHub)</span><span style=''>
+</span>66 <span style=''>
+</span>67 <span style=''>}
+</span></pre>
+          </div>
+          <div class="tab-pane" id="statementlist">
+            <table cellspacing="0" cellpadding="0" class="table statementlist">
+      <tr>
+        <th>Line</th>
+        <th>Stmt Id</th>
+        <th>Pos</th>
+        <th>Tree</th>
+        <th>Symbol</th>
+        <th>Code</th>
+      </tr><tr>
+        <td>
+          17
+        </td>
+        <td>
+          254
+        </td>
+        <td>
+          402
+          -
+          1715
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          zio.ZLayer.succeed
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZLayer.succeed[datavault.transform.Datavault.Service]({
+  final class $anon extends AnyRef with datavault.transform.Datavault.Service {
+    def &lt;init&gt;(): &lt;$anon: datavault.transform.Datavault.Service&gt; = {
+      $anon.super.&lt;init&gt;();
+      ()
+    };
+    private[this] val R: scala.util.matching.Regex = scala.Predef.augmentString(&quot;olist_([a-z]*)?s_dataset(\\.csv)?&quot;).r;
+    &lt;stable&gt; &lt;accessor&gt; private def R: scala.util.matching.Regex = $anon.this.R;
+    private def entity(tableName: String): Option[String] = tableName match {
+      case $anon.this.R.unapplySeq(&lt;unapply-selector&gt;) &lt;unapply&gt; ((name @ _), _) =&gt; scala.Some.apply[String](name)
+      case _ =&gt; scala.None
+    };
+    private def mapHubTable(clock: String, table: datavault.extractload.ExtractLoad.Table): Option[datavault.extractload.ExtractLoad.Table] = {
+      &lt;synthetic&gt; &lt;artifact&gt; private[this] val x$1: (String, Array[String], zio.stream.Stream[Any,Array[String]]) = (table: datavault.extractload.ExtractLoad.Table @unchecked) match {
+        case (name: String, headers: Array[String], rows: zio.stream.Stream[Any,Array[String]])datavault.extractload.ExtractLoad.Table((name @ _), (headers @ _), (rows @ _)) =&gt; scala.Tuple3.apply[String, Array[String], zio.stream.Stream[Any,Array[String]]](name, headers, rows)
+      };
+      val name: String = x$1._1;
+      val headers: Array[String] = x$1._2;
+      val rows: zio.stream.Stream[Any,Array[String]] = x$1._3;
+      def generateHubHeader(tableName: String, key: String): Array[String] = scala.Array.apply[String](scala.StringContext.apply(&quot;HUB_&quot;, &quot;_KEY&quot;).s(tableName.toUpperCase()), key.toUpperCase(), &quot;HUB_Load_DTS&quot;, &quot;HUB_Rec_SRC&quot;)((ClassTag.apply[String](classOf[java.lang.String]): scala.reflect.ClassTag[String]));
+      def generateHubRow(index: Int)(arr: Array[String]): Array[String] = scala.Array.apply[String](arr.apply(index), arr.apply(index), clock, name)((ClassTag.apply[String](classOf[java.lang.String]): scala.reflect.ClassTag[String]));
+      $anon.this.entity(name).map[(String, Int)](((entName: String) =&gt; {
+  val index: Int = 0;
+  scala.Tuple2.apply[String, Int](entName, index)
+})).map[datavault.extractload.ExtractLoad.Table](((x$2: (String, Int)) =&gt; (x$2: (String, Int) @unchecked) match {
+        case (_1: String, _2: Int)(String, Int)((entName @ _), (index @ _)) =&gt; datavault.extractload.ExtractLoad.Table.apply(name, generateHubHeader(entName, scala.StringContext.apply(&quot;&quot;, &quot;_id&quot;).s(entName)), rows.map[Array[String]]({
+          ((arr: Array[String]) =&gt; generateHubRow(index)(arr))
+        }))
+      }))
+    };
+    def transformHub: zio.ZIO[zio.clock.Clock,Throwable,datavault.extractload.ExtractLoad.Table =&gt; zio.ZIO[Any,Option[Nothing],datavault.extractload.ExtractLoad.Table]] = zio.clock.`package`.currentDateTime.map[datavault.extractload.ExtractLoad.Table =&gt; zio.IO[Option[Nothing],datavault.extractload.ExtractLoad.Table]](((clock: java.time.OffsetDateTime) =&gt; ((table: datavault.extractload.ExtractLoad.Table) =&gt; zio.ZIO.fromOption[datavault.extractload.ExtractLoad.Table]($anon.this.mapHubTable(clock.toEpochSecond().toString(), table)))));
+    def filterHub: zio.ZIO[Any,Nothing,datavault.extractload.ExtractLoad.Table =&gt; Boolean] = zio.ZIO.succeed[datavault.extractload.ExtractLoad.Table =&gt; Boolean](((table: datavault.extractload.ExtractLoad.Table) =&gt; table.name match {
+      case $anon.this.R.unapplySeq(&lt;unapply-selector&gt;) &lt;unapply&gt; ((name @ _), _) =&gt; true
+      case _ =&gt; false
+    }))
+  };
+  new $anon()
+})((izumi.reflect.Tag.apply[datavault.transform.Datavault.Service](classOf[java.lang.Object], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((-1671428273: Int), (&quot;\u0004\u0000\u0001%datavault.transform.Datavault.Service\u0001\u0002\u0003\u0000\u0000\u001Ddatavault.transform.Datavault\u0001\u0001&quot;: String), (&quot;\u0000\u0001\u0004\u0000\u0001%datavault.transform.Datavault.Service\u0001\u0002\u0003\u0000\u0000\u001Ddatavault.transform.Datavault\u0001\u0001\u0001\u0004\u0000\u0001\u0090\u0002\u0001\u0002\u0003\u0090\u0002\u0001\u0000\u0001*datavault.transform.Datavault.&lt;refinement&gt;\u0001\u0001\u0001\u0000\u0001\u0090\u0002\u0001\u0002\u0003\u0090\u0002&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.transform.Datavault.Service]))
+        </td>
+      </tr><tr>
+        <td>
+          18
+        </td>
+        <td>
+          253
+        </td>
+        <td>
+          423
+          -
+          426
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.transform.Datavault.$anon.&lt;init&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          new $anon()
+        </td>
+      </tr><tr>
+        <td>
+          19
+        </td>
+        <td>
+          220
+        </td>
+        <td>
+          451
+          -
+          488
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.collection.immutable.StringLike.r
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.augmentString(&quot;olist_([a-z]*)?s_dataset(\\.csv)?&quot;).r
+        </td>
+      </tr><tr>
+        <td>
+          19
+        </td>
+        <td>
+          219
+        </td>
+        <td>
+          451
+          -
+          486
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;olist_([a-z]*)?s_dataset(\\.csv)?&quot;
+        </td>
+      </tr><tr>
+        <td>
+          22
+        </td>
+        <td>
+          221
+        </td>
+        <td>
+          573
+          -
+          583
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Some.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Some.apply[String](name)
+        </td>
+      </tr><tr>
+        <td>
+          23
+        </td>
+        <td>
+          222
+        </td>
+        <td>
+          611
+          -
+          615
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.None
+        </td>
+        <td style="background: #F0ADAD">
+          scala.None
+        </td>
+      </tr><tr>
+        <td>
+          27
+        </td>
+        <td>
+          223
+        </td>
+        <td>
+          713
+          -
+          713
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.Tuple3._1
+        </td>
+        <td style="background: #AEF1AE">
+          x$1._1
+        </td>
+      </tr><tr>
+        <td>
+          27
+        </td>
+        <td>
+          225
+        </td>
+        <td>
+          728
+          -
+          728
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.Tuple3._3
+        </td>
+        <td style="background: #AEF1AE">
+          x$1._3
+        </td>
+      </tr><tr>
+        <td>
+          27
+        </td>
+        <td>
+          224
+        </td>
+        <td>
+          719
+          -
+          719
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          scala.Tuple3._2
+        </td>
+        <td style="background: #AEF1AE">
+          x$1._2
+        </td>
+      </tr><tr>
+        <td>
+          30
+        </td>
+        <td>
+          227
+        </td>
+        <td>
+          853
+          -
+          858
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;_KEY&quot;
+        </td>
+      </tr><tr>
+        <td>
+          30
+        </td>
+        <td>
+          226
+        </td>
+        <td>
+          825
+          -
+          830
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;HUB_&quot;
+        </td>
+      </tr><tr>
+        <td>
+          30
+        </td>
+        <td>
+          229
+        </td>
+        <td>
+          823
+          -
+          858
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.StringContext.s
+        </td>
+        <td style="background: #AEF1AE">
+          scala.StringContext.apply(&quot;HUB_&quot;, &quot;_KEY&quot;).s(tableName.toUpperCase())
+        </td>
+      </tr><tr>
+        <td>
+          30
+        </td>
+        <td>
+          232
+        </td>
+        <td>
+          893
+          -
+          906
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;HUB_Rec_SRC&quot;
+        </td>
+      </tr><tr>
+        <td>
+          30
+        </td>
+        <td>
+          228
+        </td>
+        <td>
+          831
+          -
+          852
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.lang.String.toUpperCase
+        </td>
+        <td style="background: #AEF1AE">
+          tableName.toUpperCase()
+        </td>
+      </tr><tr>
+        <td>
+          30
+        </td>
+        <td>
+          231
+        </td>
+        <td>
+          877
+          -
+          891
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          &quot;HUB_Load_DTS&quot;
+        </td>
+      </tr><tr>
+        <td>
+          30
+        </td>
+        <td>
+          230
+        </td>
+        <td>
+          860
+          -
+          875
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          java.lang.String.toUpperCase
+        </td>
+        <td style="background: #AEF1AE">
+          key.toUpperCase()
+        </td>
+      </tr><tr>
+        <td>
+          30
+        </td>
+        <td>
+          233
+        </td>
+        <td>
+          817
+          -
+          907
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          scala.Array.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Array.apply[String](scala.StringContext.apply(&quot;HUB_&quot;, &quot;_KEY&quot;).s(tableName.toUpperCase()), key.toUpperCase(), &quot;HUB_Load_DTS&quot;, &quot;HUB_Rec_SRC&quot;)((ClassTag.apply[String](classOf[java.lang.String]): scala.reflect.ClassTag[String]))
+        </td>
+      </tr><tr>
+        <td>
+          33
+        </td>
+        <td>
+          236
+        </td>
+        <td>
+          980
+          -
+          1022
+        </td>
+        <td>
+          ApplyToImplicitArgs
+        </td>
+        <td>
+          scala.Array.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Array.apply[String](arr.apply(index), arr.apply(index), clock, name)((ClassTag.apply[String](classOf[java.lang.String]): scala.reflect.ClassTag[String]))
+        </td>
+      </tr><tr>
+        <td>
+          33
+        </td>
+        <td>
+          235
+        </td>
+        <td>
+          998
+          -
+          1008
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Array.apply
+        </td>
+        <td style="background: #AEF1AE">
+          arr.apply(index)
+        </td>
+      </tr><tr>
+        <td>
+          33
+        </td>
+        <td>
+          234
+        </td>
+        <td>
+          986
+          -
+          996
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Array.apply
+        </td>
+        <td style="background: #AEF1AE">
+          arr.apply(index)
+        </td>
+      </tr><tr>
+        <td>
+          36
+        </td>
+        <td>
+          244
+        </td>
+        <td>
+          1032
+          -
+          1238
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Option.map
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.entity(name).map[(String, Int)](((entName: String) =&gt; {
+  val index: Int = 0;
+  scala.Tuple2.apply[String, Int](entName, index)
+})).map[datavault.extractload.ExtractLoad.Table](((x$2: (String, Int)) =&gt; (x$2: (String, Int) @unchecked) match {
+  case (_1: String, _2: Int)(String, Int)((entName @ _), (index @ _)) =&gt; datavault.extractload.ExtractLoad.Table.apply(name, generateHubHeader(entName, scala.StringContext.apply(&quot;&quot;, &quot;_id&quot;).s(entName)), rows.map[Array[String]]({
+    ((arr: Array[String]) =&gt; generateHubRow(index)(arr))
+  }))
+}))
+        </td>
+      </tr><tr>
+        <td>
+          36
+        </td>
+        <td>
+          238
+        </td>
+        <td>
+          1048
+          -
+          1048
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Tuple2.apply
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Tuple2.apply[String, Int](entName, index)
+        </td>
+      </tr><tr>
+        <td>
+          37
+        </td>
+        <td>
+          237
+        </td>
+        <td>
+          1090
+          -
+          1091
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          0
+        </td>
+      </tr><tr>
+        <td>
+          38
+        </td>
+        <td>
+          243
+        </td>
+        <td>
+          1108
+          -
+          1238
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.Table.apply
+        </td>
+        <td style="background: #AEF1AE">
+          datavault.extractload.ExtractLoad.Table.apply(name, generateHubHeader(entName, scala.StringContext.apply(&quot;&quot;, &quot;_id&quot;).s(entName)), rows.map[Array[String]]({
+  ((arr: Array[String]) =&gt; generateHubRow(index)(arr))
+}))
+        </td>
+      </tr><tr>
+        <td>
+          40
+        </td>
+        <td>
+          240
+        </td>
+        <td>
+          1141
+          -
+          1185
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.transform.Datavault.$anon.generateHubHeader
+        </td>
+        <td style="background: #AEF1AE">
+          generateHubHeader(entName, scala.StringContext.apply(&quot;&quot;, &quot;_id&quot;).s(entName))
+        </td>
+      </tr><tr>
+        <td>
+          40
+        </td>
+        <td>
+          239
+        </td>
+        <td>
+          1168
+          -
+          1184
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.StringContext.s
+        </td>
+        <td style="background: #AEF1AE">
+          scala.StringContext.apply(&quot;&quot;, &quot;_id&quot;).s(entName)
+        </td>
+      </tr><tr>
+        <td>
+          41
+        </td>
+        <td>
+          241
+        </td>
+        <td>
+          1206
+          -
+          1227
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.transform.Datavault.$anon.generateHubRow
+        </td>
+        <td style="background: #AEF1AE">
+          generateHubRow(index)(arr)
+        </td>
+      </tr><tr>
+        <td>
+          41
+        </td>
+        <td>
+          242
+        </td>
+        <td>
+          1197
+          -
+          1228
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.stream.ZStream.map
+        </td>
+        <td style="background: #AEF1AE">
+          rows.map[Array[String]]({
+  ((arr: Array[String]) =&gt; generateHubRow(index)(arr))
+})
+        </td>
+      </tr><tr>
+        <td>
+          48
+        </td>
+        <td>
+          248
+        </td>
+        <td>
+          1350
+          -
+          1499
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.map
+        </td>
+        <td style="background: #AEF1AE">
+          zio.clock.`package`.currentDateTime.map[datavault.extractload.ExtractLoad.Table =&gt; zio.IO[Option[Nothing],datavault.extractload.ExtractLoad.Table]](((clock: java.time.OffsetDateTime) =&gt; ((table: datavault.extractload.ExtractLoad.Table) =&gt; zio.ZIO.fromOption[datavault.extractload.ExtractLoad.Table]($anon.this.mapHubTable(clock.toEpochSecond().toString(), table)))))
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          245
+        </td>
+        <td>
+          1462
+          -
+          1490
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          scala.Any.toString
+        </td>
+        <td style="background: #AEF1AE">
+          clock.toEpochSecond().toString()
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          247
+        </td>
+        <td>
+          1435
+          -
+          1499
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.fromOption
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.fromOption[datavault.extractload.ExtractLoad.Table]($anon.this.mapHubTable(clock.toEpochSecond().toString(), table))
+        </td>
+      </tr><tr>
+        <td>
+          49
+        </td>
+        <td>
+          246
+        </td>
+        <td>
+          1450
+          -
+          1498
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          datavault.transform.Datavault.$anon.mapHubTable
+        </td>
+        <td style="background: #AEF1AE">
+          $anon.this.mapHubTable(clock.toEpochSecond().toString(), table)
+        </td>
+      </tr><tr>
+        <td>
+          51
+        </td>
+        <td>
+          252
+        </td>
+        <td>
+          1562
+          -
+          1705
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.succeed
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.succeed[datavault.extractload.ExtractLoad.Table =&gt; Boolean](((table: datavault.extractload.ExtractLoad.Table) =&gt; table.name match {
+  case $anon.this.R.unapplySeq(&lt;unapply-selector&gt;) &lt;unapply&gt; ((name @ _), _) =&gt; true
+  case _ =&gt; false
+}))
+        </td>
+      </tr><tr>
+        <td>
+          52
+        </td>
+        <td>
+          249
+        </td>
+        <td>
+          1600
+          -
+          1610
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.extractload.ExtractLoad.Table.name
+        </td>
+        <td style="background: #AEF1AE">
+          table.name
+        </td>
+      </tr><tr>
+        <td>
+          53
+        </td>
+        <td>
+          250
+        </td>
+        <td>
+          1648
+          -
+          1652
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          true
+        </td>
+      </tr><tr>
+        <td>
+          54
+        </td>
+        <td>
+          251
+        </td>
+        <td>
+          1682
+          -
+          1687
+        </td>
+        <td>
+          Literal
+        </td>
+        <td>
+          &lt;nosymbol&gt;
+        </td>
+        <td style="background: #AEF1AE">
+          false
+        </td>
+      </tr><tr>
+        <td>
+          62
+        </td>
+        <td>
+          256
+        </td>
+        <td>
+          1844
+          -
+          1862
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.transform.Datavault.Service.transformHub
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.Has.HasSyntax[datavault.transform.Datavault with zio.clock.Clock](x$3).get[datavault.transform.Datavault.Service](scala.Predef.$conforms[datavault.transform.Datavault with zio.clock.Clock], (izumi.reflect.Tag.apply[datavault.transform.Datavault.Service](classOf[datavault.transform.Datavault$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((-1671428273: Int), (&quot;\u0004\u0000\u0001%datavault.transform.Datavault.Service\u0001\u0002\u0003\u0000\u0000\u001Ddatavault.transform.Datavault\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.transform.Datavault.Service])).transformHub
+        </td>
+      </tr><tr>
+        <td>
+          62
+        </td>
+        <td>
+          255
+        </td>
+        <td>
+          1846
+          -
+          1846
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.Predef.$conforms
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.$conforms[datavault.transform.Datavault with zio.clock.Clock]
+        </td>
+      </tr><tr>
+        <td>
+          62
+        </td>
+        <td>
+          257
+        </td>
+        <td>
+          1832
+          -
+          1863
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.accessM[datavault.transform.Datavault with zio.clock.Clock].apply[Throwable, datavault.extractload.ExtractLoad.Table =&gt; zio.ZIO[Any,Option[Nothing],datavault.extractload.ExtractLoad.Table]](((x$3: datavault.transform.Datavault with zio.clock.Clock) =&gt; zio.this.Has.HasSyntax[datavault.transform.Datavault with zio.clock.Clock](x$3).get[datavault.transform.Datavault.Service](scala.Predef.$conforms[datavault.transform.Datavault with zio.clock.Clock], (izumi.reflect.Tag.apply[datavault.transform.Datavault.Service](classOf[datavault.transform.Datavault$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((-1671428273: Int), (&quot;\u0004\u0000\u0001%datavault.transform.Datavault.Service\u0001\u0002\u0003\u0000\u0000\u001Ddatavault.transform.Datavault\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.transform.Datavault.Service])).transformHub))
+        </td>
+      </tr><tr>
+        <td>
+          65
+        </td>
+        <td>
+          259
+        </td>
+        <td>
+          1955
+          -
+          1970
+        </td>
+        <td>
+          Select
+        </td>
+        <td>
+          datavault.transform.Datavault.Service.filterHub
+        </td>
+        <td style="background: #AEF1AE">
+          zio.this.Has.HasSyntax[datavault.transform.Datavault](x$4).get[datavault.transform.Datavault.Service](scala.Predef.$conforms[datavault.transform.Datavault], (izumi.reflect.Tag.apply[datavault.transform.Datavault.Service](classOf[datavault.transform.Datavault$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((-1671428273: Int), (&quot;\u0004\u0000\u0001%datavault.transform.Datavault.Service\u0001\u0002\u0003\u0000\u0000\u001Ddatavault.transform.Datavault\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.transform.Datavault.Service])).filterHub
+        </td>
+      </tr><tr>
+        <td>
+          65
+        </td>
+        <td>
+          258
+        </td>
+        <td>
+          1957
+          -
+          1957
+        </td>
+        <td>
+          TypeApply
+        </td>
+        <td>
+          scala.Predef.$conforms
+        </td>
+        <td style="background: #AEF1AE">
+          scala.Predef.$conforms[datavault.transform.Datavault]
+        </td>
+      </tr><tr>
+        <td>
+          65
+        </td>
+        <td>
+          260
+        </td>
+        <td>
+          1932
+          -
+          1971
+        </td>
+        <td>
+          Apply
+        </td>
+        <td>
+          zio.ZIO.AccessMPartiallyApplied.apply
+        </td>
+        <td style="background: #AEF1AE">
+          zio.ZIO.accessM[datavault.transform.Datavault].apply[Nothing, datavault.extractload.ExtractLoad.Table =&gt; Boolean](((x$4: datavault.transform.Datavault) =&gt; zio.this.Has.HasSyntax[datavault.transform.Datavault](x$4).get[datavault.transform.Datavault.Service](scala.Predef.$conforms[datavault.transform.Datavault], (izumi.reflect.Tag.apply[datavault.transform.Datavault.Service](classOf[datavault.transform.Datavault$$Service], izumi.reflect.macrortti.LightTypeTag.parse[Nothing]((-1671428273: Int), (&quot;\u0004\u0000\u0001%datavault.transform.Datavault.Service\u0001\u0002\u0003\u0000\u0000\u001Ddatavault.transform.Datavault\u0001\u0001&quot;: String), (&quot;\u0000\u0000\u0000&quot;: String), (1: Int))): izumi.reflect.Tag[datavault.transform.Datavault.Service])).filterHub))
+        </td>
+      </tr>
+    </table>
+          </div>
+        </div>
+      </body>
+    </html>
